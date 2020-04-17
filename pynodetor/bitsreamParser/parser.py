@@ -47,7 +47,7 @@ class parser:
 			
 			return stream_modified
 		except Exception as e:
-			return f'{e}: An Error Occured: unsupported bitsream was provided.'
+			return ''
 	def get_message(self):
 		'''
 			(None) -> (String)
