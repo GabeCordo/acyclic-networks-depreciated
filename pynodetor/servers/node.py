@@ -174,10 +174,10 @@ class Node:
 			2) Thread Two : Monitors the enqueded bitsreams for overflow/flooding
 		'''
 		#settup and start the incoming socket
-		threadOne = threading.Thread(target=self.listen)
+		threadOne = threading.Thread(target=self.listen, args=())
 		threadOne.daemon = True # Daemonize thread (run in background)
 		threadOne.start()  
 		#settup and start the queue monitor  
-		threadTwo = threading.Thread(target=self.monitor)
+		threadTwo = threading.Thread(target=self.monitor, args=())
 		threadTwo.daemon = True # Daemonize thread (run in background)
 		threadTwo.start()
