@@ -4,7 +4,7 @@
 ## To-Do
 
 - [ ] establish end-to-end encyrption
-- [ ] Key Encryption
+- [x] Key Encryption
 - [ ] Entry Nodes
 - [ ] Exit Nodes
 - [ ] Relay Nodes
