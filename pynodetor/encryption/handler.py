@@ -1,7 +1,7 @@
 #import the Crypto package for RSA key creation
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP
-import base64, six
+import base64
 
 ##Handler Class##
 #an out-of the box and easy to use object-oriented RSA encryption handler for developers
@@ -41,7 +41,7 @@ class Handler:
 		'''
 		return self._privateKey
 	
-	def restoreKeySet(self, password):
+	def restoreKeySet(self):
 		'''(Handler) -> (boolean)
 			:loads all public and private keys from text-files to class variables
 			
@@ -52,13 +52,13 @@ class Handler:
 		#Open the file containing the private key and store in the class instance variable
 		try:
 			keyPrivate = open(directoryKeyPrivate, 'rb').read()
-			self._privateKey = RSA.import_key(keyPublic, passhrase=password)
+			self._privateKey = RSA.importKey(keyPrivate)
 		except:
 			raise Exception(f'There was a problem restoring the private key: check if the directoryKeyPrivate path is valid or that the file is not empty')
 		#Open the file containing the public key and store in the class instance variable
 		try:
 			keyPublic = open(directoryKeyPublic, 'rb').read()
-			self._publicKey = RSA.import_key(keyPublic, passhrase=password)
+			self._publicKey = RSA.import_key(keyPublic)
 		except:
 			raise Exception(f'There was a problem restoring the public key: check if the directoryKeyPublic path is valid or that the file is not empty')
 	
@@ -104,7 +104,7 @@ class Handler:
 		if ( isinstance(message, six.binary_type) ):
 			return message
 	
-	def encrypt(self, message, keyPublic, password=''):
+	def encrypt(self, message, keyPublic):
 		'''(Handler, string, string) -> (string)
 			:transforms a plain text into a cyhpher text
 			
@@ -116,18 +116,19 @@ class Handler:
 		if ( keyPublic == '' ):
 			keyPublic = self._publicKey
 		cypherRSA = RSA.importKey(keyPublic)
+		cypherRSA = PKCS1_OAEP.new(cypherRSA)
 		#encrypt the given message using a given (or our own) public RSA key 
-		encryptedMessage = cypherRSA.encrypt(self.formatForEncryption(message), password)
-		return base64.b64encode(encryptedMessage)
+		messageBase64 = base64.b64encode( message.encode('ascii') ) #text needs to be in base64 to be encrypted
+		return cypherRSA.encrypt( messageBase64 )
 	
 	def decrypt(self, cyphertext):
 		'''(Handler, string) -> (string)
 			:transforms a cypher text into a plain text
 		'''
-		encryptedMessage = base64.b64decode(cyphertext)
 		cypherRSA = RSA.importKey(self._privateKey)
-		decryptedMessage = cipherRSA.decrypt(cyphertext)
-		return six.text_type(decryptedMessage, encoding='utf8')
+		cypherRSA = PKCS1_OAEP.new(cypherRSA)
+		decryptedMSG = cypherRSA.decrypt(cyphertext)
+		return base64.b64decode( decryptedMSG ).decode()
 	
 	def __eq__(self, other):
 		'''(Handler) -> (boolean)
