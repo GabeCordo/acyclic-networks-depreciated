@@ -3,7 +3,7 @@
 
 ## To-Do
 
-- [ ] establish end-to-end encyrption
+- [x] establish end-to-end encyrption
 - [ ] Key Encryption
 - [ ] Entry Nodes
 - [ ] Exit Nodes

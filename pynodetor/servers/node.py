@@ -7,7 +7,7 @@ import socket, time
 # that will be needed on the mock-tor network for socket communication
 class Node:
 	
-	def __init__(self, ip, portIn):
+	def __init__(self, ip, portIn, directoryKeyPrivate, directoryKeyPublic):
 		'''(Node, string, int) -> None
 			:the class constructor for the primitive node type. All children class
 			 are specific variations of the node class for specific socket input and
@@ -26,6 +26,8 @@ class Node:
 		##Initialize the recieving socket##
 		self.listening = True
 		self.incoming = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+		##Initialize the encryption handler##
+		encryptionHandler = Handler(directoryKeyPrivate, directoryKeyPublic)
 	
 	def getIp(self):
 		'''(Node) -> (string)
@@ -61,11 +63,20 @@ class Node:
 		self.incoming.listen(10)
 		while True:
 			c, addr = self.incoming.accept()
-			message = c.recv(1024)
+			#send the public RSA key so the connector can send a cyphertext
+			c.send( bytes(encryptionHandler.getPublicKey(), 'utf8') )
+			#receive the cypher text from the connector
+			cyphertext = c.recv(1024).decode()
+			
 			#ensure the bitsream isn't blank incase someone is trying to spam
 			#the node program and overflow the queue 
-			if (message != ''):
+			if (cyphertext != ''):
+				#decrypt the cypher text and place it into a temp holder
+				message = encryptionHandler.decrypt(cyphertext)
+				#append to the message queue
 				self.queue.append( message )
+				
+			#close the connection with the connector
 			c.close()
 
 	def close(self):
@@ -93,10 +104,16 @@ class Node:
 			outgoing = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			outgoing.connect((ipOut, portOut))
 			
+			#receive the public RSA key from the host
+			publicRSA = outgoing.recv(1024).decode()
+			
 			#ensure the node is not sending a message over a certain byte length
 			#to avoid strenious or inefficient processing on the devs end
 			if (len(message.encode('utf-8')) <= 1024):
-				outgoing.send(bytes(message, 'utf-8'))
+				#cypher the text using the RSA public key received from the listening socket node
+				cyphertext = encryptionHandler(message, publicRSA)
+				#send the cyphertext containing the message to the listening socket node
+				outgoing.send(bytes(cyphertext, 'utf-8'))
 			else:
 				#if there is default to returning an empty string
 				return ''
@@ -172,6 +189,8 @@ class Node:
 			:creates two new threads for the socket node on the network
 			1) Thread One : Receives and sorts all incoming bitsream traffic
 			2) Thread Two : Monitors the enqueded bitsreams for overflow/flooding
+			
+			** settup end-to-end encryption keys for the socket node **
 		'''
 		#settup and start the incoming socket
 		threadOne = threading.Thread(target=self.listen, args=())
@@ -181,3 +200,6 @@ class Node:
 		threadTwo = threading.Thread(target=self.monitor, args=())
 		threadTwo.daemon = True # Daemonize thread (run in background)
 		threadTwo.start()
+		#settup the end-to-end encryption keys
+		#(will generate a new key-set when the server is started)
+		encryptionHandler.generateKeySet()
