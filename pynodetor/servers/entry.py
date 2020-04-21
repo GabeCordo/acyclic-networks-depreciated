@@ -1,11 +1,11 @@
 ##Child Class of the Node##
-#Responisble for routing the packet to the next relay or exit node
+#Responisble for handling incoming connections that are to be fed through the tor network
 class NodeEntry(Node):
 	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, networkMap):
 		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic)
 		self.network = network
-	def discoverNextNode(self):
+	def mapPathway(self):
 		pass
-	def modifyPathStatus(self):
+	def checkDestination(self):
 		pass
 	

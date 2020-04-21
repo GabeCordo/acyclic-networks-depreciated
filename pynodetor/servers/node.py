@@ -47,6 +47,15 @@ class Node:
 		'''
 		return self.listening
 	
+	def specialFunctionality(self):
+		'''(string) -> (boolean)
+			:child classes can overide this function to offer special functionality
+			 to the listening aspect of the server
+			
+			@returns a boolean value representing whether to enqueue message
+		'''
+		return True
+	
 	def listen(self):
 		'''(Node, int) -> None
 			:listens to all incoming traffic to the server node.
@@ -73,8 +82,11 @@ class Node:
 			if (cyphertext != ''):
 				#decrypt the cypher text and place it into a temp holder
 				message = encryptionHandler.decrypt(cyphertext)
-				#append to the message queue
-				self.queue.append( message )
+				#allow child classes to manipulate the message
+				enqueue = self.specialFunctionality(message)
+				#append to the message queue if required for further functionality
+				if (enqueue):
+					self.queue.append( message )
 				
 			#close the connection with the connector
 			c.close()

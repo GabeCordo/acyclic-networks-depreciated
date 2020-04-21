@@ -1,11 +1,11 @@
 ##Child Class of the Node##
-#Responisble for routing the packet to the next relay or exit node
+#Responisble for sending the message request to the final destination in the userid
 class NodeEntry(Node):
 	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, networkMap):
 		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic)
 		self.network = network
-	def discoverNextNode(self):
+	def modifyPath(self):
 		pass
-	def modifyPathStatus(self):
+	def deliverPacket(self):
 		pass
 	
