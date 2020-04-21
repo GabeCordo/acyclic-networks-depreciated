@@ -14,10 +14,22 @@ class Handler:
 			
 			@paramaters directories must point to a valid path
 		'''
-		#class variables
+		##class variables##
 		self.directoryKeyPrivate = directoryKeyPrivate
 		self.directoryKeyPublic = directoryKeyPublic
-		#instance variables
+		
+		#check to see that the directories given for the encryption keys are valid
+		try:
+			#check the private key pathway
+			pathwayCheck = open(directoryKeyPrivate, 'r')
+			pathwayCheck.close()
+			#check the public key pathway
+			pathwayCheck = open(directoryKeyPublic, 'r')
+			pathwayCheck.close()
+		except:
+			raise FileNotFoundError('RSA Key Error: one or more key paths are invalid')
+			
+		##instance variables
 		self._privateKey = ''
 		self._publicKey = ''
 	

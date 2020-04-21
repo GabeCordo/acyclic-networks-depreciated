@@ -1,0 +1,33 @@
+{ "index":
+    { "entry": [
+        { "ip-address": "1.0.1.0",
+          "listening-port": 800,
+          "anonid": 0
+        }
+       ],
+      "relay": [
+        { "ip-address": "1.0.1.0",
+          "listening-port": 800,
+          "anon-id": 1
+        },
+        { "ip-address": "1.0.1.0",
+          "listening-port": 800,
+          "anon-id": 2
+        },
+        { "ip-address": "1.0.1.0",
+          "listening-port": 800,
+          "anon-id": 3
+        },
+        { "ip-address": "1.0.1.0",
+          "listening-port": 800,
+          "anon-id": 5
+        }
+       ],
+      "exit": [
+        { "ip-address": "1.0.1.0",
+          "listening-port": 800,
+          "anon-id": 5
+        }
+       ],
+    }
+}

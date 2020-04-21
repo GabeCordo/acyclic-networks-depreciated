@@ -72,8 +72,12 @@ class Node:
 		self.incoming.listen(10)
 		while True:
 			c, addr = self.incoming.accept()
+			#receive the connectors public RSA key
+			publicRSA = c.recv(1024).decode()
+			
 			#send the public RSA key so the connector can send a cyphertext
 			c.send( bytes(encryptionHandler.getPublicKey(), 'utf8') )
+			
 			#receive the cypher text from the connector
 			cyphertext = c.recv(1024).decode()
 			
@@ -115,6 +119,9 @@ class Node:
 			'''
 			outgoing = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			outgoing.connect((ipOut, portOut))
+			
+			#send public key for any responses
+			outgoing.send(bytes(encryptionHandler.getPublicKey, 'utf8'))
 			
 			#receive the public RSA key from the host
 			publicRSA = outgoing.recv(1024).decode()
@@ -166,7 +173,17 @@ class Node:
 		else:
 			#the queue was empty, no bitsreams have been received or approved for enqueing
 			return ''
+	
+	def checkDestination(self, userid):
+		'''(Node) -> (string)
+			:retrieves the ip-address of the userid inputed from the index server
 			
+			@returns the string representation of the ip-address associated with the userid
+			@exception if the connection is lost or the userid is invalid, returns an empty string
+		'''
+		idRequest = f''
+		return self.send(ipOut, portOut, userid) #settup ip and port of indexing server
+	
 	def monitor(self):
 		'''(Node) -> None
 			:the monitor function is an active listener on the enqueued messages
