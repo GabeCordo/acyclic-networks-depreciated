@@ -1,6 +1,8 @@
+import node
+
 ##Child Class of the Node##
 #Responisble for routing the packet to the next relay or exit node
-class NodeRelay(Node):
+class NodeRelay(node.Node):
 	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, networkMap):
 		'''
 		'''

@@ -1,6 +1,8 @@
+import node
+
 ##Child Class of the Node##
 #Responisble for sending the message request to the final destination in the userid
-class NodeExit(Node):
+class NodeExit(node.Node):
 	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, networkMap):
 		''' (NodeExit, string, string, string, list) -> None
 		'''

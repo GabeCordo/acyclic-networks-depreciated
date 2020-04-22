@@ -1,6 +1,8 @@
+import node
+
 ##Child Class of the Node##
 #Responisble for handling incoming connections that are to be fed through the tor network
-class NodeEntry(Node):
+class NodeEntry(node.Node):
 	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, networkMap):
 		'''
 		'''
