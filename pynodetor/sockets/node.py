@@ -7,7 +7,7 @@ import socket, time
 # that will be needed on the mock-tor network for socket communication
 class Node:
 	
-	def __init__(self, ip, portIn, directoryKeyPrivate, directoryKeyPublic):
+	def __init__(self, ip, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp):
 		'''(Node, string, int) -> None
 			:the class constructor for the primitive node type. All children class
 			 are specific variations of the node class for specific socket input and
@@ -28,6 +28,8 @@ class Node:
 		self.incoming = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 		##Initialize the encryption handler##
 		encryptionHandler = Handler(directoryKeyPrivate, directoryKeyPublic)
+		##Settup connection to an indexing/logging server##
+		self.indexIP = indexIP
 	
 	def getIp(self):
 		'''(Node) -> (string)
@@ -87,7 +89,7 @@ class Node:
 				#decrypt the cypher text and place it into a temp holder
 				message = encryptionHandler.decrypt(cyphertext)
 				#allow child classes to manipulate the message
-				enqueue = self.specialFunctionality(message)
+				enqueue = self.specialFunctionality(message, addr)
 				#append to the message queue if required for further functionality
 				if (enqueue):
 					self.queue.append( message )
@@ -117,37 +119,40 @@ class Node:
 						 from the server.
 				@exception returns an empty string if there was a failure.
 			'''
-			outgoing = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			outgoing.connect((ipOut, portOut))
-			
-			#send public key for any responses
-			outgoing.send(bytes(encryptionHandler.getPublicKey, 'utf8'))
-			
-			#receive the public RSA key from the host
-			publicRSA = outgoing.recv(1024).decode()
-			
-			#ensure the node is not sending a message over a certain byte length
-			#to avoid strenious or inefficient processing on the devs end
-			if (len(message.encode('utf-8')) <= 1024):
-				#cypher the text using the RSA public key received from the listening socket node
-				cyphertext = encryptionHandler(message, publicRSA)
-				#send the cyphertext containing the message to the listening socket node
-				outgoing.send(bytes(cyphertext, 'utf-8'))
-			else:
-				#if there is default to returning an empty string
-				return ''
+			try:
+				outgoing = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				outgoing.connect((ipOut, portOut))
 				
-			received = outgoing.recv(1024).decode()
-			#if we receive a status code of '0' that means something went wrong
-			if (received == '0'):
-				#if there is default to returning an empty string
-				return ''
-			else:
-				#the bitsream was successfuly sent, we received usfull information from
-				#the server we may need to process (it might be a response)
-				return received
-			
-			outgoing.close()
+				#send public key for any responses
+				outgoing.send(bytes(encryptionHandler.getPublicKey, 'utf8'))
+				
+				#receive the public RSA key from the host
+				publicRSA = outgoing.recv(1024).decode()
+				
+				#ensure the node is not sending a message over a certain byte length
+				#to avoid strenious or inefficient processing on the devs end
+				if (len(message.encode('utf-8')) <= 1024):
+					#cypher the text using the RSA public key received from the listening socket node
+					cyphertext = encryptionHandler(message, publicRSA)
+					#send the cyphertext containing the message to the listening socket node
+					outgoing.send(bytes(cyphertext, 'utf-8'))
+				else:
+					#if there is default to returning an empty string
+					return ''
+					
+				received = outgoing.recv(1024).decode()
+				#if we receive a status code of '0' that means something went wrong
+				if (received == '0'):
+					#if there is default to returning an empty string
+					return ''
+				else:
+					#the bitsream was successfuly sent, we received usfull information from
+					#the server we may need to process (it might be a response)
+					return received
+				
+				outgoing.close()
+			except:
+				return '2'
 	
 	def sizeOfQueue(self):
 		'''(Node) -> (int)
@@ -181,8 +186,8 @@ class Node:
 			@returns the string representation of the ip-address associated with the userid
 			@exception if the connection is lost or the userid is invalid, returns an empty string
 		'''
-		idRequest = f''
-		return self.send(ipOut, portOut, userid) #settup ip and port of indexing server
+		idRequest = f'0:{userid}'
+		return self.send(self.indexIp, 8077, idRequest) #settup ip and port of indexing server
 	
 	def monitor(self):
 		'''(Node) -> None

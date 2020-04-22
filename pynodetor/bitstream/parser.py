@@ -10,7 +10,8 @@
 
 from cffi import FFI
 
-class parser:
+class Parser:
+	
 	def __init__(self, message=''):
 		'''
 			(String) -> (None)
@@ -20,6 +21,7 @@ class parser:
 						showed within the comments of the rust parser
 		'''
 		self.message = message
+	
 	def pull(self, request):
 		'''
 			(int) -> (String)
@@ -48,6 +50,7 @@ class parser:
 			return stream_modified
 		except Exception as e:
 			return f'{e}: An Error Occured: unsupported bitsream was provided.'
+	
 	def get_message(self):
 		'''
 			(None) -> (String)
@@ -55,6 +58,7 @@ class parser:
 			***		Shortcut for the pull function		***
 		'''
 		return self.pull(0)
+	
 	def get_request_type(self):
 		'''
 			(None) -> (String)
@@ -62,13 +66,33 @@ class parser:
 			***		Shortcut for the pull function		***
 		'''
 		return self.pull(1)
-	def get_status(self):
+	
+	def get_relay_path(self):
 		'''
 			(None) -> (String)
-			@returns the status embedded in the bitsream
+			@returns the ids of the relay path
 			***		Shortcut for the pull function		***
 		'''
-		return self.pull(2)
+		origin_and_target_ids = self.pull(2)
+		try:
+			path_character_seperator = origin_and_target_ids.index('/')
+			return origin_and_target_ids[:path_character_seperator]
+		except:
+			return 'An Error Occured: unsupported bitsream was provided'
+	
+	def get_exit_node(self):
+		'''
+			(Node) -> (String)
+			@returns the exit node ip-address of the bitstream
+			***		Shortcut for the pull function		***
+		'''
+		origin_and_target_ids = self.pull(2)
+		try:
+			path_character_seperator = origin_and_target_ids.index('/')
+			return origin_and_target_ids[path_character_seperator+1:]
+		except:
+			return 'An Error Occured: unsupported bitsream was provided'
+	
 	def get_origin_id(self):
 		'''
 			(None) -> (String)
@@ -81,6 +105,7 @@ class parser:
 			return origin_and_target_ids[:id_character_seperator]
 		except:
 			return 'An Error Occured: unsupported bitsream was provided'
+	
 	def get_target_id(self):
 		'''
 			(None) -> (String)
@@ -93,6 +118,7 @@ class parser:
 			return origin_and_target_ids[id_character_seperator+1:]
 		except:
 			return 'An Error Occured: unsupported bitsream was provided'
+	
 	def __retr__(self):
 		'''
 			(None) -> (String)

@@ -1,22 +1,31 @@
+from threading import Thread
 from datetime import date
-import json, node
+import json, node, time, random
 
+###########################
+## Indexing DATA Node    ##
+###########################
+#This node is responisble for storing all SENSITIVE information, hence it is important
+#that this node remain HIGHLY ANONYMOUS and can only recieve connections from the entry
+#node in such a way that it acts as a proxy to conceal the address or data of this node
 class Index(node.Node):
-	
-	def __init__(self, directoryIndex):
-		'''(Index, string) -> None
+	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp, directoryLookup, directoryLog):
+		'''(Index, string, string, string, string, string) -> None
 			:constructor method for the Index Class
 			
 			@paramaters a valid pathway(directory) for all the user-id to ip-addr matches
 			@exception the class constructor will throw an error if the pathway is NOT valid
 		'''
+		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp, indexPort)
+		self.directoryLookup = directoryLookup
+		self.directoryLog = directoryLog
 		#check to see that the directory given for the JSON file is valid
 		try:
 			pathwayCheck = open(directoryLookup, 'r')
 			#initialize the JSON file to a disctionary for quick-access called 'directory'
 			self.directoryIndex = json.load(pathwayCheck)
 			
-			pathwayCheck = open(directoryLogs, 'r')
+			pathwayCheck = open(directoryLog, 'r')
 			#initialize the JSON file to a disctionary for quick-access called 'directory'
 			self.directoryLogs = json.load(pathwayCheck)
 		except:
@@ -49,7 +58,7 @@ class Index(node.Node):
 			@exception if there is an error (ip doesnt exist) an empty string is returned
 		'''
 		try:
-			return self.directoryLogs["ip-addresses"][ip]
+			return self.directoryLogs["ip-addresses"].append(ip)
 		except:
 			return ''
 	
@@ -102,17 +111,58 @@ class Index(node.Node):
 		if ( self.lookupIP(connectingIp) == ''):
 			return False
 		self.directoryLogs[connectingIp] = str( date.today() ) #convert from date to string type
-		
+	
 	def cleaner(self):
 		'''(Index) -> None
 			:responsible for removing ip-addresses that go unused for over two days
 			** this is to make sure that ip's are not stored forever (NO LOGS ALLOWED) **
 		'''
-		pass
+		while True:
+			#run this script every 10 minutes to updates the tor index
+			time.sleep(600)
+			ipAddresses = getList(self.directoryLogs)
+			#iterate over every logged ip address and associated with it  
+			for i in range(0, len(ipAddresses)):
+				currentUserIP = ipAddresses[i]
+				currentUserID = self.directoryLogs["ip-addresses"][i]
+				#ping the address (an empty string will not be queued and dropped)
+				connectionResponse = self.send(currentUserIP, portOut, '')
+				if (connectionResponse == '2'):
+					self.deleteIndex(currentUserID, currentUserIP)
+			#write the current JSON dictionaries to the JSON files in-case the server unexpectedly stops
+			#to avoid the loss of data stored on the heap
+			pathwayCheck = open(self.directoryLookup, 'w')
+			json.dump(self.directoryIndex, pathwayCheck)
+			pathwayCheck = open(self.directoryLog, 'w')
+			json.dump(self.directoryLogs, pathwayCheck)
+			pathwayCheck.close()
 	
-	def specialFunctionality(self):
-		'''(NodeExit) -> (boolean)
+	def mapPathway(self):
+		'''(Index) -> (string)
+			:creates a randomized path through the server relay nodes
+			
+			@returns a path of minimum 4 relays and maximum 10 relays
+		'''
+		idRequest = f''
+		self.send(ipOut, portOut, userid)
+		pass
+			
+	def mapExit(self):
+		'''(Index) -> (string)
+			:chooses one random exit node to leave (reduce the chance of someone sitting on the end
+			 of the socket and listening to the unencrypted traffic)
+			
+			@returns the ip of one exit node of n many within the index JSON file
+		'''
+		numberOfExitNodes = len( self.directoryIndex['index']['entry'] )
+		randomExitNode = random.randrange(0, numberOfExitNodes)
+		return self.directoryIndex['index']['entry'][randomExitNode]['ip-address']
+	
+	def specialFunctionality(self, message, connectingAddress):
+		'''(NodeExit, string, string) -> (boolean)
 			:auto-handles the generic requests made to the indexing function
+			
+			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
 		return False
 		
