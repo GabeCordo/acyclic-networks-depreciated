@@ -79,6 +79,18 @@ class Parser:
 			return origin_and_target_ids[:path_character_seperator]
 		except:
 			return 'An Error Occured: unsupported bitsream was provided'
+			
+	def replace_paths(self, relays, exitnode):
+		'''
+			(None) -> (String)
+			@returns a modified bitsream with the new modified pathways
+			***		Shortcut for multiple pull function		***
+		'''
+		message = self.get_message()
+		request = self.get_request_type()
+		origin = self.get_origin_id()
+		final = self.get_target_id()
+		return f'<{message}<!{request}!?{relays}/{exitnode}?^{origin}/{final}^'
 	
 	def get_exit_node(self):
 		'''
@@ -118,7 +130,7 @@ class Parser:
 			return origin_and_target_ids[id_character_seperator+1:]
 		except:
 			return 'An Error Occured: unsupported bitsream was provided'
-	
+		
 	def __retr__(self):
 		'''
 			(None) -> (String)

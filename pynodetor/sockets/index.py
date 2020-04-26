@@ -16,7 +16,7 @@ class Index(node.Node):
 			@paramaters a valid pathway(directory) for all the user-id to ip-addr matches
 			@exception the class constructor will throw an error if the pathway is NOT valid
 		'''
-		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp, indexPort)
+		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp)
 		self.directoryLookup = directoryLookup
 		self.directoryLog = directoryLog
 		#check to see that the directory given for the JSON file is valid
@@ -164,5 +164,39 @@ class Index(node.Node):
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
+		#parse the simple bitsream requests
+		try:
+			request_seperator = origin_and_target_ids.index(':')
+			data_seperator = origin_and_target_ids.index('/')
+			#the request is from index 0 to the request seperator
+			request = message[:request_seperator]
+			#the first data is from the index after the index seperator to the data seperator
+			data_first = message[request_seperator+1:data_seperator]
+			#the second data is from the index after the data seperator to the end of the bitsream
+			data_last = message[data_seperator+1:]
+		except:
+			#the message is not specific to the generic indexing requests
+			return True
+			
+		if (request == '0'):
+			address = self.lookupIndex(data_first) #the first data is the userid
+			self.send(connectingAddress, 8075, address)
+		elif (request == '1'):
+			userid = self.lookupIP(data_first) #the first data is the ip
+			seld.send(connectingAddress, 8075, userid)
+		elif (request == '2'):
+			check = self.addIndex(data_first, data_last) #the first data is the userid, last is userip
+			self.send(connectingAddress, 8075, check)
+		elif (request == '3'): 
+			check = self.deleteIndex(data_first, data_last) #the first data is the userid, last is userip
+		elif (request == '4'):
+			path = self.mapPathway() #the relays pathway
+			exit = self.mapExit() #the exit node ip
+			self.send(connectingAddress, 8075, f'{path}/{exit}') #concat the two together and release
+		else
+			#the message is not specific to the generic indexing requests
+			return True
+		
+		#the message has been handled by the generic implemented index requests
 		return False
 		

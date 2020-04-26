@@ -11,18 +11,18 @@ import parser
 #Responisble for routing the packet to the next relay or exit node
 class NodeRelay(node.Node):
 	
-	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp):
+	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIP):
 		'''(NodeRelay, string, string, string, string) -> None
 			:constructor for the NodeRelay class, sets up the relay node server
 		'''
-		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp, indexPort)
+		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIP)
 	
 	def discoverNextNode(self, bitsream):
 		'''(NodeRelay, string) -> (list of strings)
 			:discover the next relay node for communication and modify the path
 			
 			@paramaters a valid bitsream syntax is provided
-			@returns a list of strings [the next node id, the modified pathway]
+			@returns a list of strings [the next relay node id, the modified pathway, exitpath]
 			@exception returns an empty list if the paramaters are not followed
 		'''
 		modify = parser.Parser(bitsream)
@@ -30,11 +30,9 @@ class NodeRelay(node.Node):
 		relayPath = modify.get_relay_path()
 		exitNode = modify.get_exit_node()
 		#see whether to modify the relay path or exit node path
-		if (relayPath == ''):
-			return [ exitNode, '' ]
-		else:
-			numberOfRelays = len(relayPath)
-			return [ relayPath[numberOfRelays], relayPath[:numberOfRelays] ]
+		numberOfRelays = len(relayPath)
+		#[ only the last node, every relay but the last node, exitNode IP ]
+		return [ relayPath[numberOfRelays:], relayPath[:numberOfRelays], exitNode ]
 		
 	
 	def specialFunctionality(self, message, connectingAddress):
@@ -43,4 +41,19 @@ class NodeRelay(node.Node):
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
+		#extract the bitsream mapped route from the former entry or relay node
+		resend_data = self.discoverNextNode(message)
+		
+		#if the next relay node is blank, this means that it needs to be sent to the exit node
+		#as it is done meshing/anonymising through the network
+		if (resend_data[0] == ''):
+			self.send(ipOut, 8075, message)
+		#the bitsream still needs to be send through the network
+		else:
+			message_modified = modify.replace_paths(resend_data[1], resend_data[2])
+			next_relay_ip = self.checkDestination(resend_data[2])
+			self.send(next_relay_ip, 8076, message_modified)
+		
+		#the relay node should only redirect data, it should never do anything else
+		#(we want to avoid users capturing any traffic on the network)
 		return False

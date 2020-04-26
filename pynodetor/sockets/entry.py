@@ -21,7 +21,7 @@ class NodeEntry(node.Node):
 			:constructor for the node entry class; provides all the connective functionality to begin routing
 			 messages or act as a middle-man for indexing/removing/lookingup userids on the index node
 		'''
-		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp, indexPort)
+		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp)
 	
 	def indexUserID(self, userid, connectingip):
 		'''(NodeEntry, string, string) -> (boolean)
@@ -95,6 +95,7 @@ class NodeEntry(node.Node):
 		else:
 			#none of the requests matched the special functions		   ^
 			return True
+		
 		#the message has been handled automaticly, there is no need to enqueue
 		return False
 	
