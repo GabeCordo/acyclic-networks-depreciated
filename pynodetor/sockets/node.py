@@ -7,7 +7,7 @@ import socket, time
 # that will be needed on the mock-tor network for socket communication
 class Node:
 	
-	def __init__(self, ip, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp):
+	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
 		'''(Node, string, int) -> None
 			:the class constructor for the primitive node type. All children class
 			 are specific variations of the node class for specific socket input and
@@ -20,7 +20,6 @@ class Node:
 		'''
 		##Generic Variables##
 		self.ip = ip
-		self.portIn = portIn
 		##List to store all received bitsreams for processing##
 		self.queue = []
 		##Initialize the recieving socket##
@@ -38,10 +37,10 @@ class Node:
 		return self.ip
 	
 	def getPort(self):
-		'''(Node) -> (string)
+		'''(Node) -> (int)
 			@returns the port binded to watch all incoming traffic.
 		'''
-		return self.portIn
+		return 8074
 	
 	def isListening(self):
 		'''(Node) -> (boolean)
@@ -70,7 +69,7 @@ class Node:
 					   1024 bites long to enforce maximum runtime of string
 					   parsing.
 		'''
-		self.incoming.bind( (self.ip, self.portIn) )
+		self.incoming.bind( (self.ip, 8074) )
 		self.incoming.listen(10)
 		while True:
 			c, addr = self.incoming.accept()
@@ -107,7 +106,7 @@ class Node:
 			#ensure the socket is closed
 			self.incoming.close()
 	
-	def send(self, ipOut, portOut, message):
+	def send(self, ipOut, message):
 			'''(Node, int, message) -> (string)
 				:sends a bitsream to another Node.
 				
@@ -121,7 +120,7 @@ class Node:
 			'''
 			try:
 				outgoing = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				outgoing.connect((ipOut, portOut))
+				outgoing.connect((ipOut, 8074)) #all outgoing requests are sent on port 8075
 				
 				#send public key for any responses
 				outgoing.send(bytes(encryptionHandler.getPublicKey, 'utf8'))
@@ -187,7 +186,7 @@ class Node:
 			@exception if the connection is lost or the userid is invalid, returns an empty string
 		'''
 		idRequest = f'0:{userid}'
-		return self.send(self.indexIp, 8077, idRequest) #settup ip and port of indexing server
+		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
 	
 	def monitor(self):
 		'''(Node) -> None

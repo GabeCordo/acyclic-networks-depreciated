@@ -18,19 +18,23 @@ class NodeExit(node.Node):
 		'''
 		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp)
 	
-	def stripBitsream(self, bitsream):
+	def formatMessage(self, message, origin):
 		'''(NodeExit, string) -> (string)
 			:strip the advanced bitsream into a simpler form with less usless data for the user
 			 and pass that to the specialFunctionality function
 			
-			@returns list with a simple bitsream 'mesage:message_origin' and the destination id
+			@returns list with a simple bitsream 'request:message/origin_id' and the destination id
 		'''
-		modify = parser.Parser(bitsream)
-		message = modify.get_message()
-		origin = modify.get_origin_id() #we need the origin in case a message needs to be sent back
-		destination = modify.get_target_id()
-		return [ f'{message}:{origin}', destination ]
-		
+		return f'7:{message}/{origin}'
+	
+	def formatRequest(self, request, origin):
+		'''(NodeExit, string) -> (string)
+			:format the bitsream for outgoing RSA public key or friend requests made by the originid
+			
+			@returns a simple bitstream 'request:origin_id/none'
+		'''
+		return f'{request}:{origin}/none'
+	
 	def specialFunctionality(self, message, connectingAddress):
 		'''(NodeExit, string, string) -> (boolean)
 			:handles all messages sent to the final recipient of the message/request that
@@ -38,10 +42,23 @@ class NodeExit(node.Node):
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
-		data_exit = self.stripBitsream(message)
-		destination_ip = self.checkDestination( data_exit[1] )
-		#send to the target_id's ip on the index server on the default port for 8074
-		self.send( destination_ip, 8074, data_exit[0] )
+		modify = parser.Parser(bitsream)
+		
+		request = modify.get_request_type()
+		#we need the origin in case a message needs to be sent back
+		origin = modify.get_origin_id()
+		destination = self.checkDestination( modify.get_target_id() )
+		
+		#if we are sending a standard message
+		if (request == '7'):
+			message_formated = self.formatMessage(message, origin)
+			#send to the target_id's ip on the index server on the default port for 8074
+			self.send( destination, message_formated )
+		#if we are requesting a RSA public key or requesting a friend request
+		elif (request == '5' || request == '6'):
+			message_formated = self.formatRequest(request, origin)
+			self.send( destination, message_formated )
+			
 		#we shouldn't need any functionality other than sending data to a user's computer
 		return False
 	

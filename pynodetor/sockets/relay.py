@@ -47,12 +47,12 @@ class NodeRelay(node.Node):
 		#if the next relay node is blank, this means that it needs to be sent to the exit node
 		#as it is done meshing/anonymising through the network
 		if (resend_data[0] == ''):
-			self.send(ipOut, 8075, message)
+			self.send(ipOut, message)
 		#the bitsream still needs to be send through the network
 		else:
 			message_modified = modify.replace_paths(resend_data[1], resend_data[2])
 			next_relay_ip = self.checkDestination(resend_data[2])
-			self.send(next_relay_ip, 8076, message_modified)
+			self.send(next_relay_ip, message_modified)
 		
 		#the relay node should only redirect data, it should never do anything else
 		#(we want to avoid users capturing any traffic on the network)

@@ -180,20 +180,20 @@ class Index(node.Node):
 			
 		if (request == '0'):
 			address = self.lookupIndex(data_first) #the first data is the userid
-			self.send(connectingAddress, 8075, address)
+			self.send(connectingAddress, address)
 		elif (request == '1'):
 			userid = self.lookupIP(data_first) #the first data is the ip
-			seld.send(connectingAddress, 8075, userid)
+			self.send(connectingAddress, userid)
 		elif (request == '2'):
 			check = self.addIndex(data_first, data_last) #the first data is the userid, last is userip
-			self.send(connectingAddress, 8075, check)
+			self.send(connectingAddress, check)
 		elif (request == '3'): 
 			check = self.deleteIndex(data_first, data_last) #the first data is the userid, last is userip
 		elif (request == '4'):
 			path = self.mapPathway() #the relays pathway
 			exit = self.mapExit() #the exit node ip
-			self.send(connectingAddress, 8075, f'{path}/{exit}') #concat the two together and release
-		else
+			self.send(connectingAddress, f'{path}/{exit}') #concat the two together and release
+		else:
 			#the message is not specific to the generic indexing requests
 			return True
 		

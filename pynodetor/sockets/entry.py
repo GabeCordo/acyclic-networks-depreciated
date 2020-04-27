@@ -32,7 +32,7 @@ class NodeEntry(node.Node):
 			@exception returns boolean false if the userid or ip is already used
 		'''
 		idRequest = f'2:{userid}/{connectingip}'
-		return self.send(self.indexIp, 8077, idRequest)
+		return self.send(self.indexIp, idRequest)
 
 	def deindexUserID(self, userid, connectingip):
 		'''(NodeEntry, string, string) -> (boolean)
@@ -43,7 +43,7 @@ class NodeEntry(node.Node):
 			@exception returns boolean false if the paramaters were invalid
 		'''
 		idRequest = f'3:{userid}/{connectingip}'
-		return self.send(self.indexIp, 8077, idRequest)
+		return self.send(self.indexIp, idRequest)
 
 	def mapAnonymousRoute(self):
 		'''(NodeEntry) -> (list of strings)
@@ -52,8 +52,15 @@ class NodeEntry(node.Node):
 			@returns a list of strings (relay_map, exit_node)
 			@exceptions none should occur unless the indexing server is down
 		'''
-		idRequest = f'4:None'
-		return self.send(self.indexIp, 8077, idRequest)
+		idRequest = f'4:none/none'
+		return self.send(self.indexIp, idRequest)
+		
+	def useridOfAddress(self, ip):
+		'''(NodeEntry, string) -> (string)
+			:finds the associated id with the connecting ip address
+			**this is a private function, it is important only the entry node has this functionality**
+		'''
+		return self.send(self.indexIP, f'1:{ip}')
 	
 	def specialFunctionality(self, message, connectingAddress):
 		'''(NodeEntry, string, string) -> (boolean)
@@ -61,37 +68,47 @@ class NodeEntry(node.Node):
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
-		character_seperator = message.index(':')
-		request = message[:character_seperator]
-		data = message[character_seperator+1:]
+		request_seperator = origin_and_target_ids.index(':')
+		data_seperator = origin_and_target_ids.index('/')
+		#the request is from index 0 to the request seperator
+		request = message[:request_seperator]
+		#the first data is from the index after the index seperator to the data seperator
+		data_first = message[request_seperator+1:data_seperator]
+		#the second data is from the index after the data seperator to the end of the bitsream
+		data_last = message[data_seperator+1:]
 		
-		if (request == '0'): #request to lookup index (most likely)    v
+		#request to lookup index (most likely)
+		if (request == '0'):
 			self.checkDestination(data)
-		elif (request == '7'): #request to send a message			   |
-			character_seperator = message.index('/')
-			userid_target = data[character_seperator+1:]
-			text = data[:character_seperator]
+		#request to send a message
+		elif (request == '7'):
 			path = self.mapAnonymousRoute()
-			template = f'<{text}<!{request}!?{path[0]}/{path[1]}?^{userid}/{userid_target}^' #add userid
-			self.send(ip, 8076, template)
-		elif (request == '5'): #request a Public RSA key			   |
-			node_exit = self.mapAnonymousRoute()[1]
-			template = f'<<!{request}!??^{userid}/{userid_target}^'
-			self.send(node_exit, 8075, template)
-		elif (request == '6'): #request to send a 'friend' request     |
-			node_exit = self.mapAnonymousRoute()[1]
-			template = f'<<!{request}!??^{userid}/{userid_target}^'
-			self.send(node_exit, 8075, template)
-		elif (request == '2'): #request to add index			       |
-			character_seperator = message.index('/')
-			userid = data[character_seperator+1:]
-			userid_target = data[:character_seperator]
-			self.indexUserID(userid, userid_target)
-		elif (request == '3'): #request to delete index (least likely) |
-			character_seperator = message.index('/')
-			userid = data[character_seperator+1:]
-			userid_target = data[:character_seperator]
-			self.deindexUserID(userid, userid_target)
+			#find what the id is of the individual who sent the request
+			userid = self.useridOfAddress(connectingAddress)
+			template = f'<{data_first}<!7!?{path[0]}/{path[1]}?^{userid}/{data_last}^' #add userid
+			self.send(ip, template)
+		#request a Public RSA key
+		elif (request == '5'):
+			path = self.mapAnonymousRoute()
+			#find what the id is of the individual who sent the request
+			userid = self.useridOfAddress(connectingAddress)
+			template = f'<<!5!?{path[0}/{path[1]}?^{userid}/{data_first}^'
+			self.send(path[1], template)
+		#request to send a 'friend' request
+		elif (request == '6'):
+			path = self.mapAnonymousRoute()
+			#find what the id is of the individual who sent the request
+			userid = self.useridOfAddress(connectingAddress)
+			template = f'<<!6!?{path[0]}/{path[1]}?^{userid}/{data_first}^'
+			self.send(path[1], template)
+		#request to add index
+		elif (request == '2'):
+			#data_first is userid, data_lat is userip
+			self.indexUserID(data_fist, data_last)
+		#request to delete index (least likely)
+		elif (request == '3'):
+			#data_first is userid, data_lat is userip
+			self.deindexUserID(data_first, data_last)
 		else:
 			#none of the requests matched the special functions		   ^
 			return True
