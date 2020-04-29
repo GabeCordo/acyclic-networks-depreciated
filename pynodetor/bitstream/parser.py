@@ -31,8 +31,10 @@ class Parser:
 						bitsream:
 							a) int 0 : message (text)
 							b) int 1 : request type (security type)
-							c) int 2 : status (how far from target)
-							d) int 3 : userids (origin/target ids)
+							c) int 2 : pathway (array of relay ips)
+							d) int 3 : exit (final exit node ip)
+							e) int 4 : userid (origin/sender)
+							f) int 5 : userid (target/destination)
 			@returns the datatype associated with the integer provided
 					 by the function argument
 			@exception returns None type if an unsupported bitsream is
@@ -73,12 +75,7 @@ class Parser:
 			@returns the ids of the relay path
 			***		Shortcut for the pull function		***
 		'''
-		origin_and_target_ids = self.pull(2)
-		try:
-			path_character_seperator = origin_and_target_ids.index('/')
-			return origin_and_target_ids[:path_character_seperator]
-		except:
-			return 'An Error Occured: unsupported bitsream was provided'
+		return self.pull(2)
 			
 	def replace_paths(self, relays, exitnode):
 		'''
@@ -98,12 +95,7 @@ class Parser:
 			@returns the exit node ip-address of the bitstream
 			***		Shortcut for the pull function		***
 		'''
-		origin_and_target_ids = self.pull(2)
-		try:
-			path_character_seperator = origin_and_target_ids.index('/')
-			return origin_and_target_ids[path_character_seperator+1:]
-		except:
-			return 'An Error Occured: unsupported bitsream was provided'
+		return self.pull(3)
 	
 	def get_origin_id(self):
 		'''
@@ -111,12 +103,7 @@ class Parser:
 			@returns the origin id embedded in the bitsream
 			***		Shortcut for the pull function		***
 		'''
-		origin_and_target_ids = self.pull(3)
-		try:
-			id_character_seperator = origin_and_target_ids.index('/')
-			return origin_and_target_ids[:id_character_seperator]
-		except:
-			return 'An Error Occured: unsupported bitsream was provided'
+		return self.pull(4)
 	
 	def get_target_id(self):
 		'''
@@ -124,12 +111,7 @@ class Parser:
 			@returns the target id embedded in the bitsream
 			***		Shortcut for the pull function		***
 		'''
-		origin_and_target_ids = self.pull(3)
-		try:
-			id_character_seperator = origin_and_target_ids.index('/')
-			return origin_and_target_ids[id_character_seperator+1:]
-		except:
-			return 'An Error Occured: unsupported bitsream was provided'
+		return self.pull(5)
 		
 	def __retr__(self):
 		'''
