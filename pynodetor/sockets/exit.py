@@ -18,6 +18,16 @@ class NodeExit(node.Node):
 		'''
 		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp)
 	
+	def checkDestination(self, userid):
+		'''(Node) -> (string)
+			:retrieves the ip-address of the userid inputed from the index server
+				
+			@returns the string representation of the ip-address associated with the userid
+			@exception if the connection is lost or the userid is invalid, returns an empty string
+		'''
+		idRequest = f'0:{userid}'
+		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
+	
 	def formatMessage(self, message, origin):
 		'''(NodeExit, string) -> (string)
 			:strip the advanced bitsream into a simpler form with less usless data for the user

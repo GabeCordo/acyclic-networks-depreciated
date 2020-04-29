@@ -178,16 +178,6 @@ class Node:
 			#the queue was empty, no bitsreams have been received or approved for enqueing
 			return ''
 	
-	def checkDestination(self, userid):
-		'''(Node) -> (string)
-			:retrieves the ip-address of the userid inputed from the index server
-			
-			@returns the string representation of the ip-address associated with the userid
-			@exception if the connection is lost or the userid is invalid, returns an empty string
-		'''
-		idRequest = f'0:{userid}'
-		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
-	
 	def monitor(self):
 		'''(Node) -> None
 			:the monitor function is an active listener on the enqueued messages

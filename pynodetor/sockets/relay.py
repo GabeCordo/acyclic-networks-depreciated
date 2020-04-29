@@ -27,12 +27,13 @@ class NodeRelay(node.Node):
 		'''
 		modify = parser.Parser(bitsream)
 		#retrieve the path ids and the ip-address of the exit node
-		relayPath = modify.get_relay_path()
+		pathway = modify.get_relay_path()
 		exitNode = modify.get_exit_node()
 		#see whether to modify the relay path or exit node path
-		numberOfRelays = len(relayPath)
+		activeRelays = pathway.split(':')
+		nextRelay = activeRelays.pop()
 		#[ only the last node, every relay but the last node, exitNode IP ]
-		return [ relayPath[numberOfRelays:], relayPath[:numberOfRelays], exitNode ]
+		return [ nextRelay, ':'.join(activeRelays), exitNode ]
 		
 	
 	def specialFunctionality(self, message, connectingAddress):
@@ -51,7 +52,6 @@ class NodeRelay(node.Node):
 		#the bitsream still needs to be send through the network
 		else:
 			message_modified = modify.replace_paths(resend_data[1], resend_data[2])
-			next_relay_ip = self.checkDestination(resend_data[2])
 			self.send(next_relay_ip, message_modified)
 		
 		#the relay node should only redirect data, it should never do anything else

@@ -141,11 +141,13 @@ class Index(node.Node):
 		'''(Index) -> (string)
 			:creates a randomized path through the server relay nodes
 			
-			@returns a path of minimum 4 relays and maximum 10 relays
+			@returns a path of 4 node relays
 		'''
-		idRequest = f''
-		self.send(ipOut, portOut, userid)
-		pass
+		activeRelays = self.directoryLogs.keys()
+		for i in range(0, 4):
+			relayNode = random.randrange(0, activeRelays)
+			pathway = activeRelays[relayNode] + ':'
+		return pathway[:len(pathway)]
 			
 	def mapExit(self):
 		'''(Index) -> (string)
@@ -154,9 +156,9 @@ class Index(node.Node):
 			
 			@returns the ip of one exit node of n many within the index JSON file
 		'''
-		numberOfExitNodes = len( self.directoryIndex['index']['entry'] )
-		randomExitNode = random.randrange(0, numberOfExitNodes)
-		return self.directoryIndex['index']['entry'][randomExitNode]['ip-address']
+		activeExits = len( self.directoryIndex['index']['entry'] )
+		exitNode = random.randrange(0, activeExits)
+		return self.directoryIndex['index']['entry'][exitNode]['ip-address']
 	
 	def specialFunctionality(self, message, connectingAddress):
 		'''(NodeExit, string, string) -> (boolean)

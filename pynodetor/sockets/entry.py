@@ -23,6 +23,16 @@ class NodeEntry(node.Node):
 		'''
 		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp)
 	
+	def checkDestination(self, userid):
+		'''(Node) -> (string)
+			:retrieves the ip-address of the userid inputed from the index server
+			
+			@returns the string representation of the ip-address associated with the userid
+			@exception if the connection is lost or the userid is invalid, returns an empty string
+		'''
+		idRequest = f'0:{userid}'
+		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
+	
 	def indexUserID(self, userid, connectingip):
 		'''(NodeEntry, string, string) -> (boolean)
 			:add a new userid and ip-address match on the indexing node for transmission
@@ -68,14 +78,20 @@ class NodeEntry(node.Node):
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
-		request_seperator = origin_and_target_ids.index(':')
-		data_seperator = origin_and_target_ids.index('/')
-		#the request is from index 0 to the request seperator
-		request = message[:request_seperator]
-		#the first data is from the index after the index seperator to the data seperator
-		data_first = message[request_seperator+1:data_seperator]
-		#the second data is from the index after the data seperator to the end of the bitsream
-		data_last = message[data_seperator+1:]
+		
+		#parse the simple bitsream requests
+		try:
+			request_seperator = origin_and_target_ids.index(':')
+			data_seperator = origin_and_target_ids.index('/')
+			#the request is from index 0 to the request seperator
+			request = message[:request_seperator]
+			#the first data is from the index after the index seperator to the data seperator
+			data_first = message[request_seperator+1:data_seperator]
+			#the second data is from the index after the data seperator to the end of the bitsream
+			data_last = message[data_seperator+1:]
+		except:
+			#the message is not specific to the generic indexing requests
+			return True
 		
 		#request to lookup index (most likely)
 		if (request == '0'):
@@ -85,21 +101,21 @@ class NodeEntry(node.Node):
 			path = self.mapAnonymousRoute()
 			#find what the id is of the individual who sent the request
 			userid = self.useridOfAddress(connectingAddress)
-			template = f'<{data_first}<!7!?{path[0]}/{path[1]}?^{userid}/{data_last}^' #add userid
+			template = f'#{data_first}#?7?^{path[0]}^@{path[1]}@<{userid}<>{data_last}>' #add userid
 			self.send(ip, template)
 		#request a Public RSA key
 		elif (request == '5'):
 			path = self.mapAnonymousRoute()
 			#find what the id is of the individual who sent the request
 			userid = self.useridOfAddress(connectingAddress)
-			template = f'<<!5!?{path[0}/{path[1]}?^{userid}/{data_first}^'
+			template = f'?5?<{userid}<>{data_first}>'
 			self.send(path[1], template)
 		#request to send a 'friend' request
 		elif (request == '6'):
 			path = self.mapAnonymousRoute()
 			#find what the id is of the individual who sent the request
 			userid = self.useridOfAddress(connectingAddress)
-			template = f'<<!6!?{path[0]}/{path[1]}?^{userid}/{data_first}^'
+			template = f'?6?<{userid}<>{data_first}>'
 			self.send(path[1], template)
 		#request to add index
 		elif (request == '2'):
