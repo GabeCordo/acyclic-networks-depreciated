@@ -1,0 +1,9 @@
+README.md
+setup.cfg
+setup.py
+pynodetor/__init__.py
+pynodetor.egg-info/PKG-INFO
+pynodetor.egg-info/SOURCES.txt
+pynodetor.egg-info/dependency_links.txt
+pynodetor.egg-info/requires.txt
+pynodetor.egg-info/top_level.txt
