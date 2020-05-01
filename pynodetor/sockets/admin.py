@@ -1,9 +1,11 @@
 import node
+from pynodetor.utils import linkerJSON
+from pynodetor.utils.authenticator import generate
 
-class Admin(node.Node):
+class Admin(node.Node, linkerJSON.Handler):
 	
-	def __init__(self):
-			pass
+	def __init__(self, authcode):
+		self.authcode = authcode
 			
 	def refreshAuth(self):
 		pass

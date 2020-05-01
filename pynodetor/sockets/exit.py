@@ -2,8 +2,7 @@
 import node, sys
 
 #import the bitstream parser
-sys.path.append('../bitstream/')
-import parser
+from pynodetor.bitstream import advanced
 
 ###########################
 ##Child Class of the Node##
@@ -11,12 +10,12 @@ import parser
 #Responisble for sending the message request to the final destination in the userid
 class NodeExit(node.Node):
 	
-	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp):
+	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
 		'''(NodeExit, string, string, string, string) -> None
 			:the consturctor is the same as the node server, small maniplulation of the origional
 			 node server to specifically redirect data to the final ip
 		'''
-		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp)
+		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp)
 	
 	def checkDestination(self, userid):
 		'''(Node) -> (string)
@@ -52,7 +51,7 @@ class NodeExit(node.Node):
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
-		modify = parser.Parser(bitsream)
+		modify = advanced.Parser(bitsream)
 		
 		request = modify.get_request_type()
 		#we need the origin in case a message needs to be sent back

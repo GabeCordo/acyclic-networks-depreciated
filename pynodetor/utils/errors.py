@@ -71,7 +71,7 @@ class CleanupFailure(Exception):
 		Exception.__init__(self, f'Indexing Node Error: There was an attempt to load the local index to the JSON file but an error occured.')
 		self.time = time
 		
-class MissingIndex(Exception)
+class MissingIndex(Exception):
 	def __init__(self, request):
 		Exception.__init__(self, f'Indexing Node Error: There was an attempt to pull from JSON but the indexing file was missing.')
 		self.request = request
@@ -83,3 +83,11 @@ class MissingIndex(Exception)
 class TrafficOverloadError(Exception):
 	def __init__(self):
 		Exception.__init__(self, f'Balancer Node Error: As a result of an unusual amount of requests the Node has closed.')
+		
+##########################################
+#	 	  Parsing/Markup Errors
+##########################################
+
+class MismatchedSyntax(Exception):
+	def __init__(self):
+		Exception.__init__(self, f'Parsing Error: There was an attempt to pass incorrect syntax to the parser.')

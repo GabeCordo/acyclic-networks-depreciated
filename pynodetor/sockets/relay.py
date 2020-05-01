@@ -2,8 +2,7 @@
 import node, sys
 
 #import the bitstream parser
-sys.path.append('../bitstream/')
-import parser
+from pynodetor.bitstream import advanced
 
 ###########################
 ##Child Class of the Node##
@@ -11,11 +10,11 @@ import parser
 #Responisble for routing the packet to the next relay or exit node
 class NodeRelay(node.Node):
 	
-	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIP):
+	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP):
 		'''(NodeRelay, string, string, string, string) -> None
 			:constructor for the NodeRelay class, sets up the relay node server
 		'''
-		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIP)
+		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP)
 	
 	def discoverNextNode(self, bitsream):
 		'''(NodeRelay, string) -> (list of strings)
@@ -25,7 +24,7 @@ class NodeRelay(node.Node):
 			@returns a list of strings [the next relay node id, the modified pathway, exitpath]
 			@exception returns an empty list if the paramaters are not followed
 		'''
-		modify = parser.Parser(bitsream)
+		modify = advanced.Parser(bitsream)
 		#retrieve the path ids and the ip-address of the exit node
 		pathway = modify.get_relay_path()
 		exitNode = modify.get_exit_node()

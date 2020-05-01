@@ -1,6 +1,9 @@
-from threading import Thread
+import node, random
 from datetime import date
-import json, node, time, random
+from threading import Thread
+from pynodetor.bitstream import basic
+from pynodetor.utils import linkerJSON
+
 
 ###########################
 ## Indexing DATA Node    ##
@@ -9,32 +12,19 @@ import json, node, time, random
 #that this node remain HIGHLY ANONYMOUS and can only recieve connections from the entry
 #node in such a way that it acts as a proxy to conceal the address or data of this node
 class Index(node.Node):
-	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp, directoryLookup, directoryLog):
+	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, directoryLookup, directoryLog):
 		'''(Index, string, string, string, string, string) -> None
 			:constructor method for the Index Class
 			
 			@paramaters a valid pathway(directory) for all the user-id to ip-addr matches
 			@exception the class constructor will throw an error if the pathway is NOT valid
 		'''
-		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp)
+		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic)
 		self.directoryLookup = directoryLookup
 		self.directoryLog = directoryLog
-		#check to see that the directory given for the JSON file is valid
-		try:
-			pathwayCheck = open(directoryLookup, 'r')
-			#initialize the JSON file to a disctionary for quick-access called 'directory'
-			self.directoryIndex = json.load(pathwayCheck)
-			
-			pathwayCheck = open(directoryLog, 'r')
-			#initialize the JSON file to a disctionary for quick-access called 'directory'
-			self.directoryLogs = json.load(pathwayCheck)
-		except:
-			raise FileNotFoundError('Indexing Error: the JSON directory was INVALID')
-		
-		#initialize the JSON file to a disctionary for quick-access called 'directory'
-		self.directoryIndex = json.load(pathwayCheck)
-		#close the file reader for the JSON file
-		pathwayCheck.close()
+		self.l = linkerJSON(directoryLookup, directoryLog)
+		self.directoryLogs = self.l.data[0]
+		self.directoryIndex = self.l.data[1]
 		
 	def lookupIndex(self, userid):
 		'''(Index, string) -> (string)

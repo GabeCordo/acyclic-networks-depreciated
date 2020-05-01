@@ -8,6 +8,7 @@
 	as requested by the class instance variables		***
 '''
 
+from pynodetor.utils.errors import *
 from cffi import FFI
 
 class Parser:
@@ -51,7 +52,7 @@ class Parser:
 			
 			return stream_modified
 		except Exception as e:
-			return f'{e}: An Error Occured: unsupported bitsream was provided.'
+			raise MismatchedSyntax()
 	
 	def get_message(self):
 		'''

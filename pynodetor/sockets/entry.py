@@ -2,8 +2,7 @@
 import node, sys
 
 #import the bitstream parser
-sys.path.append('../bitstream/')
-import parser
+from pynodetor.bitstream import basic
 
 ###########################
 ##Child Class of the Node##
@@ -16,12 +15,12 @@ import parser
 ###########################
 class NodeEntry(node.Node):
 	
-	def __init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp):
+	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
 		'''(NodeEntry, string, string, string, string) -> None
 			:constructor for the node entry class; provides all the connective functionality to begin routing
 			 messages or act as a middle-man for indexing/removing/lookingup userids on the index node
 		'''
-		super().__init__(self, portIn, directoryKeyPrivate, directoryKeyPublic, indexIp)
+		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp)
 	
 	def checkDestination(self, userid):
 		'''(Node) -> (string)
@@ -78,19 +77,12 @@ class NodeEntry(node.Node):
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
-		
-		#parse the simple bitsream requests
 		try:
-			request_seperator = origin_and_target_ids.index(':')
-			data_seperator = origin_and_target_ids.index('/')
-			#the request is from index 0 to the request seperator
-			request = message[:request_seperator]
-			#the first data is from the index after the index seperator to the data seperator
-			data_first = message[request_seperator+1:data_seperator]
-			#the second data is from the index after the data seperator to the end of the bitsream
-			data_last = message[data_seperator+1:]
+			b = basic.Parser(message)
+			request = b.getRequest()
+			data_first = b.getPrimaryData()
+			data_last = b.getSecondaryData()
 		except:
-			#the message is not specific to the generic indexing requests
 			return True
 		
 		#request to lookup index (most likely)

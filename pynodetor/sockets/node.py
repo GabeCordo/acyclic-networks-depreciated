@@ -1,13 +1,14 @@
 #import pythons socket connection features
-from threading import Thread
 import socket, time
+from threading import Thread
+from pynodetor.encryption import rsa
 
 ## Parent Class for Entry, Relay and Exit Nodes ##
 # The Node class contains functionality shared by all entry, relay or exit nodes
 # that will be needed on the mock-tor network for socket communication
 class Node:
 	
-	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
+	def __init__(self, ip, directoryKeyPrivate=None, directoryKeyPublic=None, indexIp=None):
 		'''(Node, string, int) -> None
 			:the class constructor for the primitive node type. All children class
 			 are specific variations of the node class for specific socket input and
@@ -26,7 +27,7 @@ class Node:
 		self.listening = True
 		self.incoming = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 		##Initialize the encryption handler##
-		encryptionHandler = Handler(directoryKeyPrivate, directoryKeyPublic)
+		encryptionHandler = rsa.Handler(directoryKeyPrivate, directoryKeyPublic)
 		##Settup connection to an indexing/logging server##
 		self.indexIP = indexIP
 	
