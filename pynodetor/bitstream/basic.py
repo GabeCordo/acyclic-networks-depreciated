@@ -3,7 +3,8 @@ from pynodetor.utils.errors import *
 class Parser():
 	
 	def __init__(self, message=''):
-		'''(Parser, string) -> None
+		'''
+			(Parser, string) -> None
 			:the constructor class for the simple parser
 			
 			@syntax (request):(primary_data)/(secondary_data)
@@ -25,7 +26,8 @@ class Parser():
 		self.parse()
 	
 	def parse(self):
-		'''(Parser) -> None
+		'''
+			(Parser) -> None
 			:using indexing, parses the pieces of data into the class variables
 			
 			@returns nothing to the main program but initializes the class variables
@@ -44,7 +46,8 @@ class Parser():
 			raise MismatchedSyntax()
 		
 	def getRequest(self):
-		'''(Parser) -> (string)
+		'''
+			(Parser) -> (string)
 			:the getter function for the messages request field
 			
 			@returns the request parsed from the message during initialization
@@ -53,7 +56,8 @@ class Parser():
 		return self.request
 		
 	def getPrimaryData(self):
-		'''(Parser) -> (string)
+		'''
+			(Parser) -> (string)
 			:the getter function for the messages primary data field
 			
 			@returns the primary data parsed from the message during initialization
@@ -62,7 +66,8 @@ class Parser():
 		return self.data_primary
 		
 	def getSecondaryData(self):
-		'''(Parser) -> (string)
+		'''
+			(Parser) -> (string)
 			:the getter function for the messages secondary data field
 			
 			@returns the secondary data parsed from the message during initialization
@@ -71,13 +76,15 @@ class Parser():
 		return self.data_secondary
 		
 	def __str__(self):
-		'''(Parser) -> (string)
+		'''
+			(Parser) -> (string)
 			@returns a string representation of the class variables in the proper simple bitstream syntax
 		'''
 		return f'{self.request}:{self.data_primary}/{self.data_secondary}'
 		
 	def __repr__(self):
-		'''(Parser) -> (string)
+		'''
+			(Parser) -> (string)
 			@returns a string representation of the class type
 		'''
 		return f'Parser({message})'

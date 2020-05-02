@@ -1,20 +1,21 @@
-#import the parent class and pathway library
-import node, sys
-
-#import the bitstream parser
+###############################
+#	   pynodetor imports
+###############################
+import node
 from pynodetor.bitstream import advanced
+from pynodetor.utils import errors, enums
 
-###########################
-##Child Class of the Node##
-###########################
+###############################
+#		   main code
+###############################
 #Responisble for routing the packet to the next relay or exit node
+
 class NodeRelay(node.Node):
-	
 	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP):
 		'''(NodeRelay, string, string, string, string) -> None
 			:constructor for the NodeRelay class, sets up the relay node server
 		'''
-		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP)
+		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP, False, True, False) #ecryption, listening, monitoring
 	
 	def discoverNextNode(self, bitsream):
 		'''(NodeRelay, string) -> (list of strings)

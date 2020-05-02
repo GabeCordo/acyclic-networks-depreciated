@@ -1,13 +1,16 @@
-#import the Crypto package for RSA key creation
+###############################
+#		python imports
+###############################
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP
 import base64
 
-##Handler Class##
+###############################
+#		   main code
+###############################
 #an out-of the box and easy to use object-oriented RSA encryption handler for developers
 #to implement end-to-end encryption within socket communication
 class Handler:
-	
 	def __init__(self, directoryKeyPrivate, directoryKeyPublic):
 		'''(Handler, string, string) -> None
 			:constructor function of the end-to-end encryption handler

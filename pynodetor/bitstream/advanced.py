@@ -58,6 +58,7 @@ class Parser:
 		'''
 			(None) -> (String)
 			@returns the message embedded in the bitsream
+			
 			***		Shortcut for the pull function		***
 		'''
 		return self.pull(0)
@@ -66,6 +67,7 @@ class Parser:
 		'''
 			(None) -> (String)
 			@returns the request embedded in the bitsream
+			
 			***		Shortcut for the pull function		***
 		'''
 		return self.pull(1)
@@ -74,6 +76,7 @@ class Parser:
 		'''
 			(None) -> (String)
 			@returns the ids of the relay path
+			
 			***		Shortcut for the pull function		***
 		'''
 		return self.pull(2)
@@ -82,6 +85,7 @@ class Parser:
 		'''
 			(None) -> (String)
 			@returns a modified bitsream with the new modified pathways
+			
 			***		Shortcut for multiple pull function		***
 		'''
 		message = self.get_message()
@@ -94,6 +98,7 @@ class Parser:
 		'''
 			(Node) -> (String)
 			@returns the exit node ip-address of the bitstream
+			
 			***		Shortcut for the pull function		***
 		'''
 		return self.pull(3)
@@ -102,6 +107,7 @@ class Parser:
 		'''
 			(None) -> (String)
 			@returns the origin id embedded in the bitsream
+			
 			***		Shortcut for the pull function		***
 		'''
 		return self.pull(4)
@@ -110,6 +116,7 @@ class Parser:
 		'''
 			(None) -> (String)
 			@returns the target id embedded in the bitsream
+			
 			***		Shortcut for the pull function		***
 		'''
 		return self.pull(5)

@@ -1,29 +1,30 @@
-#import the parent class and pathway library
-import node, sys
-
-#import the bitstream parser
+###############################
+#	   pynodetor imports
+###############################
+import node
 from pynodetor.bitstream import basic
+from pynodetor.utils import errors, enums
 
-###########################
-##Child Class of the Node##
-###########################
+###############################
+#		   main code
+###############################
 #Responisble for handling incoming connections that are to be fed through the tor network
+# [we will want to keep the template (even if it can increase runtime by 0.01s, we NEED to
+# [ensure a failproof transfer of data to more sensitive areas of the network
 
-###########################
-# we will want to keep the template (even if it can increase runtime by 0.01s, we NEED to
-# ensure a failproof transfer of data to more sensitive areas of the network
-###########################
 class NodeEntry(node.Node):
-	
 	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
-		'''(NodeEntry, string, string, string, string) -> None
+		'''
+			(NodeEntry, string, string, string, string) -> None
+			
 			:constructor for the node entry class; provides all the connective functionality to begin routing
 			 messages or act as a middle-man for indexing/removing/lookingup userids on the index node
 		'''
-		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp)
-	
+		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp, True, True, False) #ecryption, listening, monitoring
+		
 	def checkDestination(self, userid):
-		'''(Node) -> (string)
+		'''
+			(Node) -> (string)
 			:retrieves the ip-address of the userid inputed from the index server
 			
 			@returns the string representation of the ip-address associated with the userid
@@ -33,7 +34,8 @@ class NodeEntry(node.Node):
 		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
 	
 	def indexUserID(self, userid, connectingip):
-		'''(NodeEntry, string, string) -> (boolean)
+		'''
+			(NodeEntry, string, string) -> (boolean)
 			:add a new userid and ip-address match on the indexing node for transmission
 			
 			@paramaters the userid must be unique and the ip must not have an id already indexed
@@ -44,7 +46,8 @@ class NodeEntry(node.Node):
 		return self.send(self.indexIp, idRequest)
 
 	def deindexUserID(self, userid, connectingip):
-		'''(NodeEntry, string, string) -> (boolean)
+		'''
+			(NodeEntry, string, string) -> (boolean)
 			:remove a userid and ip-address match on the indexing node
 			
 			@paramaters the userid must be valid and the ip must be associated with the indexed id
@@ -55,7 +58,8 @@ class NodeEntry(node.Node):
 		return self.send(self.indexIp, idRequest)
 
 	def mapAnonymousRoute(self):
-		'''(NodeEntry) -> (list of strings)
+		'''
+			(NodeEntry) -> (list of strings)
 			:map a route through all the tor relay nodes and choose a random exit node
 			
 			@returns a list of strings (relay_map, exit_node)
@@ -65,61 +69,80 @@ class NodeEntry(node.Node):
 		return self.send(self.indexIp, idRequest)
 		
 	def useridOfAddress(self, ip):
-		'''(NodeEntry, string) -> (string)
+		'''
+			(NodeEntry, string) -> (string)
 			:finds the associated id with the connecting ip address
+			
 			**this is a private function, it is important only the entry node has this functionality**
 		'''
 		return self.send(self.indexIP, f'1:{ip}')
+		
+	def publicKeyOfUser(self, userid):
+		'''
+			(NodeEntry, string) -> (string)
+			:finds the publicRSA key associated with the user-id
+			
+			@returns a string of the publicRSA if the connectingIP is friends with the UserID
+			@exception returns an empty string if the two userid's are not friends
+		'''
+		return self.send(self.indexIP, f'5:{userid}')
+		
+	def formatRequestMessage(self, connectingAddress, data_first, data_last):
+		'''
+			(NodeEntry) -> None
+			:formats the data into an advanced parsable bitsream request for transmitting messages
+		'''
+		path = self.mapAnonymousRoute()
+		#find what the id is of the individual who sent the request
+		userid = self.useridOfAddress(connectingAddress)
+		template = f'#{data_first}#?7?^{path[0]}^@{path[1]}@<{userid}<>{data_last}>' #add userid
+		return self.send(ip, template)
+		
+	def formatRequestFriend(self, connectingAddress, targetid):
+		'''
+			(NodeEntry) -> None
+			:formats the data into an advanced parsable bitsream request for transmitting friend requests
+		'''
+		path = self.mapAnonymousRoute()
+		#find what the id is of the individual who sent the request
+		userid = self.useridOfAddress(connectingAddress)
+		template = f'?6?<{userid}<>{targetid}>'
+		self.send(path[1], template)
 	
 	def specialFunctionality(self, message, connectingAddress):
-		'''(NodeEntry, string, string) -> (boolean)
+		'''
+			(NodeEntry, string, string) -> (boolean)
 			:handles all socket requests that pertain to the requests under 'entry node' in the docs
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue
 		'''
+		#validate syntax in-case the message hasn't been run through a balancer which verifies syntax
 		try:
 			b = basic.Parser(message)
 			request = b.getRequest()
 			data_first = b.getPrimaryData()
 			data_last = b.getSecondaryData()
 		except:
-			return True
+			return
 		
 		#request to lookup index (most likely)
 		if (request == '0'):
 			self.checkDestination(data)
 		#request to send a message
 		elif (request == '7'):
-			path = self.mapAnonymousRoute()
-			#find what the id is of the individual who sent the request
-			userid = self.useridOfAddress(connectingAddress)
-			template = f'#{data_first}#?7?^{path[0]}^@{path[1]}@<{userid}<>{data_last}>' #add userid
-			self.send(ip, template)
+			self.formatRequestMessage(connectingAddress, data_first, data_last)
 		#request a Public RSA key
 		elif (request == '5'):
-			path = self.mapAnonymousRoute()
-			#find what the id is of the individual who sent the request
-			userid = self.useridOfAddress(connectingAddress)
-			template = f'?5?<{userid}<>{data_first}>'
-			self.send(path[1], template)
+			self.publicKeyOfUser(data_first)
 		#request to send a 'friend' request
 		elif (request == '6'):
-			path = self.mapAnonymousRoute()
-			#find what the id is of the individual who sent the request
-			userid = self.useridOfAddress(connectingAddress)
-			template = f'?6?<{userid}<>{data_first}>'
-			self.send(path[1], template)
+			self.formatRequestFriend(connectingAddress, data_first)
 		#request to add index
 		elif (request == '2'):
-			#data_first is userid, data_lat is userip
-			self.indexUserID(data_fist, data_last)
+			self.indexUserID(data_fist, data_last) #data_first: userid | data_last: userip
 		#request to delete index (least likely)
 		elif (request == '3'):
-			#data_first is userid, data_lat is userip
-			self.deindexUserID(data_first, data_last)
-		else:
-			#none of the requests matched the special functions		   ^
-			return True
+			self.deindexUserID(data_first, data_last) #data_first: userid | data_last: userip
 		
 		#the message has been handled automaticly, there is no need to enqueue
 		return False

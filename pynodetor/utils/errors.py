@@ -91,3 +91,11 @@ class TrafficOverloadError(Exception):
 class MismatchedSyntax(Exception):
 	def __init__(self):
 		Exception.__init__(self, f'Parsing Error: There was an attempt to pass incorrect syntax to the parser.')
+		
+##########################################
+#			Encryption Errors
+##########################################
+
+class MismatchedKeys(Exception):
+	def __init__(self):
+		Exception.__init__(self, f'Encryption Error: the key pair provided is incorrect or corrupted.')

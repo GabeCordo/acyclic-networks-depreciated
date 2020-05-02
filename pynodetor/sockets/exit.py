@@ -1,21 +1,22 @@
-#import the parent class and pathway library
-import node, sys
-
-#import the bitstream parser
+###############################
+#	   pynodetor imports
+###############################
+import node
 from pynodetor.bitstream import advanced
+from pynodetor.utils import errors, enums
 
-###########################
-##Child Class of the Node##
-###########################
+###############################
+#		   main code
+###############################
 #Responisble for sending the message request to the final destination in the userid
+
 class NodeExit(node.Node):
-	
 	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
 		'''(NodeExit, string, string, string, string) -> None
 			:the consturctor is the same as the node server, small maniplulation of the origional
 			 node server to specifically redirect data to the final ip
 		'''
-		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp)
+		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp, False, True, False) #ecryption, listening, monitoring
 	
 	def checkDestination(self, userid):
 		'''(Node) -> (string)

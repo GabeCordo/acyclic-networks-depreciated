@@ -1,25 +1,34 @@
-import node, random
+###############################
+#		python imports
+###############################
+import random
 from datetime import date
 from threading import Thread
+
+###############################
+#	   pynodetor imports
+###############################
+import node
 from pynodetor.bitstream import basic
-from pynodetor.utils import linkerJSON
+from pynodetor.utils import linkerJSON, errors, enums
 
-
-###########################
-## Indexing DATA Node    ##
-###########################
+###############################
+#		   main code
+###############################
 #This node is responisble for storing all SENSITIVE information, hence it is important
 #that this node remain HIGHLY ANONYMOUS and can only recieve connections from the entry
 #node in such a way that it acts as a proxy to conceal the address or data of this node
+
 class Index(node.Node):
 	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, directoryLookup, directoryLog):
-		'''(Index, string, string, string, string, string) -> None
+		'''
+			(Index, string, string, string, string, string) -> None
 			:constructor method for the Index Class
 			
 			@paramaters a valid pathway(directory) for all the user-id to ip-addr matches
 			@exception the class constructor will throw an error if the pathway is NOT valid
 		'''
-		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic)
+		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, True, True, False) #ecryption, listening, monitoring
 		self.directoryLookup = directoryLookup
 		self.directoryLog = directoryLog
 		self.l = linkerJSON(directoryLookup, directoryLog)
@@ -27,7 +36,8 @@ class Index(node.Node):
 		self.directoryIndex = self.l.data[1]
 		
 	def lookupIndex(self, userid):
-		'''(Index, string) -> (string)
+		'''
+			(Index, string) -> (string)
 			:lookup an ip address associated with a certain id
 			
 			@paramaters a valid userid on the index node is provided
@@ -40,7 +50,8 @@ class Index(node.Node):
 			return ''
 	
 	def lookupIP(self, ip):
-		'''(Index, string) -> (string)
+		'''
+			(Index, string) -> (string)
 			:lookup the timestamp associtate with the initialization of an ip with userid
 			
 			@paramaters a valid ip-address on the index node is provided
@@ -51,9 +62,24 @@ class Index(node.Node):
 			return self.directoryLogs["ip-addresses"].append(ip)
 		except:
 			return ''
+			
+	def lookupRSA(self, userid):
+		'''
+			(Index, string) -> (string)
+			:lookup the public RSA key associated with the provided user-id
+			
+			@paramaters a valid userid on the index node is provided
+			@returns the public RSA key string in the index JSON file
+			@exception if there is an error (id doesnt exist) an empty string is returned
+		'''
+		try:
+			return self.directoryIndex["index"][userid]
+		except:
+			return ''
 	
-	def addIndex(self, userid, ip):
-		'''(Index, string) -> (boolean)
+	def addIndex(self, userid, ip, publicRSA):
+		'''
+			(Index, string) -> (boolean)
 			:insert a new user-id / ip link within the index JSON file and timestamp it in the JSON log file
 			
 			@paramaters a valid ip-address on the index node is provided
@@ -70,7 +96,8 @@ class Index(node.Node):
 		self.directoryLogs["ip-addresses"][ip] = str( date.today() ) #convert from date to string type
 	
 	def deleteIndex(self, userid, connectingIp):
-		'''(Index, string) -> (boolean)
+		'''
+			(Index, string) -> (boolean)
 			:delete the userid and ip found within the index and log JSON files
 			
 			@paramaters the userid exists within the index JSON file and the connecting
@@ -89,7 +116,8 @@ class Index(node.Node):
 		self.directoryLogs.pop(connectingIp)
 	
 	def resetLoggedDate(self, connectingIp):
-		'''(Index, string) -> (boolean)
+		'''
+			(Index, string) -> (boolean)
 			:reset the time-stamp on the JSON log file to ensure that the cleaner does not delete all data
 			
 			@paramaters the connectingIP address given is in the JSON log file
@@ -103,8 +131,10 @@ class Index(node.Node):
 		self.directoryLogs[connectingIp] = str( date.today() ) #convert from date to string type
 	
 	def cleaner(self):
-		'''(Index) -> None
+		'''
+			(Index) -> None
 			:responsible for removing ip-addresses that go unused for over two days
+			
 			** this is to make sure that ip's are not stored forever (NO LOGS ALLOWED) **
 		'''
 		while True:
@@ -128,7 +158,8 @@ class Index(node.Node):
 			pathwayCheck.close()
 	
 	def mapPathway(self):
-		'''(Index) -> (string)
+		'''
+			(Index) -> (string)
 			:creates a randomized path through the server relay nodes
 			
 			@returns a path of 4 node relays
@@ -140,7 +171,8 @@ class Index(node.Node):
 		return pathway[:len(pathway)]
 			
 	def mapExit(self):
-		'''(Index) -> (string)
+		'''
+			(Index) -> (string)
 			:chooses one random exit node to leave (reduce the chance of someone sitting on the end
 			 of the socket and listening to the unencrypted traffic)
 			
@@ -151,7 +183,8 @@ class Index(node.Node):
 		return self.directoryIndex['index']['entry'][exitNode]['ip-address']
 	
 	def specialFunctionality(self, message, connectingAddress):
-		'''(NodeExit, string, string) -> (boolean)
+		'''
+			(NodeExit, string, string) -> (boolean)
 			:auto-handles the generic requests made to the indexing function
 			
 			@returns boolean False indicating that messages will NOT be enqueued to a queue

@@ -20,3 +20,11 @@ class Encrypted(Enum):
 class Listening(Enum):
 	ENABLED = 0
 	DISABLED = 1
+	
+class Encryption(Enum):
+	RSA = 0
+	AES = 1
+	
+class DataTransfer(Enum):
+	BRIEF = 0
+	EXTENDED = 1
