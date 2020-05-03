@@ -25,8 +25,10 @@ class Index(node.Node):
 			(Index, string, string, string, string, string) -> None
 			:constructor method for the Index Class
 			
-			@paramaters a valid pathway(directory) for all the user-id to ip-addr matches
-			@exception the class constructor will throw an error if the pathway is NOT valid
+			@paramaters a valid pathway(directory) for all the user-id 
+						to ip-addr matches
+			@exception the class constructor will throw an error if the
+					   pathway is NOT valid
 		'''
 		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, True, True, False) #ecryption, listening, monitoring
 		self.directoryLookup = directoryLookup
@@ -42,7 +44,8 @@ class Index(node.Node):
 			
 			@paramaters a valid userid on the index node is provided
 			@returns the ip-address of a user-id in the index JSON file
-			@exception if there is an error (id doesnt exist) an empty string is returned
+			@exception if there is an error (id doesnt exist) an empty 
+					   string is returned
 		'''
 		try:
 			return self.directoryIndex["index"][userid]
@@ -52,11 +55,13 @@ class Index(node.Node):
 	def lookupIP(self, ip):
 		'''
 			(Index, string) -> (string)
-			:lookup the timestamp associtate with the initialization of an ip with userid
+			:lookup the timestamp associtate with the initialization of
+			 an ip with userid
 			
 			@paramaters a valid ip-address on the index node is provided
 			@returns the timestamp of a ip-address in the logger JSON file
-			@exception if there is an error (ip doesnt exist) an empty string is returned
+			@exception if there is an error (ip doesnt exist) an empty 
+					   string is returned
 		'''
 		try:
 			return self.directoryLogs["ip-addresses"].append(ip)
@@ -70,7 +75,8 @@ class Index(node.Node):
 			
 			@paramaters a valid userid on the index node is provided
 			@returns the public RSA key string in the index JSON file
-			@exception if there is an error (id doesnt exist) an empty string is returned
+			@exception if there is an error (id doesnt exist) an empty string
+					   is returned
 		'''
 		try:
 			return self.directoryIndex["index"][userid]
@@ -80,11 +86,14 @@ class Index(node.Node):
 	def addIndex(self, userid, ip, publicRSA):
 		'''
 			(Index, string) -> (boolean)
-			:insert a new user-id / ip link within the index JSON file and timestamp it in the JSON log file
+			:insert a new user-id / ip link within the index JSON file and 
+			 timestamp it in the JSON log file
 			
 			@paramaters a valid ip-address on the index node is provided
-			@returns boolean true if the userid and ip were sucessfuly added to the index and log JSON files
-			@exception returns boolean false; it is likely that the userid or ip has not been used before
+			@returns boolean true if the userid and ip were sucessfuly added
+					 to the index and log JSON files
+			@exception returns boolean false; it is likely that the userid or
+					   ip has not been used before
 		'''
 		#check to see if the userid already exists
 		if (self.lookupIndex(userid) != ''):
@@ -100,8 +109,8 @@ class Index(node.Node):
 			(Index, string) -> (boolean)
 			:delete the userid and ip found within the index and log JSON files
 			
-			@paramaters the userid exists within the index JSON file and the connecting
-						ip is associated with the account
+			@paramaters the userid exists within the index JSON file and the 
+						connecting ip is associated with the account
 			@returns boolean true if the userid was sucessfuly deleted
 			@exception returns boolean false if any of the paramaters are not met
 		'''
@@ -118,11 +127,15 @@ class Index(node.Node):
 	def resetLoggedDate(self, connectingIp):
 		'''
 			(Index, string) -> (boolean)
-			:reset the time-stamp on the JSON log file to ensure that the cleaner does not delete all data
+			:reset the time-stamp on the JSON log file to ensure that the
+			 cleaner does not delete all data
 			
-			@paramaters the connectingIP address given is in the JSON log file
-			@returns boolean true if the time-stamp was changed to the current day
-			@exception returns boolean false if your ip has not been logged before
+			@paramaters the connectingIP address given is in the JSON log
+						file
+			@returns boolean true if the time-stamp was changed to the current
+					 day
+			@exception returns boolean false if your ip has not been logged
+					   before
 		'''
 		#check to see if the id exists already (we don't want to add an ip unknowiningly
 		#and not have it link up with the index JSON file
@@ -173,8 +186,9 @@ class Index(node.Node):
 	def mapExit(self):
 		'''
 			(Index) -> (string)
-			:chooses one random exit node to leave (reduce the chance of someone sitting on the end
-			 of the socket and listening to the unencrypted traffic)
+			:chooses one random exit node to leave (reduce the chance of someone
+			 sitting on the end of the socket and listening to the unencrypted 
+			 traffic)
 			
 			@returns the ip of one exit node of n many within the index JSON file
 		'''
@@ -187,7 +201,8 @@ class Index(node.Node):
 			(NodeExit, string, string) -> (boolean)
 			:auto-handles the generic requests made to the indexing function
 			
-			@returns boolean False indicating that messages will NOT be enqueued to a queue
+			@returns boolean False indicating that messages will NOT be enqueued
+					 to a queue
 		'''
 		#parse the simple bitsream requests
 		try:

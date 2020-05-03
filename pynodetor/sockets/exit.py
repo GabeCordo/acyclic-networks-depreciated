@@ -13,8 +13,9 @@ from pynodetor.utils import errors, enums
 class NodeExit(node.Node):
 	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
 		'''(NodeExit, string, string, string, string) -> None
-			:the consturctor is the same as the node server, small maniplulation of the origional
-			 node server to specifically redirect data to the final ip
+			:the consturctor is the same as the node server, small maniplulation
+			 of the origional node server to specifically redirect data to the
+			 final ip
 		'''
 		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp, False, True, False) #ecryption, listening, monitoring
 	
@@ -22,24 +23,28 @@ class NodeExit(node.Node):
 		'''(Node) -> (string)
 			:retrieves the ip-address of the userid inputed from the index server
 				
-			@returns the string representation of the ip-address associated with the userid
-			@exception if the connection is lost or the userid is invalid, returns an empty string
+			@returns the string representation of the ip-address associated with
+					 the userid
+			@exception if the connection is lost or the userid is invalid, returns
+					   an empty string
 		'''
 		idRequest = f'0:{userid}'
 		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
 	
 	def formatMessage(self, message, origin):
 		'''(NodeExit, string) -> (string)
-			:strip the advanced bitsream into a simpler form with less usless data for the user
-			 and pass that to the specialFunctionality function
+			:strip the advanced bitsream into a simpler form with less usless data
+			 for the user and pass that to the specialFunctionality function
 			
-			@returns list with a simple bitsream 'request:message/origin_id' and the destination id
+			@returns list with a simple bitsream 'request:message/origin_id' and
+					 the destination id
 		'''
 		return f'7:{message}/{origin}'
 	
 	def formatRequest(self, request, origin):
 		'''(NodeExit, string) -> (string)
-			:format the bitsream for outgoing RSA public key or friend requests made by the originid
+			:format the bitsream for outgoing RSA public key or friend requests
+			 made by the originid
 			
 			@returns a simple bitstream 'request:origin_id/none'
 		'''
@@ -47,10 +52,11 @@ class NodeExit(node.Node):
 	
 	def specialFunctionality(self, message, connectingAddress):
 		'''(NodeExit, string, string) -> (boolean)
-			:handles all messages sent to the final recipient of the message/request that
-			 has transversed through the relay network
+			:handles all messages sent to the final recipient of the message/
+			 request that has transversed through the relay network
 			
-			@returns boolean False indicating that messages will NOT be enqueued to a queue
+			@returns boolean False indicating that messages will NOT be enqueued
+					 to a queue
 		'''
 		modify = advanced.Parser(bitsream)
 		

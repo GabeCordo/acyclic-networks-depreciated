@@ -19,9 +19,9 @@ class Node:
 		'''
 			(Node, string, int, boolean, DataTransfer) -> None
 			
-			:the class constructor for the primitive node type. All children class
-			 are specific variations of the node class for specific socket input and
-			 output manipulation on the mock 'tor' network.
+			:the class constructor for the primitive node type. All children
+			 class are specific variations of the node class for specific
+			 socket input and output manipulation on the mock 'tor' network.
 			
 			ip : the protocol adress of the current server
 			port : the socket for incoming connections to the server
@@ -56,7 +56,8 @@ class Node:
 	def isListening(self):
 		'''
 			(Node) -> (boolean)
-			:the getter function for whether accepting incoming traffic is toggled
+			:the getter function for whether accepting incoming traffic is
+			 toggled
 			
 			@returns whether the socket is currently listening.
 		'''
@@ -95,13 +96,13 @@ class Node:
 			(Node, int) -> None
 			:listens to all incoming traffic to the server node.
 			
-			[despite not returning anything, all incoming messages
-			 are checked and then enqued on the node to be processed.]
-			
 			@returns nothing.
 			@exception will not queue any incoming messages that are over
 					   1024 bites long to enforce maximum runtime of string
 					   parsing.
+					
+			**despite not returning anything, all incoming messages
+			 are checked and then enqued on the node to be processed.**
 		'''
 		self.incoming.bind( (self.ip, 8074) )
 		self.incoming.listen(10)
@@ -141,7 +142,7 @@ class Node:
 	def close(self):
 		'''
 			(Node) -> None
-			close the socket listening for incoming connections.
+			:close the socket listening for incoming connections.
 		'''
 		#make sure the listening port is open in the first place before closing
 		#the socket otherwise it will throw an error.
@@ -234,9 +235,9 @@ class Node:
 			
 			1) Check for garbage messages near the end of the queue
 			
-			**Queues only near the end of the queue will be effect to ensure it does
-			  not interfere with the any systems working to manipulate/handle elements
-			  at the front of the queue during runtime AVOIDING MEMORY RACES **
+			**Queues only near the end of the queue will be effect to ensure it
+			  does not interfere with the any systems working to manipulate/handle
+			  elements at the front of the queue during runtime AVOIDING MEMORY RACES **
 		'''
 		sizeQueuePrevious = 0
 		#runs throughout the lifetime of the incoming socket

@@ -17,8 +17,9 @@ class NodeEntry(node.Node):
 		'''
 			(NodeEntry, string, string, string, string) -> None
 			
-			:constructor for the node entry class; provides all the connective functionality to begin routing
-			 messages or act as a middle-man for indexing/removing/lookingup userids on the index node
+			:constructor for the node entry class; provides all the connective
+			 functionality to begin routing messages or act as a middle-man for
+			 indexing/removing/lookingup userids on the index node
 		'''
 		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp, True, True, False) #ecryption, listening, monitoring
 		
@@ -27,8 +28,10 @@ class NodeEntry(node.Node):
 			(Node) -> (string)
 			:retrieves the ip-address of the userid inputed from the index server
 			
-			@returns the string representation of the ip-address associated with the userid
-			@exception if the connection is lost or the userid is invalid, returns an empty string
+			@returns the string representation of the ip-address associated with
+					 the userid
+			@exception if the connection is lost or the userid is invalid, returns
+					 an empty string
 		'''
 		idRequest = f'0:{userid}'
 		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
@@ -36,9 +39,11 @@ class NodeEntry(node.Node):
 	def indexUserID(self, userid, connectingip):
 		'''
 			(NodeEntry, string, string) -> (boolean)
-			:add a new userid and ip-address match on the indexing node for transmission
+			:add a new userid and ip-address match on the indexing node for
+			 transmission
 			
-			@paramaters the userid must be unique and the ip must not have an id already indexed
+			@paramaters the userid must be unique and the ip must not have an id
+						already indexed
 			@returns a boolean true if the userid was added to the indexing node
 			@exception returns boolean false if the userid or ip is already used
 		'''
@@ -50,8 +55,10 @@ class NodeEntry(node.Node):
 			(NodeEntry, string, string) -> (boolean)
 			:remove a userid and ip-address match on the indexing node
 			
-			@paramaters the userid must be valid and the ip must be associated with the indexed id
-			@returns a boolean true if the userid was removed from the indexing node
+			@paramaters the userid must be valid and the ip must be associated
+						with the indexed id
+			@returns a boolean true if the userid was removed from the indexing
+					 node
 			@exception returns boolean false if the paramaters were invalid
 		'''
 		idRequest = f'3:{userid}/{connectingip}'
@@ -60,7 +67,8 @@ class NodeEntry(node.Node):
 	def mapAnonymousRoute(self):
 		'''
 			(NodeEntry) -> (list of strings)
-			:map a route through all the tor relay nodes and choose a random exit node
+			:map a route through all the tor relay nodes and choose a random
+			 exit node
 			
 			@returns a list of strings (relay_map, exit_node)
 			@exceptions none should occur unless the indexing server is down
@@ -73,7 +81,8 @@ class NodeEntry(node.Node):
 			(NodeEntry, string) -> (string)
 			:finds the associated id with the connecting ip address
 			
-			**this is a private function, it is important only the entry node has this functionality**
+			** this is a private function, it is important only the
+			   entry node has this functionality					 **
 		'''
 		return self.send(self.indexIP, f'1:{ip}')
 		
@@ -82,7 +91,8 @@ class NodeEntry(node.Node):
 			(NodeEntry, string) -> (string)
 			:finds the publicRSA key associated with the user-id
 			
-			@returns a string of the publicRSA if the connectingIP is friends with the UserID
+			@returns a string of the publicRSA if the connectingIP is friends 
+					 with the UserID
 			@exception returns an empty string if the two userid's are not friends
 		'''
 		return self.send(self.indexIP, f'5:{userid}')
@@ -90,7 +100,8 @@ class NodeEntry(node.Node):
 	def formatRequestMessage(self, connectingAddress, data_first, data_last):
 		'''
 			(NodeEntry) -> None
-			:formats the data into an advanced parsable bitsream request for transmitting messages
+			:formats the data into an advanced parsable bitsream request for
+			 transmitting messages
 		'''
 		path = self.mapAnonymousRoute()
 		#find what the id is of the individual who sent the request
@@ -101,7 +112,8 @@ class NodeEntry(node.Node):
 	def formatRequestFriend(self, connectingAddress, targetid):
 		'''
 			(NodeEntry) -> None
-			:formats the data into an advanced parsable bitsream request for transmitting friend requests
+			:formats the data into an advanced parsable bitsream request for
+			 transmitting friend requests
 		'''
 		path = self.mapAnonymousRoute()
 		#find what the id is of the individual who sent the request
@@ -112,9 +124,11 @@ class NodeEntry(node.Node):
 	def specialFunctionality(self, message, connectingAddress):
 		'''
 			(NodeEntry, string, string) -> (boolean)
-			:handles all socket requests that pertain to the requests under 'entry node' in the docs
+			:handles all socket requests that pertain to the requests under
+			 'entry node' in the docs
 			
-			@returns boolean False indicating that messages will NOT be enqueued to a queue
+			@returns boolean False indicating that messages will NOT be
+					 enqueued to a queue
 		'''
 		#validate syntax in-case the message hasn't been run through a balancer which verifies syntax
 		try:

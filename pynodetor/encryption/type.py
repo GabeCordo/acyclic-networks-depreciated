@@ -9,7 +9,8 @@ from pynodetor.utils import enums, errors
 ###############################
 class Keys:
 	def __init__(self, encryptionType ,directoryKeyPrivate, directoryKeyPublic):
-		'''(Keys, Encryption, string, string) -> None
+		'''
+			(Keys, Encryption, string, string) -> None
 			:constructor function of the RSA Key Pair Class
 			
 			@paramaters directories must point to a valid path
@@ -25,7 +26,8 @@ class Keys:
 		self.verifyPath() #verify the are not corrupted
 	
 	def verifyPath(self):
-		'''(Keys) -> None
+		'''
+			(Keys) -> None
 			:checks whether the pathways provided are a valid key pair
 			
 			@returns nothing reveals the key pairs are not corrupted
@@ -48,7 +50,8 @@ class Keys:
 			raise MismatchedKeys()
 			
 	def getPublicKey(self):
-		'''(Keys) -> (string)
+		'''
+			(Keys) -> (string)
 			:the getter function for the public encryption key
 			
 			@returns the public encryption key
@@ -56,7 +59,8 @@ class Keys:
 		return self._publicKey
 		
 	def getPrivateKey(self):
-		'''(Keys) -> (string)
+		'''
+			(Keys) -> (string)
 			:the getter function for the private encryption key
 			
 			@returns the private encryption key

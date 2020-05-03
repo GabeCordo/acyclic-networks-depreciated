@@ -1,11 +1,26 @@
+'''
+	  INTERFACE FOR PARSING RAW BASIC SERVER BITSREAMS
+		-          DO NOT MODIFY THIS FILE          -
+		
+	*** used for bitstream transfers with minimal (one-
+		two elements of data on-top of the standard
+		request, can be used by any node class: O(n) ***
+'''
+
+###############################
+#	   pynodetor imports
+###############################
 from pynodetor.utils.errors import *
 
+###############################
+#		   main code
+###############################
 class Parser():
 	
 	def __init__(self, message=''):
 		'''
 			(Parser, string) -> None
-			:the constructor class for the simple parser
+			@description the constructor class for the simple parser
 			
 			@syntax (request):(primary_data)/(secondary_data)
 						^			^				^
@@ -15,7 +30,8 @@ class Parser():
 			1: the most significant piece of data
 			2: assisting data to the primary data
 			
-			@exception throws MismatchedSyntax() Error if given an invalid message
+			@exception throws MismatchedSyntax() Error if given an
+					   invalid message
 		'''
 		self.message = message
 		
@@ -28,10 +44,13 @@ class Parser():
 	def parse(self):
 		'''
 			(Parser) -> None
-			:using indexing, parses the pieces of data into the class variables
+			:using indexing, parses the pieces of data into the class
+			 variables
 			
-			@returns nothing to the main program but initializes the class variables
-			@exception if an incorrect syntax is provided, throws MismatchedSyntax() Error
+			@returns nothing to the main program but initializes the
+					 class variables
+			@exception if an incorrect syntax is provided, throws
+					   MismatchedSyntax() Error
 		'''
 		try:
 			request_seperator = self.message.index(':')
@@ -78,7 +97,8 @@ class Parser():
 	def __str__(self):
 		'''
 			(Parser) -> (string)
-			@returns a string representation of the class variables in the proper simple bitstream syntax
+			@returns a string representation of the class variables in the proper
+					 simple bitstream syntax
 		'''
 		return f'{self.request}:{self.data_primary}/{self.data_secondary}'
 		

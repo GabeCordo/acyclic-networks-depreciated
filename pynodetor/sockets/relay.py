@@ -13,16 +13,19 @@ from pynodetor.utils import errors, enums
 class NodeRelay(node.Node):
 	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP):
 		'''(NodeRelay, string, string, string, string) -> None
-			:constructor for the NodeRelay class, sets up the relay node server
+			:constructor for the NodeRelay class, sets up the relay node
+			 server
 		'''
 		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP, False, True, False) #ecryption, listening, monitoring
 	
 	def discoverNextNode(self, bitsream):
 		'''(NodeRelay, string) -> (list of strings)
-			:discover the next relay node for communication and modify the path
+			:discover the next relay node for communication and modify the
+			 path
 			
 			@paramaters a valid bitsream syntax is provided
-			@returns a list of strings [the next relay node id, the modified pathway, exitpath]
+			@returns a list of strings [the next relay node id, the modified
+					 pathway, exitpath]
 			@exception returns an empty list if the paramaters are not followed
 		'''
 		modify = advanced.Parser(bitsream)
@@ -40,7 +43,8 @@ class NodeRelay(node.Node):
 		'''(NodeRelay, string, string) -> (boolean)
 			:handles all relay requests made to the server
 			
-			@returns boolean False indicating that messages will NOT be enqueued to a queue
+			@returns boolean False indicating that messages will NOT be enqueued
+					 to a queue
 		'''
 		#extract the bitsream mapped route from the former entry or relay node
 		resend_data = self.discoverNextNode(message)

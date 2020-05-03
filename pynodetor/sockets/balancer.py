@@ -22,7 +22,8 @@ class Balancer(node.Node, linkerJSON.Handler):
 	
 	def track(self, ip):
 		'''(Balancer, string) -> (int)
-			:find the number of times traffic has been re-directed to a specific ip
+			:find the number of times traffic has been re-directed to a specific
+			 ip
 			
 			@returns an integer representing the number of re-directs
 		'''

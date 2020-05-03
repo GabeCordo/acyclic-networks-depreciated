@@ -12,7 +12,8 @@ import base64
 #to implement end-to-end encryption within socket communication
 class Handler:
 	def __init__(self, directoryKeyPrivate, directoryKeyPublic):
-		'''(Handler, string, string) -> None
+		'''
+			(Handler, string, string) -> None
 			:constructor function of the end-to-end encryption handler
 			
 			@paramaters directories must point to a valid path
@@ -37,32 +38,40 @@ class Handler:
 		self._publicKey = ''
 	
 	def getPublicKey(self):
-		'''(Handler) -> (string)
+		'''
+			(Handler) -> (string)
 			:getter function for the classes public encryption key
 			
 			@paramaters a public key must exist
 			@returns the public key found within the placehodler variable
-			@exception returns an empty string if no key was generated or restored
+			@exception returns an empty string if no key was generated or
+					   restored
 		'''
 		return self._publicKey
 	
 	def getPrivateKey(self):
-		'''(Handler) -> (string)
+		'''
+			(Handler) -> (string)
 			:getter function for the classes private encryption key
 			
 			@paramaters a private key must exist
 			@returns the private key found within the placehodler variable
-			@exception returns an empty string if no key was generated or restored
+			@exception returns an empty string if no key was generated or
+					   restored
 		'''
 		return self._privateKey
 	
 	def restoreKeySet(self):
-		'''(Handler) -> (boolean)
+		'''
+			(Handler) -> (boolean)
 			:loads all public and private keys from text-files to class variables
 			
-			@paramaters keys must be pre-initialized within the file directories, password must be valid
-			@returns boolean true if the keys were transfered from file to instance var
-			@exception returns boolean false if there was an issue (password likeley INVALID)
+			@paramaters keys must be pre-initialized within the file directories,
+						password must be valid
+			@returns boolean true if the keys were transfered from file to instance
+					 var
+			@exception returns boolean false if there was an issue (password likeley
+					   INVALID)
 		'''
 		#Open the file containing the private key and store in the class instance variable
 		try:
@@ -78,7 +87,8 @@ class Handler:
 			raise Exception(f'There was a problem restoring the public key: check if the directoryKeyPublic path is valid or that the file is not empty')
 	
 	def generateKeySet(self):
-		'''(Handler) -> (list of strings)
+		'''
+			(Handler) -> (list of strings)
 			:creates a random private key deleting the old private key
 			
 			@paramaters none
@@ -106,7 +116,8 @@ class Handler:
 			raise Exception(f'There was a problem creating a public key: check if the directoryKeyPublic path is valid')
 	
 	def formatForEncryption(message):
-		'''(Handler, string) -> (utf8)
+		'''
+			(Handler, string) -> (utf8)
 			:turns a string into a utf8 encryptable form for RSA
 			
 			@returns a utf8 encoded form for encryption
@@ -120,7 +131,8 @@ class Handler:
 			return message
 	
 	def encrypt(self, message, keyPublic):
-		'''(Handler, string, string) -> (string)
+		'''
+			(Handler, string, string) -> (string)
 			:transforms a plain text into a cyhpher text
 			
 			@paramaters no value for a password will leave it as an empty string
@@ -137,7 +149,8 @@ class Handler:
 		return cypherRSA.encrypt( messageBase64 )
 	
 	def decrypt(self, cyphertext):
-		'''(Handler, string) -> (string)
+		'''
+			(Handler, string) -> (string)
 			:transforms a cypher text into a plain text
 		'''
 		cypherRSA = RSA.importKey(self._privateKey)
@@ -146,7 +159,8 @@ class Handler:
 		return base64.b64decode( decryptedMSG ).decode()
 	
 	def __eq__(self, other):
-		'''(Handler) -> (boolean)
+		'''
+			(Handler) -> (boolean)
 			:compares two encryption handlers and compares them based on directories
 			
 			@returns boolean true if both directories are the same
