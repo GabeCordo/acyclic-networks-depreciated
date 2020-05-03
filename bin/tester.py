@@ -1,4 +1,4 @@
-import linkerJSON
+from pynodetor.utils import linkerJSON
 
-t = linkerJSON.Handler('../templates/template.json', '../templates/template2.json')
-print( t.data[1] )
+t = linkerJSON.Handler('../templates/index.json', '../templates/log.json')
+print( t.data[0] )

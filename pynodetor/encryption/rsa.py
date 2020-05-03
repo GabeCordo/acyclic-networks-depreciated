@@ -11,7 +11,7 @@ import base64
 #an out-of the box and easy to use object-oriented RSA encryption handler for developers
 #to implement end-to-end encryption within socket communication
 class Handler:
-	def __init__(self, directoryKeyPrivate, directoryKeyPublic):
+	def __init__(self, directoryKeyPrivate=None, directoryKeyPublic=None):
 		'''
 			(Handler, string, string) -> None
 			:constructor function of the end-to-end encryption handler
@@ -24,12 +24,14 @@ class Handler:
 		
 		#check to see that the directories given for the encryption keys are valid
 		try:
-			#check the private key pathway
-			pathwayCheck = open(directoryKeyPrivate, 'r')
-			pathwayCheck.close()
-			#check the public key pathway
-			pathwayCheck = open(directoryKeyPublic, 'r')
-			pathwayCheck.close()
+			if (directoryKeyPrivate != None):
+				#check the private key pathway
+				pathwayCheck = open(directoryKeyPrivate, 'r')
+				pathwayCheck.close()
+			if (directoryKeyPublic != None):
+				#check the public key pathway
+				pathwayCheck = open(directoryKeyPublic, 'r')
+				pathwayCheck.close()
 		except:
 			raise FileNotFoundError('RSA Key Error: one or more key paths are invalid')
 			
@@ -73,18 +75,20 @@ class Handler:
 			@exception returns boolean false if there was an issue (password likeley
 					   INVALID)
 		'''
-		#Open the file containing the private key and store in the class instance variable
-		try:
-			keyPrivate = open(directoryKeyPrivate, 'rb').read()
-			self._privateKey = RSA.importKey(keyPrivate)
-		except:
-			raise Exception(f'There was a problem restoring the private key: check if the directoryKeyPrivate path is valid or that the file is not empty')
-		#Open the file containing the public key and store in the class instance variable
-		try:
-			keyPublic = open(directoryKeyPublic, 'rb').read()
-			self._publicKey = RSA.import_key(keyPublic)
-		except:
-			raise Exception(f'There was a problem restoring the public key: check if the directoryKeyPublic path is valid or that the file is not empty')
+		if (self.directoryKeyPrivate != None):
+			#Open the file containing the private key and store in the class instance variable
+			try:
+				keyPrivate = open(directoryKeyPrivate, 'rb').read()
+				self._privateKey = RSA.importKey(keyPrivate)
+			except:
+				raise Exception(f'There was a problem restoring the private key: check if the directoryKeyPrivate path is valid or that the file is not empty')
+		if (self.directoryKeyPublic != None):
+			#Open the file containing the public key and store in the class instance variable
+			try:
+				keyPublic = open(directoryKeyPublic, 'rb').read()
+				self._publicKey = RSA.import_key(keyPublic)
+			except:
+				raise Exception(f'There was a problem restoring the public key: check if the directoryKeyPublic path is valid or that the file is not empty')
 	
 	def generateKeySet(self):
 		'''
@@ -153,10 +157,13 @@ class Handler:
 			(Handler, string) -> (string)
 			:transforms a cypher text into a plain text
 		'''
-		cypherRSA = RSA.importKey(self._privateKey)
-		cypherRSA = PKCS1_OAEP.new(cypherRSA)
-		decryptedMSG = cypherRSA.decrypt(cyphertext)
-		return base64.b64decode( decryptedMSG ).decode()
+		if (self.directoryKeyPrivate != None):
+			cypherRSA = RSA.importKey(self._privateKey)
+			cypherRSA = PKCS1_OAEP.new(cypherRSA)
+			decryptedMSG = cypherRSA.decrypt(cyphertext)
+			return base64.b64decode( decryptedMSG ).decode()
+		else:
+			return ''
 	
 	def __eq__(self, other):
 		'''

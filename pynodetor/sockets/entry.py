@@ -63,18 +63,6 @@ class NodeEntry(node.Node):
 		'''
 		idRequest = f'3:{userid}/{connectingip}'
 		return self.send(self.indexIp, idRequest)
-
-	def mapAnonymousRoute(self):
-		'''
-			(NodeEntry) -> (list of strings)
-			:map a route through all the tor relay nodes and choose a random
-			 exit node
-			
-			@returns a list of strings (relay_map, exit_node)
-			@exceptions none should occur unless the indexing server is down
-		'''
-		idRequest = f'4:none/none'
-		return self.send(self.indexIp, idRequest)
 		
 	def useridOfAddress(self, ip):
 		'''
@@ -86,44 +74,17 @@ class NodeEntry(node.Node):
 		'''
 		return self.send(self.indexIP, f'1:{ip}')
 		
-	def publicKeyOfUser(self, userid):
-		'''
-			(NodeEntry, string) -> (string)
-			:finds the publicRSA key associated with the user-id
-			
-			@returns a string of the publicRSA if the connectingIP is friends 
-					 with the UserID
-			@exception returns an empty string if the two userid's are not friends
-		'''
-		return self.send(self.indexIP, f'5:{userid}')
-		
-	def formatRequestMessage(self, connectingAddress, data_first, data_last):
+	def formatMessage(self, targetid, message, userid):
 		'''
 			(NodeEntry) -> None
 			:formats the data into an advanced parsable bitsream request for
 			 transmitting messages
 		'''
-		path = self.mapAnonymousRoute()
-		#find what the id is of the individual who sent the request
-		userid = self.useridOfAddress(connectingAddress)
-		template = f'#{data_first}#?7?^{path[0]}^@{path[1]}@<{userid}<>{data_last}>' #add userid
-		return self.send(ip, template)
-		
-	def formatRequestFriend(self, connectingAddress, targetid):
-		'''
-			(NodeEntry) -> None
-			:formats the data into an advanced parsable bitsream request for
-			 transmitting friend requests
-		'''
-		path = self.mapAnonymousRoute()
-		#find what the id is of the individual who sent the request
-		userid = self.useridOfAddress(connectingAddress)
-		template = f'?6?<{userid}<>{targetid}>'
-		self.send(path[1], template)
+		return self.send(self.indexIP, f'4:{targetid}/{message}')
 	
 	def specialFunctionality(self, message, connectingAddress):
 		'''
-			(NodeEntry, string, string) -> (boolean)
+			(Node, string, string) -> (boolean)
 			:handles all socket requests that pertain to the requests under
 			 'entry node' in the docs
 			
@@ -143,14 +104,8 @@ class NodeEntry(node.Node):
 		if (request == '0'):
 			self.checkDestination(data)
 		#request to send a message
-		elif (request == '7'):
-			self.formatRequestMessage(connectingAddress, data_first, data_last)
-		#request a Public RSA key
-		elif (request == '5'):
-			self.publicKeyOfUser(data_first)
-		#request to send a 'friend' request
-		elif (request == '6'):
-			self.formatRequestFriend(connectingAddress, data_first)
+		elif (request == '4'):
+			self.formatMessage(connectingAddress, data_first, data_last, b.getOtherData()[0])
 		#request to add index
 		elif (request == '2'):
 			self.indexUserID(data_fist, data_last) #data_first: userid | data_last: userip

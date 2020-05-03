@@ -61,9 +61,9 @@ class Handler:
 		except:
 			raise FileNotFoundError('linkerJSON Error: one or more of the provided files does not exist.')
 	
-	def additionalFunctionality(element):
+	def cleanerFunctionality(self, element):
 		'''(Handler) -> None
-			:
+			:adds special functionality to the JSON updater file
 		'''
 		pass
 	

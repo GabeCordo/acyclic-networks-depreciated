@@ -39,19 +39,10 @@ class NodeExit(node.Node):
 			@returns list with a simple bitsream 'request:message/origin_id' and
 					 the destination id
 		'''
-		return f'7:{message}/{origin}'
-	
-	def formatRequest(self, request, origin):
-		'''(NodeExit, string) -> (string)
-			:format the bitsream for outgoing RSA public key or friend requests
-			 made by the originid
-			
-			@returns a simple bitstream 'request:origin_id/none'
-		'''
-		return f'{request}:{origin}/none'
+		return f'4:{message}/{origin}'
 	
 	def specialFunctionality(self, message, connectingAddress):
-		'''(NodeExit, string, string) -> (boolean)
+		'''(Node, string, string) -> (boolean)
 			:handles all messages sent to the final recipient of the message/
 			 request that has transversed through the relay network
 			
@@ -66,13 +57,9 @@ class NodeExit(node.Node):
 		destination = self.checkDestination( modify.get_target_id() )
 		
 		#if we are sending a standard message
-		if (request == '7'):
+		if (request == '4'):
 			message_formated = self.formatMessage(message, origin)
 			#send to the target_id's ip on the index server on the default port for 8074
-			self.send( destination, message_formated )
-		#if we are requesting a RSA public key or requesting a friend request
-		elif (request == '5' || request == '6'):
-			message_formated = self.formatRequest(request, origin)
 			self.send( destination, message_formated )
 			
 		#we shouldn't need any functionality other than sending data to a user's computer

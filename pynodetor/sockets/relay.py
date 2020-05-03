@@ -17,7 +17,7 @@ class NodeRelay(node.Node):
 			 server
 		'''
 		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP, False, True, False) #ecryption, listening, monitoring
-	
+		
 	def discoverNextNode(self, bitsream):
 		'''(NodeRelay, string) -> (list of strings)
 			:discover the next relay node for communication and modify the
@@ -29,18 +29,25 @@ class NodeRelay(node.Node):
 			@exception returns an empty list if the paramaters are not followed
 		'''
 		modify = advanced.Parser(bitsream)
+		
 		#retrieve the path ids and the ip-address of the exit node
 		pathway = modify.get_relay_path()
 		exitNode = modify.get_exit_node()
+		
 		#see whether to modify the relay path or exit node path
-		activeRelays = pathway.split(':')
-		nextRelay = activeRelays.pop()
+		try:
+			activeRelays = pathway.split(':')
+			encryptedRelay = activeRelays.pop(0)
+			nextRelay = self.encryptionHandler.decrypt(encryptedRelay)
+		except:
+			exitNode = self.encryptionHandler.decrypt(exitNode)
+		
 		#[ only the last node, every relay but the last node, exitNode IP ]
 		return [ nextRelay, ':'.join(activeRelays), exitNode ]
 		
 	
 	def specialFunctionality(self, message, connectingAddress):
-		'''(NodeRelay, string, string) -> (boolean)
+		'''(Node, string, string) -> (boolean)
 			:handles all relay requests made to the server
 			
 			@returns boolean False indicating that messages will NOT be enqueued
@@ -52,7 +59,7 @@ class NodeRelay(node.Node):
 		#if the next relay node is blank, this means that it needs to be sent to the exit node
 		#as it is done meshing/anonymising through the network
 		if (resend_data[0] == ''):
-			self.send(ipOut, message)
+			self.send(resend_data[2], message)
 		#the bitsream still needs to be send through the network
 		else:
 			message_modified = modify.replace_paths(resend_data[1], resend_data[2])

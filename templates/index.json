@@ -1,14 +1,14 @@
 {
   "entry": [
      {
-        "ip-address": "1.0.1.0",
-        "anon-id": "000"
+        "ip": "1.0.1.0",
+        "user-id": "000"
      }
   ],
   "exit": [
     {
-      "ip-address": "1.0.1.1",
-      "anon-id":"001"
+      "ip": "1.0.1.1",
+      "user-id": "001"
     }
   ],
   "anon-id-1": {

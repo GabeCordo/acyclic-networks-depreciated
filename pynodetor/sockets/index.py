@@ -1,7 +1,7 @@
 ###############################
 #		python imports
 ###############################
-import random
+import random, os
 from datetime import date
 from threading import Thread
 
@@ -9,6 +9,7 @@ from threading import Thread
 #	   pynodetor imports
 ###############################
 import node
+from pynodetor.encryption import rsa
 from pynodetor.bitstream import basic
 from pynodetor.utils import linkerJSON, errors, enums
 
@@ -20,7 +21,7 @@ from pynodetor.utils import linkerJSON, errors, enums
 #node in such a way that it acts as a proxy to conceal the address or data of this node
 
 class Index(node.Node):
-	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, directoryLookup, directoryLog):
+	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, directoryIndex, directoryLog, directoryKeys):
 		'''
 			(Index, string, string, string, string, string) -> None
 			:constructor method for the Index Class
@@ -31,11 +32,16 @@ class Index(node.Node):
 					   pathway is NOT valid
 		'''
 		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, True, True, False) #ecryption, listening, monitoring
-		self.directoryLookup = directoryLookup
+		
+		self.directoryIndex = directoryIndex
 		self.directoryLog = directoryLog
+		self.directoryKeys = directoryKeys
+		
 		self.l = linkerJSON(directoryLookup, directoryLog)
-		self.directoryLogs = self.l.data[0]
-		self.directoryIndex = self.l.data[1]
+		self.index = self.l.data[0]
+		self.log = self.l.data[1]
+		
+		self.startCleaner()
 		
 	def lookupIndex(self, userid):
 		'''
@@ -48,7 +54,7 @@ class Index(node.Node):
 					   string is returned
 		'''
 		try:
-			return self.directoryIndex["index"][userid]
+			return self.index[userid]['ip']
 		except:
 			return ''
 	
@@ -59,19 +65,41 @@ class Index(node.Node):
 			 an ip with userid
 			
 			@paramaters a valid ip-address on the index node is provided
-			@returns the timestamp of a ip-address in the logger JSON file
+			@returns the userid of a ip-address in the logger JSON file
 			@exception if there is an error (ip doesnt exist) an empty 
 					   string is returned
 		'''
 		try:
-			return self.directoryLogs["ip-addresses"].append(ip)
+			return self.log[ip]
 		except:
 			return ''
+	
+	def addRSA(self, userid, publicRSA):
+		'''
+			(Index, string) -> (boolean)
+			:this is a private function responsible for adding a new public
+			 encryption key file to the directory for all userid-keys
 			
-	def lookupRSA(self, userid):
+			@returns boolean true if the file was created sucessfully
+			@exception returns boolean false if the file could not be made
+			
+				** files created with the formated (userid).pem **
+		'''
+		try:
+			f = open(self.index[userid]['rsa'], 'wb')
+			f.write(publicRSA)
+			f.close()
+		except:
+			return False
+		
+		return True
+	
+	def lookupRSA(self, userid=None, ip=None):
 		'''
 			(Index, string) -> (string)
 			:lookup the public RSA key associated with the provided user-id
+			 from the directory of public RSA keys specified through the c-
+			 lasses initializer
 			
 			@paramaters a valid userid on the index node is provided
 			@returns the public RSA key string in the index JSON file
@@ -79,9 +107,41 @@ class Index(node.Node):
 					   is returned
 		'''
 		try:
-			return self.directoryIndex["index"][userid]
+			if (userid == None or ip != None):
+				userid = self.lookupIP(ip)
+				
+			if (userid != None):
+				self.lookupIndex(userid)
+			
+			f = open(self.index[userid]['rsa'], 'rb')
+			key = f.read()
+			f.close()
+			
+			return key
 		except:
 			return ''
+			
+	def deleteRSA(self, userid):
+		'''
+			(Index, string) -> (boolean)
+			:deletes the public RSA key file associated with the provided
+			 userid
+			
+			@returns boolean true if the file was removed sucessfully
+			@exception returns boolean false if the file doesn't exist
+			
+					** looks for a file named (userid.pem) **
+		'''
+		try:
+			check = self.lookupRSA(userid=userid)
+			if (check == ''):
+				return False
+			
+			os.remove(self.index[userid]['rsa'])
+		except:
+			return False
+		
+		return True
 	
 	def addIndex(self, userid, ip, publicRSA):
 		'''
@@ -101,8 +161,13 @@ class Index(node.Node):
 		#check to see if the ipaddress already has an id assigned
 		if (self.lookupIP(ip) != ''):
 			return False
-		self.directoryIndex["index"][userid] = ip
-		self.directoryLogs["ip-addresses"][ip] = str( date.today() ) #convert from date to string type
+		
+		self.index[userid] = {
+			'ip': ip,
+			'rsa': self.directoryKeys + f'/{userid}.pem'
+		}
+		self.log[ip] =  userid
+		self.addRSA(userid, publicRSA)
 	
 	def deleteIndex(self, userid, connectingIp):
 		'''
@@ -115,90 +180,96 @@ class Index(node.Node):
 			@exception returns boolean false if any of the paramaters are not met
 		'''
 		loggedIP = self.lookupIndex(userid)
+		
 		#check to see that if the userid exists (the ip will exist if the userid does)
 		if (loggedIP == ''):
 			return False
 		#check to see that the ip-address matches the logged user-id
 		if (loggedIP != connectingIp):
 			return False
-		self.directoryIndex["index"].pop(userid)
-		self.directoryLogs.pop(connectingIp)
+		
+		self.deleteRSA(userid)
+		self.index.pop(userid)
+		self.log.pop(connectingIp)
 	
-	def resetLoggedDate(self, connectingIp):
+	def validateRelay(self, ip):
 		'''
 			(Index, string) -> (boolean)
-			:reset the time-stamp on the JSON log file to ensure that the
-			 cleaner does not delete all data
+			:pings the ip-address that needs to be validated and if a ping
+			 attempt fails (node closed), de-index the ip-id match
 			
 			@paramaters the connectingIP address given is in the JSON log
 						file
-			@returns boolean true if the time-stamp was changed to the current
-					 day
-			@exception returns boolean false if your ip has not been logged
-					   before
+			@returns boolean true if the loged relay could be reached and
+					 was not de-indexed
+			@exception returns boolean false if the logged relay could not
+					   be reached and was de-indexed
+					
+			** this is to fix issues when people hard-close their client
+			   nodes instead of running a proper de-indexing quit proce. **
 		'''
 		#check to see if the id exists already (we don't want to add an ip unknowiningly
 		#and not have it link up with the index JSON file
-		if ( self.lookupIP(connectingIp) == ''):
+		if ( self.lookupIP(ip) == ''):
 			return False
-		self.directoryLogs[connectingIp] = str( date.today() ) #convert from date to string type
-	
-	def cleaner(self):
-		'''
-			(Index) -> None
-			:responsible for removing ip-addresses that go unused for over two days
+		
+		try:
+			self.send(ip, '') #all empty strings are discarted (treated as a ping)
+		except:
+			self.deleteIndex(self.log[ip], ip)
 			
-			** this is to make sure that ip's are not stored forever (NO LOGS ALLOWED) **
-		'''
-		while True:
-			#run this script every 10 minutes to updates the tor index
-			time.sleep(600)
-			ipAddresses = getList(self.directoryLogs)
-			#iterate over every logged ip address and associated with it  
-			for i in range(0, len(ipAddresses)):
-				currentUserIP = ipAddresses[i]
-				currentUserID = self.directoryLogs["ip-addresses"][i]
-				#ping the address (an empty string will not be queued and dropped)
-				connectionResponse = self.send(currentUserIP, portOut, '')
-				if (connectionResponse == '2'):
-					self.deleteIndex(currentUserID, currentUserIP)
-			#write the current JSON dictionaries to the JSON files in-case the server unexpectedly stops
-			#to avoid the loss of data stored on the heap
-			pathwayCheck = open(self.directoryLookup, 'w')
-			json.dump(self.directoryIndex, pathwayCheck)
-			pathwayCheck = open(self.directoryLog, 'w')
-			json.dump(self.directoryLogs, pathwayCheck)
-			pathwayCheck.close()
-	
-	def mapPathway(self):
+		return True
+			
+	def encryptPathwayAndExit(self):
 		'''
 			(Index) -> (string)
 			:creates a randomized path through the server relay nodes
 			
 			@returns a path of 4 node relays
 		'''
-		activeRelays = self.directoryLogs.keys()
+		h = rsa.Handler()
+		activeRelays = self.log.keys()
+		
+		ip_previous = ''
 		for i in range(0, 4):
-			relayNode = random.randrange(0, activeRelays)
-			pathway = activeRelays[relayNode] + ':'
-		return pathway[:len(pathway)]
+			random_index = random.randrange(0, len(activeRelays) )
 			
-	def mapExit(self):
+			if i > 0:
+				relay_ip = activeRelays.pop(random_index)
+				relay_encrypted = h.encrypt(relay_ip, self.lookupRSA(ip = ip_previous))
+			else:
+				relay_encrypted = activeRelays.pop(random_index)
+			
+			pathway = pathway + ":" + relay_encrypted
+			ip_previous = relay_ip
+			
+			if i == 3:
+				activeExits = len( self.index['exit'] )
+				exitNode = random.randrange(0, activeExits)
+				
+				exit = self.index['exit'][exitNode]['ip']
+		
+		return f'^{pathway}^@{exit}@'
+		
+	def encryptData(self, usrid, message):
 		'''
 			(Index) -> (string)
-			:chooses one random exit node to leave (reduce the chance of someone
-			 sitting on the end of the socket and listening to the unencrypted 
-			 traffic)
-			
-			@returns the ip of one exit node of n many within the index JSON file
 		'''
-		activeExits = len( self.directoryIndex['index']['entry'] )
-		exitNode = random.randrange(0, activeExits)
-		return self.directoryIndex['index']['entry'][exitNode]['ip-address']
+		h = rsa.Handler()
+		encrypted_message = h.encrypt(message, self.lookupRSA(userid = usrid))
+		return f'#{encrypted_message}#'
 	
+	def formatMessage(self, targetid, message, originid):
+		'''
+			(Index) -> (string)
+		'''
+		message = self.encryptData(message)
+		route = self.encryptPathwayAndExit()
+		return data + route + f'<{originid}<>{targetid}>'
+				
 	def specialFunctionality(self, message, connectingAddress):
 		'''
-			(NodeExit, string, string) -> (boolean)
+			(Node, string, string) -> (boolean)
 			:auto-handles the generic requests made to the indexing function
 			
 			@returns boolean False indicating that messages will NOT be enqueued
@@ -206,18 +277,14 @@ class Index(node.Node):
 		'''
 		#parse the simple bitsream requests
 		try:
-			request_seperator = origin_and_target_ids.index(':')
-			data_seperator = origin_and_target_ids.index('/')
-			#the request is from index 0 to the request seperator
-			request = message[:request_seperator]
-			#the first data is from the index after the index seperator to the data seperator
-			data_first = message[request_seperator+1:data_seperator]
-			#the second data is from the index after the data seperator to the end of the bitsream
-			data_last = message[data_seperator+1:]
-		except:
-			#the message is not specific to the generic indexing requests
-			return True
+			p = basic.Parser(message)
 			
+			request = p.getRequest()
+			data_first = p.getPrimaryData()
+			data_last = p.getSecondaryData()
+		except:
+			return False
+		
 		if (request == '0'):
 			address = self.lookupIndex(data_first) #the first data is the userid
 			self.send(connectingAddress, address)
@@ -227,15 +294,11 @@ class Index(node.Node):
 		elif (request == '2'):
 			check = self.addIndex(data_first, data_last) #the first data is the userid, last is userip
 			self.send(connectingAddress, check)
-		elif (request == '3'): 
+		elif (request == '3'):
 			check = self.deleteIndex(data_first, data_last) #the first data is the userid, last is userip
 		elif (request == '4'):
-			path = self.mapPathway() #the relays pathway
-			exit = self.mapExit() #the exit node ip
-			self.send(connectingAddress, f'{path}/{exit}') #concat the two together and release
-		else:
-			#the message is not specific to the generic indexing requests
-			return True
+			message = self.formatMessage(data_firt, data_last, p.getOtherData()[0])
+			self.send(connectingAddress, message)
 		
 		#the message has been handled by the generic implemented index requests
 		return False

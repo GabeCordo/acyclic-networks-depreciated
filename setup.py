@@ -20,7 +20,7 @@ setuptools.setup(
 	keywords = ['TOR', 'SOCKETS', 'SECURITY', 'ENCRYPTION'],
 	install_requires = [
 		'cffi',
-		'Cryptodome'
+		'pycryptodome'
 	],
 	classifiers = [
 		'License :: OSI Approved :: MIT License',

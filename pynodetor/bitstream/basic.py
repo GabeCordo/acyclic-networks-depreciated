@@ -38,6 +38,7 @@ class Parser():
 		self.request = ''
 		self.data_primary = ''
 		self.data_secondary = ''
+		self.data_other = []
 		
 		self.parse()
 	
@@ -54,13 +55,12 @@ class Parser():
 		'''
 		try:
 			request_seperator = self.message.index(':')
-			data_seperator = self.message.index('/')
+			
 			#the request is from index 0 to the request seperator
 			self.request = self.message[:request_seperator]
-			#the first data is from the index after the index seperator to the data seperator
-			self.data_primary = self.message[request_seperator+1:data_seperator]
-			#the second data is from the index after the data seperator to the end of the bitsream
-			self.data_secondary = self.message[data_seperator+1:]
+			
+			#split the data added on-top of the request
+			self.data = self.message[request_seperator+1:].split('/')
 		except:
 			raise MismatchedSyntax()
 		
@@ -82,7 +82,10 @@ class Parser():
 			@returns the primary data parsed from the message during initialization
 			@exception returns an empty string if invalid syntax was provided
 		'''
-		return self.data_primary
+		try:
+			return self.data[0]
+		except:
+			return ''
 		
 	def getSecondaryData(self):
 		'''
@@ -92,7 +95,23 @@ class Parser():
 			@returns the secondary data parsed from the message during initialization
 			@exception returns an empty string if invalid syntax was provided
 		'''
-		return self.data_secondary
+		try:
+			return self.data[1]
+		except:
+			return ''
+		
+	def getOtherData(self):
+		'''
+			(Parser) -> (list of strings)
+			:the getter function for the messages other data field(s)
+			
+			@returns any other data appended to the simple request as a list of strings
+			@exception returns an empty string if invalid syntax was provided
+		'''
+		try:
+			return self.data[2:]
+		except:
+			return ''
 		
 	def __str__(self):
 		'''
