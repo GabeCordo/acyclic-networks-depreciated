@@ -5,10 +5,10 @@
 
 - [x] establish end-to-end encyrption
 - [x] Key Encryption
-- [ ] Entry Nodes
-- [ ] Exit Nodes
-- [ ] Relay Nodes
-
+- [x] Entry Nodes
+- [x] Exit Nodes
+- [x] Relay Nodes
+- [ ] Extensive Tests
 	
 ## Credits
 
