@@ -1,8 +1,8 @@
 ###############################
 #	   pynodetor imports
 ###############################
-import node
 from pynodetor.bitstream import basic
+from pynodetor.sockets.node import Node
 from pynodetor.utils import errors, enums
 
 ###############################
@@ -12,8 +12,8 @@ from pynodetor.utils import errors, enums
 # [we will want to keep the template (even if it can increase runtime by 0.01s, we NEED to
 # [ensure a failproof transfer of data to more sensitive areas of the network
 
-class NodeEntry(node.Node):
-	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
+class NodeEntry(Node):
+	def __init__(self, ip, port, ip_index, ip_backup, directory_key_private, directory_key_public):
 		'''
 			(NodeEntry, string, string, string, string) -> None
 			
@@ -21,9 +21,9 @@ class NodeEntry(node.Node):
 			 functionality to begin routing messages or act as a middle-man for
 			 indexing/removing/lookingup userids on the index node
 		'''
-		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp, True, True, False) #ecryption, listening, monitoring
+		super().__init__(ip, port, ip_index, ip_backup, directory_key_private, directory_key_public, True, True, False, True) #ecryption, listening, monitoring
 		
-	def checkDestination(self, userid):
+	def checkDestination(self, id_origin):
 		'''
 			(Node) -> (string)
 			:retrieves the ip-address of the userid inputed from the index server
@@ -33,10 +33,10 @@ class NodeEntry(node.Node):
 			@exception if the connection is lost or the userid is invalid, returns
 					 an empty string
 		'''
-		idRequest = f'0:{userid}'
-		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
+		request = f'0:{id_origin}'
+		return self.send(self.ip_index, request) #settup ip and port of indexing server
 	
-	def indexUserID(self, userid, connectingip):
+	def indexUserID(self, id_origin, ip_connecting):
 		'''
 			(NodeEntry, string, string) -> (boolean)
 			:add a new userid and ip-address match on the indexing node for
@@ -47,10 +47,10 @@ class NodeEntry(node.Node):
 			@returns a boolean true if the userid was added to the indexing node
 			@exception returns boolean false if the userid or ip is already used
 		'''
-		idRequest = f'2:{userid}/{connectingip}'
-		return self.send(self.indexIp, idRequest)
+		request = f'2:{id_origin}/{ip_connecting}'
+		return self.send(self.ip_index, request)
 
-	def deindexUserID(self, userid, connectingip):
+	def deindexUserID(self, id_origin, ip_connecting):
 		'''
 			(NodeEntry, string, string) -> (boolean)
 			:remove a userid and ip-address match on the indexing node
@@ -61,8 +61,8 @@ class NodeEntry(node.Node):
 					 node
 			@exception returns boolean false if the paramaters were invalid
 		'''
-		idRequest = f'3:{userid}/{connectingip}'
-		return self.send(self.indexIp, idRequest)
+		request = f'3:{id_origin}/{ip_connecting}'
+		return self.send(self.ip_index, request)
 		
 	def useridOfAddress(self, ip):
 		'''
@@ -72,15 +72,15 @@ class NodeEntry(node.Node):
 			** this is a private function, it is important only the
 			   entry node has this functionality					 **
 		'''
-		return self.send(self.indexIP, f'1:{ip}')
+		return self.send(self.ip_index, f'1:{ip}')
 		
-	def formatMessage(self, targetid, message, userid):
+	def formatMessage(self, id_target, message, id_origin):
 		'''
 			(NodeEntry) -> None
 			:formats the data into an advanced parsable bitsream request for
 			 transmitting messages
 		'''
-		return self.send(self.indexIP, f'4:{targetid}/{message}')
+		return self.send(self.ip_index, f'4:{id_target}/{message}')
 	
 	def specialFunctionality(self, message, connectingAddress):
 		'''

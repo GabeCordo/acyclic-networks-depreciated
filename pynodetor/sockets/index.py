@@ -8,9 +8,9 @@ from threading import Thread
 ###############################
 #	   pynodetor imports
 ###############################
-import node
 from pynodetor.encryption import rsa
 from pynodetor.bitstream import basic
+from pynodetor.sockets.node import Node
 from pynodetor.utils import linkerJSON, errors, enums
 
 ###############################
@@ -20,8 +20,8 @@ from pynodetor.utils import linkerJSON, errors, enums
 #that this node remain HIGHLY ANONYMOUS and can only recieve connections from the entry
 #node in such a way that it acts as a proxy to conceal the address or data of this node
 
-class Index(node.Node):
-	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, directoryIndex, directoryLog, directoryKeys):
+class Index(Node):
+	def __init__(self, ip, port, directory_key_private, directory_key_public, directory_index, directory_log, directory_collected_keys):
 		'''
 			(Index, string, string, string, string, string) -> None
 			:constructor method for the Index Class
@@ -31,19 +31,19 @@ class Index(node.Node):
 			@exception the class constructor will throw an error if the
 					   pathway is NOT valid
 		'''
-		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, True, True, False) #ecryption, listening, monitoring
+		super().__init__(ip, port, ip_index, '', directory_key_private, directory_key_public, True, True, False, False) #ecryption, listening, monitoring
 		
-		self.directoryIndex = directoryIndex
-		self.directoryLog = directoryLog
-		self.directoryKeys = directoryKeys
+		self.directory_index = directory_index
+		self.directory_log = directory_log
+		self.directory_collected_keys = directory_collected_keys
 		
-		self.l = linkerJSON(directoryLookup, directoryLog)
+		self.l = linkerJSON(directory_index, directory_log)
 		self.index = self.l.data[0]
 		self.log = self.l.data[1]
 		
 		self.startCleaner()
 		
-	def lookupIndex(self, userid):
+	def lookupIndex(self, id_origin):
 		'''
 			(Index, string) -> (string)
 			:lookup an ip address associated with a certain id
@@ -54,7 +54,7 @@ class Index(node.Node):
 					   string is returned
 		'''
 		try:
-			return self.index[userid]['ip']
+			return self.index[id_origin]['ip']
 		except:
 			return ''
 	
@@ -74,7 +74,7 @@ class Index(node.Node):
 		except:
 			return ''
 	
-	def addRSA(self, userid, publicRSA):
+	def addRSA(self, id_origin, rsa_public):
 		'''
 			(Index, string) -> (boolean)
 			:this is a private function responsible for adding a new public
@@ -86,15 +86,15 @@ class Index(node.Node):
 				** files created with the formated (userid).pem **
 		'''
 		try:
-			f = open(self.index[userid]['rsa'], 'wb')
-			f.write(publicRSA)
+			f = open(self.index[id_origin]['rsa'], 'wb')
+			f.write(rsa_public)
 			f.close()
 		except:
 			return False
 		
 		return True
 	
-	def lookupRSA(self, userid=None, ip=None):
+	def lookupRSA(self, id_origin=None, ip=None):
 		'''
 			(Index, string) -> (string)
 			:lookup the public RSA key associated with the provided user-id
@@ -107,13 +107,13 @@ class Index(node.Node):
 					   is returned
 		'''
 		try:
-			if (userid == None or ip != None):
-				userid = self.lookupIP(ip)
+			if (id_origin == None or ip != None):
+				id_origin = self.lookupIP(ip)
 				
-			if (userid != None):
-				self.lookupIndex(userid)
+			if (id_origin != None):
+				self.lookupIndex(id_origin)
 			
-			f = open(self.index[userid]['rsa'], 'rb')
+			f = open(self.index[id_origin]['rsa'], 'rb')
 			key = f.read()
 			f.close()
 			
@@ -121,7 +121,7 @@ class Index(node.Node):
 		except:
 			return ''
 			
-	def deleteRSA(self, userid):
+	def deleteRSA(self, id_origin):
 		'''
 			(Index, string) -> (boolean)
 			:deletes the public RSA key file associated with the provided
@@ -133,17 +133,17 @@ class Index(node.Node):
 					** looks for a file named (userid.pem) **
 		'''
 		try:
-			check = self.lookupRSA(userid=userid)
+			check = self.lookupRSA(id_origin=id_origin)
 			if (check == ''):
 				return False
 			
-			os.remove(self.index[userid]['rsa'])
+			os.remove(self.index[id_origin]['rsa'])
 		except:
 			return False
 		
 		return True
 	
-	def addIndex(self, userid, ip, publicRSA):
+	def addIndex(self, id_origin, ip, publicRSA):
 		'''
 			(Index, string) -> (boolean)
 			:insert a new user-id / ip link within the index JSON file and 
@@ -156,20 +156,20 @@ class Index(node.Node):
 					   ip has not been used before
 		'''
 		#check to see if the userid already exists
-		if (self.lookupIndex(userid) != ''):
+		if (self.lookupIndex(id_origin) != ''):
 			return False
 		#check to see if the ipaddress already has an id assigned
 		if (self.lookupIP(ip) != ''):
 			return False
 		
-		self.index[userid] = {
+		self.index[id_origin] = {
 			'ip': ip,
 			'rsa': self.directoryKeys + f'/{userid}.pem'
 		}
 		self.log[ip] =  userid
-		self.addRSA(userid, publicRSA)
+		self.addRSA(id_origin, publicRSA)
 	
-	def deleteIndex(self, userid, connectingIp):
+	def deleteIndex(self, id_origin, connectingIp):
 		'''
 			(Index, string) -> (boolean)
 			:delete the userid and ip found within the index and log JSON files
@@ -179,7 +179,7 @@ class Index(node.Node):
 			@returns boolean true if the userid was sucessfuly deleted
 			@exception returns boolean false if any of the paramaters are not met
 		'''
-		loggedIP = self.lookupIndex(userid)
+		loggedIP = self.lookupIndex(id_origin)
 		
 		#check to see that if the userid exists (the ip will exist if the userid does)
 		if (loggedIP == ''):
@@ -188,8 +188,8 @@ class Index(node.Node):
 		if (loggedIP != connectingIp):
 			return False
 		
-		self.deleteRSA(userid)
-		self.index.pop(userid)
+		self.deleteRSA(id_origin)
+		self.index.pop(id_origin)
 		self.log.pop(connectingIp)
 	
 	def validateRelay(self, ip):
@@ -251,21 +251,21 @@ class Index(node.Node):
 		
 		return f'^{pathway}^@{exit}@'
 		
-	def encryptData(self, usrid, message):
+	def encryptData(self, id_origin, message):
 		'''
 			(Index) -> (string)
 		'''
 		h = rsa.Handler()
-		encrypted_message = h.encrypt(message, self.lookupRSA(userid = usrid))
+		encrypted_message = h.encrypt(message, self.lookupRSA(id_origin = id_origin))
 		return f'#{encrypted_message}#'
 	
-	def formatMessage(self, targetid, message, originid):
+	def formatMessage(self, id_target, message, id_origin):
 		'''
 			(Index) -> (string)
 		'''
 		message = self.encryptData(message)
 		route = self.encryptPathwayAndExit()
-		return data + route + f'<{originid}<>{targetid}>'
+		return data + route + f'<{id_origin}<>{id_target}>'
 				
 	def specialFunctionality(self, message, connectingAddress):
 		'''

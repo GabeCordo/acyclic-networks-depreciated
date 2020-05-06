@@ -8,7 +8,7 @@ from pynodetor.utils import enums, errors
 #		   main code
 ###############################
 class Keys:
-	def __init__(self, encryptionType ,directoryKeyPrivate, directoryKeyPublic):
+	def __init__(self, type_encryption, directory_key_private, directory_key_public):
 		'''
 			(Keys, Encryption, string, string) -> None
 			:constructor function of the RSA Key Pair Class
@@ -16,9 +16,9 @@ class Keys:
 			@paramaters directories must point to a valid path
 		'''
 		##class variables##
-		self.encryptionType = encryptionType
-		self.directoryKeyPrivate = directoryKeyPrivate
-		self.directoryKeyPublic = directoryKeyPublic
+		self.type_encryption = type_encryption
+		self.directory_key_private = directory_key_private
+		self.directory_key_public = directory_key_public
 		
 		##check keys##
 		self._publicKey = ''
@@ -34,10 +34,10 @@ class Keys:
 			@exception throws MismatchedKeys() error
 		'''
 		try:
-			if (self.encryptionType == enums.Encryption.RSA):
+			if (self.type_encryption == enums.Encryption.RSA):
 				
 				#use the directory of the public key to encrypt a test message
-				h = rsa.Handler(self.directoryKeyPrivate, self.directoryKeyPublic)
+				h = rsa.Handler(self.directory_key_private, self.directory_key_public)
 				message = 'test keys'
 				encrypted = h.encrypt(message, h.getPublicKey())
 				

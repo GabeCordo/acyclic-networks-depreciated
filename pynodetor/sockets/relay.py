@@ -1,7 +1,7 @@
 ###############################
 #	   pynodetor imports
 ###############################
-import node
+from pynodetor.sockets.node import Node
 from pynodetor.bitstream import advanced
 from pynodetor.utils import errors, enums
 
@@ -10,13 +10,13 @@ from pynodetor.utils import errors, enums
 ###############################
 #Responisble for routing the packet to the next relay or exit node
 
-class NodeRelay(node.Node):
-	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP):
+class NodeRelay(Node):
+	def __init__(self, ip, port, ip_index, ip_backup, directory_key_private, directory_key_public):
 		'''(NodeRelay, string, string, string, string) -> None
 			:constructor for the NodeRelay class, sets up the relay node
 			 server
 		'''
-		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIP, False, True, False) #ecryption, listening, monitoring
+		super().__init__(ip, port, ip_index, ip_backup, directory_key_private, directory_key_public, False, True, False, True) #ecryption, listening, monitoring, backup
 		
 	def discoverNextNode(self, bitsream):
 		'''(NodeRelay, string) -> (list of strings)
@@ -32,18 +32,18 @@ class NodeRelay(node.Node):
 		
 		#retrieve the path ids and the ip-address of the exit node
 		pathway = modify.get_relay_path()
-		exitNode = modify.get_exit_node()
+		node_exit = modify.get_exit_node()
 		
 		#see whether to modify the relay path or exit node path
 		try:
-			activeRelays = pathway.split(':')
-			encryptedRelay = activeRelays.pop(0)
-			nextRelay = self.encryptionHandler.decrypt(encryptedRelay)
+			relay_all = pathway.split(':')
+			relay_encrypted = relay_all.pop(0)
+			relay_next = self.handler_keys.decrypt(relay_encrypted)
 		except:
-			exitNode = self.encryptionHandler.decrypt(exitNode)
+			node_exit = self.handler_keys.decrypt(node_exit)
 		
 		#[ only the last node, every relay but the last node, exitNode IP ]
-		return [ nextRelay, ':'.join(activeRelays), exitNode ]
+		return [ nextRelay, ':'.join(relay_all), node_exit ]
 		
 	
 	def specialFunctionality(self, message, connectingAddress):

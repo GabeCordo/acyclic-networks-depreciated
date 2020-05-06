@@ -1,7 +1,7 @@
 ###############################
 #	   pynodetor imports
 ###############################
-import node
+from pynodetor.sockets.node import Node
 from pynodetor.bitstream import advanced
 from pynodetor.utils import errors, enums
 
@@ -10,16 +10,16 @@ from pynodetor.utils import errors, enums
 ###############################
 #Responisble for sending the message request to the final destination in the userid
 
-class NodeExit(node.Node):
-	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp):
+class NodeExit(Node):
+	def __init__(self, ip, port, ip_index, directory_key_private, directory_key_public):
 		'''(NodeExit, string, string, string, string) -> None
 			:the consturctor is the same as the node server, small maniplulation
 			 of the origional node server to specifically redirect data to the
 			 final ip
 		'''
-		super().__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, indexIp, False, True, False) #ecryption, listening, monitoring
+		super().__init__(ip, port, ip_index, '', directory_key_private, directory_key_public, False, True, False, False) #ecryption, listening, monitoring
 	
-	def checkDestination(self, userid):
+	def checkDestination(self, id_origin):
 		'''(Node) -> (string)
 			:retrieves the ip-address of the userid inputed from the index server
 				
@@ -28,8 +28,8 @@ class NodeExit(node.Node):
 			@exception if the connection is lost or the userid is invalid, returns
 					   an empty string
 		'''
-		idRequest = f'0:{userid}'
-		return self.send(self.indexIp, idRequest) #settup ip and port of indexing server
+		request = f'0:{id_origin}'
+		return self.send(self.ip_index, request) #settup ip and port of indexing server
 	
 	def formatMessage(self, message, origin):
 		'''(NodeExit, string) -> (string)

@@ -38,9 +38,9 @@ class Handler:
 		'''
 		try:
 			for i in range(0, len(self.files)):
-				writeToJSON = open(self.files[i], 'w')
-				dump(self.data[i], writeToJSON)
-				writeToJSON.close()
+				write_to_json = open(self.files[i], 'w')
+				dump(self.data[i], write_to_json)
+				write_to_json.close()
 		except:
 			raise FileNotFoundError('linkerJSON Error: one or more of the provided files does not exist.')
 	
@@ -55,9 +55,9 @@ class Handler:
 		'''
 		try:
 			for i in range(0, len(self.files)):
-				currentFile = open(self.files[i], 'r')
-				self.data.append( load(currentFile) )
-				currentFile.close()
+				file_current = open(self.files[i], 'r')
+				self.data.append( load(file_current) )
+				file_current.close()
 		except:
 			raise FileNotFoundError('linkerJSON Error: one or more of the provided files does not exist.')
 	
@@ -76,10 +76,10 @@ class Handler:
 		while True:
 			#complete this loop every 'timer' seconds
 			time.sleep(timer)
-			for fileJSON in range(0, len(self.files)):
-				keys = self.data[fileJSON].keys()
+			for file_json in range(0, len(self.files)):
+				keys = self.data[file_json].keys()
 				for key in range(0, keys):
-					element = self.data[fileJSON][key]
+					element = self.data[file_json][key]
 					#pass the element into the additionalFunctionality function to manipulate the local data
 					self.additionalFunctionality(element)
 			#push all local changes to the JSON files
@@ -92,4 +92,4 @@ class Handler:
 			 if we don't need it
 		'''
 		#thread one and two are occupied by listening port and queue monitor respecitvley
-		threadThree = Thread(target=self.cleaner(timer), args=())
+		thread_three = Thread(target=self.cleaner(timer), args=())

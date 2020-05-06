@@ -11,7 +11,7 @@ import base64
 #an out-of the box and easy to use object-oriented RSA encryption handler for developers
 #to implement end-to-end encryption within socket communication
 class Handler:
-	def __init__(self, directoryKeyPrivate=None, directoryKeyPublic=None):
+	def __init__(self, directory_key_private=None, directory_key_public=None):
 		'''
 			(Handler, string, string) -> None
 			:constructor function of the end-to-end encryption handler
@@ -19,19 +19,19 @@ class Handler:
 			@paramaters directories must point to a valid path
 		'''
 		##class variables##
-		self.directoryKeyPrivate = directoryKeyPrivate
-		self.directoryKeyPublic = directoryKeyPublic
+		self.directory_key_private = directory_key_private
+		self.directory_key_public = directory_key_public
 		
 		#check to see that the directories given for the encryption keys are valid
 		try:
-			if (directoryKeyPrivate != None):
+			if (directory_key_private != None):
 				#check the private key pathway
-				pathwayCheck = open(directoryKeyPrivate, 'r')
-				pathwayCheck.close()
-			if (directoryKeyPublic != None):
+				check_pathway = open(directory_key_private, 'r')
+				check_pathway.close()
+			if (directory_key_public != None):
 				#check the public key pathway
-				pathwayCheck = open(directoryKeyPublic, 'r')
-				pathwayCheck.close()
+				check_pathway = open(directory_key_public, 'r')
+				check_pathway.close()
 		except:
 			raise FileNotFoundError('RSA Key Error: one or more key paths are invalid')
 			
@@ -75,17 +75,17 @@ class Handler:
 			@exception returns boolean false if there was an issue (password likeley
 					   INVALID)
 		'''
-		if (self.directoryKeyPrivate != None):
+		if (self.directory_key_private != None):
 			#Open the file containing the private key and store in the class instance variable
 			try:
-				keyPrivate = open(directoryKeyPrivate, 'rb').read()
+				keyPrivate = open(self.directory_key_private, 'rb').read()
 				self._privateKey = RSA.importKey(keyPrivate)
 			except:
 				raise Exception(f'There was a problem restoring the private key: check if the directoryKeyPrivate path is valid or that the file is not empty')
-		if (self.directoryKeyPublic != None):
+		if (self.directory_key_public != None):
 			#Open the file containing the public key and store in the class instance variable
 			try:
-				keyPublic = open(directoryKeyPublic, 'rb').read()
+				keyPublic = open(self.directory_key_public, 'rb').read()
 				self._publicKey = RSA.import_key(keyPublic)
 			except:
 				raise Exception(f'There was a problem restoring the public key: check if the directoryKeyPublic path is valid or that the file is not empty')
@@ -101,21 +101,21 @@ class Handler:
 		key = RSA.generate(2048)
 		#generate a new private key, store it in the placeholder variable and place it into the directory
 		try:
-			keyPrivate = key.export_key()
-			toPrivateKeyFile = open(self.directoryKeyPrivate, 'wb')
-			toPrivateKeyFile.write(keyPrivate)
-			toPrivateKeyFile.close() #close the file handler
-			self._privateKey = keyPrivate
+			key_private = key.export_key()
+			write_to_file = open(self.directory_key_private, 'wb')
+			write_to_file.write(key_private)
+			write_to_file.close() #close the file handler
+			self._privateKey = key_private
 		except Exception as e:
 			print(e)
 			#raise Exception(f'There was a problem creating a private key: check if the directoryKeyPrivate path is valid')
 		#generate a new public key, store it in the placeholder variable and place it into the directory
 		try:
-			keyPublic = key.publickey().export_key()
-			toPublicKeyFile = open(self.directoryKeyPublic, 'wb')
-			toPublicKeyFile.write(keyPublic)
-			toPublicKeyFile.close() #close the file handler
-			self._publicKey = keyPublic
+			key_public = key.publickey().export_key()
+			write_to_file = open(self.directory_key_public, 'wb')
+			write_to_file.write(key_public)
+			write_to_file.close() #close the file handler
+			self._publicKey = key_public
 		except:
 			raise Exception(f'There was a problem creating a public key: check if the directoryKeyPublic path is valid')
 	
@@ -134,7 +134,7 @@ class Handler:
 		if ( isinstance(message, six.binary_type) ):
 			return message
 	
-	def encrypt(self, message, keyPublic):
+	def encrypt(self, message, key_public):
 		'''
 			(Handler, string, string) -> (string)
 			:transforms a plain text into a cyhpher text
@@ -144,24 +144,24 @@ class Handler:
 		'''
 		#python doesn't like us using self declarations in the default tab so in case we are given an
 		#empty keyPublic field we need to adhere to using our own publicKey for default testing possibly
-		if ( keyPublic == '' ):
-			keyPublic = self._publicKey
-		cypherRSA = RSA.importKey(keyPublic)
-		cypherRSA = PKCS1_OAEP.new(cypherRSA)
+		if ( key_public == '' ):
+			key_public = self._publicKey
+		cypher_rsa = RSA.importKey(key_public)
+		cypher_rsa = PKCS1_OAEP.new(cypher_rsa)
 		#encrypt the given message using a given (or our own) public RSA key 
-		messageBase64 = base64.b64encode( message.encode('ascii') ) #text needs to be in base64 to be encrypted
-		return cypherRSA.encrypt( messageBase64 )
+		message_base64 = base64.b64encode( message.encode('ascii') ) #text needs to be in base64 to be encrypted
+		return cypherRSA.encrypt( message_base64 )
 	
-	def decrypt(self, cyphertext):
+	def decrypt(self, text_cyphered):
 		'''
 			(Handler, string) -> (string)
 			:transforms a cypher text into a plain text
 		'''
 		if (self.directoryKeyPrivate != None):
-			cypherRSA = RSA.importKey(self._privateKey)
-			cypherRSA = PKCS1_OAEP.new(cypherRSA)
-			decryptedMSG = cypherRSA.decrypt(cyphertext)
-			return base64.b64decode( decryptedMSG ).decode()
+			cypher_rsa = RSA.importKey(self._privateKey)
+			cypher_rsa = PKCS1_OAEP.new(cypher_rsa)
+			text_plain = cypher_rsa.decrypt(text_cyphered)
+			return base64.b64decode( text_plain ).decode()
 		else:
 			return ''
 	
@@ -174,10 +174,10 @@ class Handler:
 			@exception returns boolean false if the directories are not the same
 		'''
 		#check to see if the public key directories are the same
-		if (self.directoryKeyPublic != other.directoryKeyPublic):
+		if (self.directory_key_public != other.directory_key_public):
 			return False
 		#check to see if the private key directories are the same
-		elif (self.directoryKeyPrivate != other.directoryKeyPrivate):
+		elif (self.directory_key_private != other.directory_key_private):
 			return False
 		#they are the same; all checks have passed
 		return True

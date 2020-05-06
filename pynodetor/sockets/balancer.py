@@ -1,23 +1,23 @@
 ###############################
 #	   pynodetor imports
 ###############################
-import node
 from pynodetor.bitstream import basic
+from pynodetor.sockets.node import Node
 from pynodetor.utils import linkerJSON, errors, enums
 
 ###############################
 #		   main code
 ###############################
-class Balancer(node.Node, linkerJSON.Handler):
-	def __init__(self, ip, directoryKeyPrivate, directoryKeyPublic, nodesJSON):
+class NodeBalancer(Node, linkerJSON.Handler):
+	def __init__(self, ip, port, directory_key_private, directory_key_public, directory_entry_nodes):
 		'''(Balancer, list of strings) -> None
 			:constuctor for the Balancer class takes a list of ip-addresses 
 			 representing the available entry Nodes.
 		'''
-		node.Node.__init__(self, ip, directoryKeyPrivate, directoryKeyPublic, True, True, False) #ecryption, listening, monitoring
-		linkerJSON.Handler.__init(self, nodesJSON)
+		super(Node).__init__(ip, port, ip_index, '', directory_key_private, directory_key_public, True, True, False, False) #ecryption, listening, monitoring
+		super(linkerJSON.Handler).__init__(directory_entry_nodes)
 		
-		self.entryNodes = self.data[0]
+		self.nodes_entry = self.data[0]
 		self.trackers = [0] * len(entryNodes)
 	
 	def track(self, ip):
@@ -27,7 +27,7 @@ class Balancer(node.Node, linkerJSON.Handler):
 			
 			@returns an integer representing the number of re-directs
 		'''
-		index = self.entryNodes.index(ip)
+		index = self.nodes_entry.index(ip)
 		return self.trackers[index]
 		
 	def redirect(self):
@@ -38,7 +38,7 @@ class Balancer(node.Node, linkerJSON.Handler):
 		'''
 		index = self.trackers.index( min( self.trackers ) )
 		self.trackers[index] = self.trackers[index] + 1
-		return self.entryNodes[index]
+		return self.nodes_entry[index]
 		
 	def synatxValidator(self, message):
 		'''(Balancer, string) -> None
