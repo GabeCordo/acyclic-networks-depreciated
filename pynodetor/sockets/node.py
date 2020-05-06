@@ -1,7 +1,8 @@
 ###############################
 #		python imports
 ###############################
-import socket, time
+import socket
+from time import sleep
 from threading import Thread
 
 ###############################
@@ -15,7 +16,7 @@ from pynodetor.utils import errors, enums
 ###############################
 
 class Node:
-	def __init__(self, ip='', port = '', ip_index=None, ip_backup=None,
+	def __init__(self, ip='', port='', ip_index=None, ip_backup=None,
 				 directory_key_private=None, directory_key_public=None,
 				 supports_encryption=True, supports_listening=True,
 				 supports_monitoring=True, supports_backup_ip=True):
@@ -39,7 +40,7 @@ class Node:
 		
 		##Initialize the recieving socket##
 		self.supports_listening = supports_listening
-		self.incoming = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+		self.incoming = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
 		##Initialize the encryption handler##
 		self.supports_encryption = supports_encryption
@@ -114,7 +115,7 @@ class Node:
 			**despite not returning anything, all incoming messages
 			 are checked and then enqued on the node to be processed.**
 		'''
-		self.incoming.bind( (self.ip, self.port) )
+		self.incoming.bind((self.ip, self.port))
 		self.incoming.listen(10)
 		while True:
 			c, addr = self.incoming.accept()
@@ -144,7 +145,7 @@ class Node:
 				enqueue = self.specialFunctionality(message, addr)
 				#append to the message queue if required for further functionality
 				if (enqueue):
-					self.queue.append( message )
+					self.queue.append(message)
 				
 			#close the connection with the connector
 			c.close()
@@ -160,7 +161,7 @@ class Node:
 			#ensure the socket is closed
 			self.incoming.close()
 	
-	def send(self, ip_target, message):
+	def send(self, ip_target, message, port=''):
 			'''
 				(Node, int, message) -> (string)
 				:sends a bitsream to another Node.
@@ -173,7 +174,12 @@ class Node:
 			'''
 			try:
 				outgoing = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				outgoing.connect((ip_target, self.port)) #all outgoing requests are sent on port 8075
+				
+				#if we arn't send a port to send the message to, assume its the same as
+				#the one given upon class declaration (option: send to a diff network)
+				if (port == ''):
+					port = self.port
+				outgoing.connect((ip_target, port)) #all outgoing requests are sent on port 8075
 				
 				received_rsa_public = outgoing.rec(1024).decode()
 				if (received_rsa_public != 'None'):
@@ -217,7 +223,7 @@ class Node:
 			(Node) -> (int)
 			@returns the size of the queued messages
 		'''
-		return len( self.queue )
+		return len(self.queue)
 	
 	def deQueue(self):
 		'''
@@ -228,7 +234,7 @@ class Node:
 			@returns a string of max bit-length 1024
 			@exception returns an empty string if the queue is empty
 		'''
-		length_queue = len( self.queue )
+		length_queue = len(self.queue)
 		if ( length_queue > 0 ):
 			#return the first element in the queue acording to the first-in-first-out
 			#principle enforced by the queue algorithm
@@ -252,14 +258,14 @@ class Node:
 		'''
 		length_queue_previous = 0
 		#runs throughout the lifetime of the incoming socket
-		while ( self.supports_listening == True ):
-			time.sleep(60)
+		while (self.supports_listening == True):
+			sleep(60)
 			#account for the fact that during runtime, this might be closed midway
 			try:
 				#check to see if the queue size has increased by 1000 in 60 seconds
 				#it should process quickly, this means its laggining/being flooded
-				length_queue = len( self.queue )
-				if ( (length_queue - length_queue_previous) > 1000 ):
+				length_queue = len(self.queue)
+				if ((length_queue - length_queue_previous) > 1000):
 					#reset the queue to 60s before the current check
 					self.queue = self.queue[:length_queue_previous+1]
 				else:

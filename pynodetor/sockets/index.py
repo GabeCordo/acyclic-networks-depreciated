@@ -1,7 +1,8 @@
 ###############################
 #		python imports
 ###############################
-import random, os
+import random
+from os import remove
 from datetime import date
 from threading import Thread
 
@@ -21,7 +22,8 @@ from pynodetor.utils import linkerJSON, errors, enums
 #node in such a way that it acts as a proxy to conceal the address or data of this node
 
 class Index(Node):
-	def __init__(self, ip, port, directory_key_private, directory_key_public, directory_index, directory_log, directory_collected_keys):
+	def __init__(self, ip, port, directory_key_private, directory_key_public,
+				 directory_index, directory_log, directory_collected_keys):
 		'''
 			(Index, string, string, string, string, string) -> None
 			:constructor method for the Index Class
@@ -31,7 +33,8 @@ class Index(Node):
 			@exception the class constructor will throw an error if the
 					   pathway is NOT valid
 		'''
-		super().__init__(ip, port, ip_index, '', directory_key_private, directory_key_public, True, True, False, False) #ecryption, listening, monitoring
+		super().__init__(ip, port, ip_index, '', directory_key_private,
+						 directory_key_public, True, True, False, False) #ecryption, listening, monitoring
 		
 		self.directory_index = directory_index
 		self.directory_log = directory_log
@@ -137,7 +140,7 @@ class Index(Node):
 			if (check == ''):
 				return False
 			
-			os.remove(self.index[id_origin]['rsa'])
+			remove(self.index[id_origin]['rsa'])
 		except:
 			return False
 		
@@ -232,7 +235,7 @@ class Index(Node):
 		
 		ip_previous = ''
 		for i in range(0, 4):
-			random_index = random.randrange(0, len(activeRelays) )
+			random_index = random.randrange(0, len(activeRelays))
 			
 			if i > 0:
 				relay_ip = activeRelays.pop(random_index)
@@ -244,7 +247,7 @@ class Index(Node):
 			ip_previous = relay_ip
 			
 			if i == 3:
-				activeExits = len( self.index['exit'] )
+				activeExits = len(self.index['exit'])
 				exitNode = random.randrange(0, activeExits)
 				
 				exit = self.index['exit'][exitNode]['ip']

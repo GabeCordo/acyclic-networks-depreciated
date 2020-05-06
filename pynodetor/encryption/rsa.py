@@ -3,7 +3,7 @@
 ###############################
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP
-import base64
+from base64 import b64encode, b64decode
 
 ###############################
 #		   main code
@@ -149,8 +149,8 @@ class Handler:
 		cypher_rsa = RSA.importKey(key_public)
 		cypher_rsa = PKCS1_OAEP.new(cypher_rsa)
 		#encrypt the given message using a given (or our own) public RSA key 
-		message_base64 = base64.b64encode( message.encode('ascii') ) #text needs to be in base64 to be encrypted
-		return cypherRSA.encrypt( message_base64 )
+		message_base64 = b64encode(message.encode('ascii')) #text needs to be in base64 to be encrypted
+		return cypherRSA.encrypt(message_base64)
 	
 	def decrypt(self, text_cyphered):
 		'''
@@ -161,7 +161,7 @@ class Handler:
 			cypher_rsa = RSA.importKey(self._privateKey)
 			cypher_rsa = PKCS1_OAEP.new(cypher_rsa)
 			text_plain = cypher_rsa.decrypt(text_cyphered)
-			return base64.b64decode( text_plain ).decode()
+			return b64decode( text_plain ).decode()
 		else:
 			return ''
 	

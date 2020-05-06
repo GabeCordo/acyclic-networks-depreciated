@@ -11,14 +11,16 @@ from pynodetor.utils import linkerJSON, errors, enums
 class NodeBalancer(Node, linkerJSON.Handler):
 	def __init__(self, ip, port, directory_key_private, directory_key_public, directory_entry_nodes):
 		'''(Balancer, list of strings) -> None
-			:constuctor for the Balancer class takes a list of ip-addresses 
+			:constuctor for the Balancer class takes a list of ip-addresses
 			 representing the available entry Nodes.
 		'''
-		super(Node).__init__(ip, port, ip_index, '', directory_key_private, directory_key_public, True, True, False, False) #ecryption, listening, monitoring
-		super(linkerJSON.Handler).__init__(directory_entry_nodes)
+		Node.__init__(self, ip, port, None, '', directory_key_private,
+					  directory_key_public, True, True, False, False) #ecryption, listening, monitoring
+		
+		linkerJSON.Handler.__init__(self, directory_entry_nodes)
 		
 		self.nodes_entry = self.data[0]
-		self.trackers = [0] * len(entryNodes)
+		self.trackers = [0] * len(self.nodes_entry)
 	
 	def track(self, ip):
 		'''(Balancer, string) -> (int)
@@ -36,7 +38,7 @@ class NodeBalancer(Node, linkerJSON.Handler):
 			
 			@returns a string of the ip-address with the least re-directs
 		'''
-		index = self.trackers.index( min( self.trackers ) )
+		index = self.trackers.index(min( self.trackers ))
 		self.trackers[index] = self.trackers[index] + 1
 		return self.nodes_entry[index]
 		

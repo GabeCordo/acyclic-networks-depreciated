@@ -11,12 +11,13 @@ from pynodetor.utils import errors, enums
 #Responisble for routing the packet to the next relay or exit node
 
 class NodeRelay(Node):
-	def __init__(self, ip, port, ip_index, ip_backup, directory_key_private, directory_key_public):
+	def __init__(self, ip, port, ip_backup, directory_key_private, directory_key_public):
 		'''(NodeRelay, string, string, string, string) -> None
 			:constructor for the NodeRelay class, sets up the relay node
 			 server
 		'''
-		super().__init__(ip, port, ip_index, ip_backup, directory_key_private, directory_key_public, False, True, False, True) #ecryption, listening, monitoring, backup
+		super().__init__(ip, port, None, ip_backup, directory_key_private,
+						 directory_key_public, False, True, True, True) #ecryption, listening, monitoring, backup
 		
 	def discoverNextNode(self, bitsream):
 		'''(NodeRelay, string) -> (list of strings)

@@ -17,7 +17,8 @@ class NodeExit(Node):
 			 of the origional node server to specifically redirect data to the
 			 final ip
 		'''
-		super().__init__(ip, port, ip_index, '', directory_key_private, directory_key_public, False, True, False, False) #ecryption, listening, monitoring
+		super().__init__(ip, port, ip_index, '', directory_key_private,
+						 directory_key_public, False, True, False, False) #ecryption, listening, monitoring
 	
 	def checkDestination(self, id_origin):
 		'''(Node) -> (string)
@@ -54,13 +55,13 @@ class NodeExit(Node):
 		request = modify.get_request_type()
 		#we need the origin in case a message needs to be sent back
 		origin = modify.get_origin_id()
-		destination = self.checkDestination( modify.get_target_id() )
+		destination = self.checkDestination(modify.get_target_id())
 		
 		#if we are sending a standard message
 		if (request == '4'):
 			message_formated = self.formatMessage(message, origin)
 			#send to the target_id's ip on the index server on the default port for 8074
-			self.send( destination, message_formated )
+			self.send(destination, message_formated)
 			
 		#we shouldn't need any functionality other than sending data to a user's computer
 		return False

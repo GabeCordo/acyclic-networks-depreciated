@@ -56,7 +56,7 @@ class Handler:
 		try:
 			for i in range(0, len(self.files)):
 				file_current = open(self.files[i], 'r')
-				self.data.append( load(file_current) )
+				self.data.append(load(file_current))
 				file_current.close()
 		except:
 			raise FileNotFoundError('linkerJSON Error: one or more of the provided files does not exist.')

@@ -21,7 +21,8 @@ class NodeEntry(Node):
 			 functionality to begin routing messages or act as a middle-man for
 			 indexing/removing/lookingup userids on the index node
 		'''
-		super().__init__(ip, port, ip_index, ip_backup, directory_key_private, directory_key_public, True, True, False, True) #ecryption, listening, monitoring
+		super().__init__(ip, port, ip_index, ip_backup, directory_key_private,
+						 directory_key_public, True, True, False, True) #ecryption, listening, monitoring
 		
 	def checkDestination(self, id_origin):
 		'''

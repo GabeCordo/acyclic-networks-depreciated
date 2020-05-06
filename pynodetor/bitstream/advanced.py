@@ -7,10 +7,15 @@
 	@returns the associated segment of the bitsream
 	as requested by the class instance variables		***
 '''
-
+###############################
+#	   pynodetor imports
+###############################
 from pynodetor.utils.errors import *
 from cffi import FFI
 
+###############################
+#		   main code
+###############################
 class Parser:
 	
 	def __init__(self, message=''):

@@ -6,7 +6,6 @@
 		two elements of data on-top of the standard
 		request, can be used by any node class: O(n) ***
 '''
-
 ###############################
 #	   pynodetor imports
 ###############################
