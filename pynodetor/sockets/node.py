@@ -300,15 +300,27 @@ class Node:
 		self.handler_keys.generateKeySet()
 		
 	def isThreadOneRuning(self):
+		'''
+			(Node) -> (boolean)
+		'''
 		return self.thread_one.is_alive()
-		
+	
+	def closeThreadOne(self):
+		'''
+			(Node) -> None
+		'''
+		self.thread_one._Thread_stop()
+			
 	def isThreadTwoRunning(self):
+		'''
+			(Node) -> (boolean)
+		'''
 		return self.thread_two.is_alive()
 		
-	def closeThreadOne(self):
-		self.thread_one._Thread_stop()
-		
 	def closeThreadTwo(self):
+		'''
+			(Node) -> None
+		'''
 		self.thread_two._Thread_stop()
 		
 	def __del__(self):

@@ -23,7 +23,7 @@ class Handler:
 			@exception throws a FileNotFound() error if one or more of
 					   the files are not valid
 		'''
-		self.files = list(args)
+		self.files = args
 		self.data  = []
 		self.pull() #validate that the files provided to the class exist
 			
@@ -75,7 +75,7 @@ class Handler:
 		'''
 		while True:
 			#complete this loop every 'timer' seconds
-			time.sleep(timer)
+			sleep(timer)
 			for file_json in range(0, len(self.files)):
 				keys = self.data[file_json].keys()
 				for key in range(0, keys):
@@ -93,3 +93,5 @@ class Handler:
 		'''
 		#thread one and two are occupied by listening port and queue monitor respecitvley
 		thread_three = Thread(target=self.cleaner(timer), args=())
+		thread_three.daemon = True
+		thread_three.start()

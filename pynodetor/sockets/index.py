@@ -21,7 +21,7 @@ from pynodetor.utils import linkerJSON, errors, enums
 #that this node remain HIGHLY ANONYMOUS and can only recieve connections from the entry
 #node in such a way that it acts as a proxy to conceal the address or data of this node
 
-class Index(Node):
+class Index(Node, linkerJSON.Handler):
 	def __init__(self, ip, port, directory_key_private, directory_key_public,
 				 directory_index, directory_log, directory_collected_keys):
 		'''
@@ -33,18 +33,16 @@ class Index(Node):
 			@exception the class constructor will throw an error if the
 					   pathway is NOT valid
 		'''
-		super().__init__(ip, port, ip_index, '', directory_key_private,
-						 directory_key_public, True, True, False, False) #ecryption, listening, monitoring
+		Node.__init__(self,ip, port, '', '', directory_key_private,
+					  directory_key_public, True, True, False, False) #ecryption, listening, monitoring
+		linkerJSON.Handler.__init__(self, directory_index, directory_log)
 		
 		self.directory_index = directory_index
 		self.directory_log = directory_log
 		self.directory_collected_keys = directory_collected_keys
 		
-		self.l = linkerJSON(directory_index, directory_log)
-		self.index = self.l.data[0]
-		self.log = self.l.data[1]
-		
-		self.startCleaner()
+		self.index = self.data[0]
+		self.log = self.data[1]
 		
 	def lookupIndex(self, id_origin):
 		'''
