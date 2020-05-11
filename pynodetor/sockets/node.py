@@ -125,14 +125,15 @@ class Node:
 				pre_message = self.handler_keys.getPublicKey()
 			else:
 				pre_message = 'None'
-			c.send(bytes(pre_message, 'utf8'))
+			c.send(pre_message)
+			print(pre_message)
 			
 			if (self.supports_encryption == True):
 				#receive the connectors public RSA key
 				publicRSA = c.recv(1024).decode()
 			
 			#receive the cypher text from the connector
-			bitsream = c.recv(1024).decode()
+			cyphertext = c.recv(1024).decode()
 			
 			#ensure the bitsream isn't blank incase someone is trying to spam
 			#the node program and overflow the queue 
@@ -142,7 +143,7 @@ class Node:
 				else:
 					message = bitsream
 				#allow child classes to manipulate the message
-				enqueue = self.specialFunctionality(message, addr)
+				enqueue = self.specialFunctionality(message, addr[0])
 				#append to the message queue if required for further functionality
 				if (enqueue):
 					self.queue.append(message)
@@ -181,7 +182,9 @@ class Node:
 					port = self.port
 				outgoing.connect((ip_target, port)) #all outgoing requests are sent on port 8075
 				
+				print('test')
 				received_rsa_public = outgoing.rec(1024).decode()
+				print('test')
 				if (received_rsa_public != 'None'):
 					outgoing.send(bytes(self.handler_keys.getPublicKey(), 'utf8')) #send public key for any responses
 				
