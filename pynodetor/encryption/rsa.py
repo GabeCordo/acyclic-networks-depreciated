@@ -150,14 +150,14 @@ class Handler:
 		cypher_rsa = PKCS1_OAEP.new(cypher_rsa)
 		#encrypt the given message using a given (or our own) public RSA key 
 		message_base64 = b64encode(message.encode('ascii')) #text needs to be in base64 to be encrypted
-		return cypherRSA.encrypt(message_base64)
+		return cypher_rsa.encrypt(message_base64)
 	
 	def decrypt(self, text_cyphered):
 		'''
 			(Handler, string) -> (string)
 			:transforms a cypher text into a plain text
 		'''
-		if (self.directoryKeyPrivate != None):
+		if (self.directory_key_private != None):
 			cypher_rsa = RSA.importKey(self._privateKey)
 			cypher_rsa = PKCS1_OAEP.new(cypher_rsa)
 			text_plain = cypher_rsa.decrypt(text_cyphered)

@@ -92,7 +92,7 @@ class Node:
 		'''
 		return self.supports_monitoring
 	
-	def specialFunctionality(self):
+	def specialFunctionality(self, message, address):
 		'''
 			(string) -> (boolean)
 			:child classes can overide this function to offer special functionality
@@ -124,29 +124,28 @@ class Node:
 			if (self.supports_encryption == True):
 				pre_message = self.handler_keys.getPublicKey()
 			else:
-				pre_message = 'None'
-			c.send(pre_message)
-			print(pre_message)
+				pre_message = b'None'
+			c.send(pre_message) #send the encryption key or None indiciating it's disabled
 			
 			if (self.supports_encryption == True):
 				#receive the connectors public RSA key
-				publicRSA = c.recv(1024).decode()
+				publicRSA = c.recv(1024)
 			
 			#receive the cypher text from the connector
-			cyphertext = c.recv(1024).decode()
+			cyphertext = c.recv(1024)
 			
-			#ensure the bitsream isn't blank incase someone is trying to spam
-			#the node program and overflow the queue 
-			if (cyphertext != ''):
-				if (self.supports_encryption == True):
-					message = self.handler_keys.decrypt(cyphertext) #decrypt the cypher text and place it into a temp holder
-				else:
-					message = bitsream
-				#allow child classes to manipulate the message
-				enqueue = self.specialFunctionality(message, addr[0])
-				#append to the message queue if required for further functionality
-				if (enqueue):
-					self.queue.append(message)
+			#we want to decrypt the message only if encryption is enabled otherwise it is
+			#in plain-text and decrypting it will raise an error
+			if (self.supports_encryption == True):
+				message = self.handler_keys.decrypt(cyphertext) #decrypt the cypher text and place it into a temp holder
+			else:
+				message = cyphertext.decode()
+			
+			#allow child classes to manipulate the message
+			will_enqueue = self.specialFunctionality(message, addr[0])
+			#append to the message queue if required for further functionality
+			if (will_enqueue):
+				self.queue.append(message)
 				
 			#close the connection with the connector
 			c.close()
@@ -162,7 +161,7 @@ class Node:
 			#ensure the socket is closed
 			self.incoming.close()
 	
-	def send(self, ip_target, message, port=''):
+	def send(self, ip_target, message='', port=''):
 			'''
 				(Node, int, message) -> (string)
 				:sends a bitsream to another Node.
@@ -182,43 +181,48 @@ class Node:
 					port = self.port
 				outgoing.connect((ip_target, port)) #all outgoing requests are sent on port 8075
 				
-				print('test')
-				received_rsa_public = outgoing.rec(1024).decode()
-				print('test')
+				#if we leave the string empty we are asking for a simple ping of the listening
+				#server so if we establish connection return '1' and end everything else
+				if (message == ''):
+					return '1'
+				
+				received_rsa_public = outgoing.recv(1024).decode()
+
+				key_pub_ours = self.handler_keys.getPublicKey()
 				if (received_rsa_public != 'None'):
-					outgoing.send(bytes(self.handler_keys.getPublicKey(), 'utf8')) #send public key for any responses
+					outgoing.send(key_pub_ours) #send public key for any responses
 				
-				#ensure the node is not sending a message over a certain byte length
-				#to avoid strenious or inefficient processing on the devs end
-				if (len(message.encode('utf-8')) <= 1024):
-					if(self.supports_encryption == True):
-						message_ready = self.handler_keys.encrypt(message, received_rsa_public) #if encryption is enabled, cypher it with the recieved public rsa
-					else:
-						message_ready = message
-					outgoing.send(bytes(message_ready, 'utf-8'))
+				#prepare the message we are going to send to the 
+				if(received_rsa_public != 'None'):
+					message_ready = self.handler_keys.encrypt(message, received_rsa_public) #if encryption is enabled, cypher it with the recieved public rsa
 				else:
-					#if there is default to returning an empty string
-					return ''
+					message_ready = bytes(message, 'utf-8')
 				
-				if (self.supports_encryption == True):
+				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
+				#already be in this form, and won't be able to be sent
+				outgoing.send(message_ready)
+				
+				if (received_rsa_public != 'None'):
 					received_message = outgoing.recv(1024).decode()
 					#if we receive a status code of '0' that means something went wrong
 					if (received_message == '0'):
 						#if there is default to returning an empty string
+						outgoing.close()
 						return ''
 					else:
 						#the bitsream was successfuly sent, we received usfull information from
 						#the server we may need to process (it might be a response)
+						outgoing.close()
 						return received_message
 				else:
+					outgoing.close()
 					return '1'
-				
-				outgoing.close()
 			except:
 				#we need to check that the ip_target is not self.ip_backup to avoid going into a recursive infinite loop
 				if (ip_target != self.ip_backup and self.supports_backup_ip == True):
 					self.send(self.ip_backup, message)
 				else:
+					outgoing.close()
 					return '2'
 	
 	def sizeOfQueue(self):
@@ -241,7 +245,7 @@ class Node:
 		if ( length_queue > 0 ):
 			#return the first element in the queue acording to the first-in-first-out
 			#principle enforced by the queue algorithm
-			return self.pop(0)
+			return self.queue.pop(0)
 		else:
 			#the queue was empty, no bitsreams have been received or approved for enqueing
 			return ''

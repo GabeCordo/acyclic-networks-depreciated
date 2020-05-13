@@ -8,7 +8,7 @@ longDescription = 'A mid-weight framework for replicating tor entry, relay and e
 setuptools.setup(
 	name = 'pynodetor',
 	packages = ['pynodetor'],
-	version = '1.0',
+	version = '1.1',
 	licence = 'MIT',
 	description = longDescription,
 	author = 'Gabriel Cordovado',
