@@ -94,13 +94,13 @@ class Node:
 	
 	def specialFunctionality(self, message, address):
 		'''
-			(string) -> (boolean)
+			(string, string) -> (boolean, string)
 			:child classes can overide this function to offer special functionality
 			 to the listening aspect of the server
 			
 			@returns a boolean value representing whether to enqueue message
 		'''
-		return True #by default we wan't it to queue all the requests
+		return (True, '0') #by default we wan't it to queue all the requests
 	
 	def listen(self):
 		'''
@@ -142,9 +142,16 @@ class Node:
 				message = cyphertext.decode()
 			
 			#allow child classes to manipulate the message
-			will_enqueue = self.specialFunctionality(message, addr[0])
+			data_processed = self.specialFunctionality(message, addr[0])
+			#return the data to the user
+			if (data_processed[1] != ''):
+				if (self.supports_encryption == True):
+					data_encoded = self.handler_keys.encrypt(data_processed[1], publicRSA)
+				else:
+					data_encoded = bytes(data_processed[1], 'utf-8')
+				c.send(data_encoded)
 			#append to the message queue if required for further functionality
-			if (will_enqueue):
+			if (data_processed[0]):
 				self.queue.append(message)
 				
 			#close the connection with the connector
@@ -202,28 +209,25 @@ class Node:
 				#already be in this form, and won't be able to be sent
 				outgoing.send(message_ready)
 				
-				if (received_rsa_public != 'None'):
-					received_message = outgoing.recv(1024).decode()
-					#if we receive a status code of '0' that means something went wrong
-					if (received_message == '0'):
-						#if there is default to returning an empty string
-						outgoing.close()
-						return ''
-					else:
-						#the bitsream was successfuly sent, we received usfull information from
-						#the server we may need to process (it might be a response)
-						outgoing.close()
-						return received_message
-				else:
+				response_cyphered = outgoing.recv(1024)
+				response = self.handler_keys.decrypt(response_cyphered)
+				#if we receive a status code of '0' that means something went wrong
+				if (response == '0'):
+					#if there is default to returning an empty string
 					outgoing.close()
-					return '1'
-			except:
+					return ''
+				else:
+					#the bitsream was successfuly sent, we received usfull information from
+					#the server we may need to process (it might be a response)
+					outgoing.close()
+					return response
+			except Exception as e:
 				#we need to check that the ip_target is not self.ip_backup to avoid going into a recursive infinite loop
 				if (ip_target != self.ip_backup and self.supports_backup_ip == True):
 					self.send(self.ip_backup, message)
 				else:
 					outgoing.close()
-					return '2'
+					return e
 	
 	def sizeOfQueue(self):
 		'''

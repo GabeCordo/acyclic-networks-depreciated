@@ -1,4 +1,5 @@
 from pynodetor.sockets.node import Node
+from time import sleep
 
 n1 = Node(
 	ip='',
@@ -10,6 +11,8 @@ n1 = Node(
 n1.settup()
 
 while True:
+		
+		sleep(0.01) #stop the cpu from constantly running at 100% cpu
 		
 		if (n1.sizeOfQueue() > 0):
 			
