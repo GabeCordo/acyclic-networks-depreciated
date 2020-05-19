@@ -33,7 +33,7 @@ class Index(Node, linkerJSON.Handler):
 			@exception the class constructor will throw an error if the
 					   pathway is NOT valid
 		'''
-		Node.__init__(self,ip, port, '', '', directory_key_private,
+		Node.__init__(self, ip, port, ip, '', directory_key_private,
 					  directory_key_public, True, True, False, False) #ecryption, listening, monitoring
 		linkerJSON.Handler.__init__(self, directory_index, directory_log)
 		
@@ -232,7 +232,7 @@ class Index(Node, linkerJSON.Handler):
 		activeRelays = self.log.keys()
 		
 		ip_previous = ''
-		for i in range(0, 4):
+		for i in range(0, 4 ):
 			random_index = random.randrange(0, len(activeRelays))
 			
 			if i > 0:
@@ -270,7 +270,7 @@ class Index(Node, linkerJSON.Handler):
 				
 	def specialFunctionality(self, message, connectingAddress):
 		'''
-			(Node, string, string) -> (boolean)
+			(Node, string, string) -> (boolean, string)
 			:auto-handles the generic requests made to the indexing function
 			
 			@returns boolean False indicating that messages will NOT be enqueued
@@ -284,23 +284,26 @@ class Index(Node, linkerJSON.Handler):
 			data_first = p.getPrimaryData()
 			data_last = p.getSecondaryData()
 		except:
-			return False
+			return (False, '400') #error code 400: invalid request type
 		
 		if (request == '0'):
 			address = self.lookupIndex(data_first) #the first data is the userid
-			self.send(connectingAddress, address)
+			return (False, address)
 		elif (request == '1'):
 			userid = self.lookupIP(data_first) #the first data is the ip
-			self.send(connectingAddress, userid)
+			return (False, userid)
 		elif (request == '2'):
+			print(data_first)
+			print(data_last)
 			check = self.addIndex(data_first, data_last) #the first data is the userid, last is userip
-			self.send(connectingAddress, check)
+			return (False, check)
 		elif (request == '3'):
 			check = self.deleteIndex(data_first, data_last) #the first data is the userid, last is userip
+			return (False, check)
 		elif (request == '4'):
 			message = self.formatMessage(data_firt, data_last, p.getOtherData()[0])
 			self.send(connectingAddress, message)
 		
 		#the message has been handled by the generic implemented index requests
-		return False
+		return (False, '400') #error code 400: invalid request type
 		

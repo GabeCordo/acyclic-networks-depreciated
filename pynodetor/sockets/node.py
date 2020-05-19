@@ -3,6 +3,7 @@
 ###############################
 import socket
 from time import sleep
+from sys import getsizeof
 from threading import Thread
 
 ###############################
@@ -78,7 +79,7 @@ class Node:
 		'''
 			(Node) -> (boolean)
 			:the getter function for whether encryption is toggled
-				
+			
 			@returns whether the node allows for end-to-end encryption
 		'''
 		return self.supports_encryption
@@ -131,18 +132,36 @@ class Node:
 				#receive the connectors public RSA key
 				publicRSA = c.recv(1024)
 			
+			print('test')
+			
 			#receive the cypher text from the connector
-			cyphertext = c.recv(1024)
+			i = 0
+			cyphertexts = [ c.recv(1024) ]
+			while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
+				print(cyphertexts[i])
+				cyphertexts.append(c.recv(1024))
+				i+=1
+			cyphertexts.pop() #remove the null terminating character
+			
+			print('END')
 			
 			#we want to decrypt the message only if encryption is enabled otherwise it is
 			#in plain-text and decrypting it will raise an error
 			if (self.supports_encryption == True):
-				message = self.handler_keys.decrypt(cyphertext) #decrypt the cypher text and place it into a temp holder
+				#we need to individualy decrypt each message and then join it
+				for i in range(0, len(cyphertexts)):
+					cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
 			else:
-				message = cyphertext.decode()
+				#we need to individualy decode the utf-8 bitsream into plain text
+				for i in range(0, len(cyphertexts)):
+					cyphertexts[i] = cyphertexts[i].decode()
+			
+			message = ''.join(cyphertexts)
+			print(message)
 			
 			#allow child classes to manipulate the message
 			data_processed = self.specialFunctionality(message, addr[0])
+
 			#return the data to the user
 			if (data_processed[1] != ''):
 				if (self.supports_encryption == True):
@@ -150,6 +169,7 @@ class Node:
 				else:
 					data_encoded = bytes(data_processed[1], 'utf-8')
 				c.send(data_encoded)
+				
 			#append to the message queue if required for further functionality
 			if (data_processed[0]):
 				self.queue.append(message)
@@ -199,23 +219,55 @@ class Node:
 				if (received_rsa_public != 'None'):
 					outgoing.send(key_pub_ours) #send public key for any responses
 				
+				message_lst = []
+				permited_char_len = 100 #the max number of chars allowed per bitstream (RSA maximum)
+				
 				#prepare the message we are going to send to the 
 				if(received_rsa_public != 'None'):
-					message_ready = self.handler_keys.encrypt(message, received_rsa_public) #if encryption is enabled, cypher it with the recieved public rsa
+					#if encryption is enabled, cypher it with the recieved public rsa
+					#we need to make sure the byte size of the string being encrypted does not grow > than 250
+					remaining_chars = permited_char_len
+					
+					while ((len(message) - len(message_lst)*permited_char_len) > permited_char_len): #repeat untill the len is less than 150 chars
+						#for visibility we will throw this into temp vars
+						beggining = remaining_chars - permited_char_len
+						end = remaining_chars
+						
+						#encrypt and append to the list of message segments to send that are encrypted
+						temp = self.handler_keys.encrypt(message[beggining:end], received_rsa_public)
+						message_lst.append(temp)
+						
+						#append the number of chars that remain within the message
+						remaining_chars+=permited_char_len
+					
+					#append the final part of the message to the list
+					beggining = remaining_chars - permited_char_len
+					temp = self.handler_keys.encrypt(message[beggining:], received_rsa_public)
+					message_lst.append(temp)
+						
 				else:
-					message_ready = bytes(message, 'utf-8')
+					message_lst.append(bytes(message, 'utf-8'))
+				
+				message_lst.append(b'<<') #add the message transfer terminator
 				
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
-				outgoing.send(message_ready)
+				for message_segment in message_lst:
+					outgoing.send(message_segment)
 				
+				#we are going to receive a response code back from the user after this possibly indicating some status
+				#code or will 'spit out' some sort of data associated with the request
 				response_cyphered = outgoing.recv(1024)
-				response = self.handler_keys.decrypt(response_cyphered)
+				if(received_rsa_public != 'None'):
+					response = self.handler_keys.decrypt(response_cyphered)
+				else:
+					response = response_cyphered.decode()
+				
 				#if we receive a status code of '0' that means something went wrong
-				if (response == '0'):
+				if (response == '400'):
 					#if there is default to returning an empty string
 					outgoing.close()
-					return ''
+					return 'Error 400: Bad Resquest'
 				else:
 					#the bitsream was successfuly sent, we received usfull information from
 					#the server we may need to process (it might be a response)

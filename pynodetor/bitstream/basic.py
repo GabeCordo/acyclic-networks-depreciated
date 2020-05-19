@@ -21,10 +21,10 @@ class Parser():
 			(Parser, string) -> None
 			@description the constructor class for the simple parser
 			
-			@syntax (request):(primary_data)/(secondary_data)
+			@syntax (request):(primary_data)~(secondary_data)
 						^			^				^
 						0			1				2
-				
+			
 			0: the action the server needs to preform on the data
 			1: the most significant piece of data
 			2: assisting data to the primary data
@@ -59,7 +59,7 @@ class Parser():
 			self.request = self.message[:request_seperator]
 			
 			#split the data added on-top of the request
-			self.data = self.message[request_seperator+1:].split('/')
+			self.data = self.message[request_seperator+1:].split('~')
 		except:
 			raise MismatchedSyntax()
 		
