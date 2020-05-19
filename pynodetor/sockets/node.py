@@ -132,18 +132,14 @@ class Node:
 				#receive the connectors public RSA key
 				publicRSA = c.recv(1024)
 			
-			print('test')
-			
 			#receive the cypher text from the connector
 			i = 0
 			cyphertexts = [ c.recv(1024) ]
 			while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
-				print(cyphertexts[i])
+				sleep(0.0001)
 				cyphertexts.append(c.recv(1024))
 				i+=1
 			cyphertexts.pop() #remove the null terminating character
-			
-			print('END')
 			
 			#we want to decrypt the message only if encryption is enabled otherwise it is
 			#in plain-text and decrypting it will raise an error
@@ -157,7 +153,6 @@ class Node:
 					cyphertexts[i] = cyphertexts[i].decode()
 			
 			message = ''.join(cyphertexts)
-			print(message)
 			
 			#allow child classes to manipulate the message
 			data_processed = self.specialFunctionality(message, addr[0])
@@ -253,6 +248,7 @@ class Node:
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
 				for message_segment in message_lst:
+					sleep(0.0001)
 					outgoing.send(message_segment)
 				
 				#we are going to receive a response code back from the user after this possibly indicating some status

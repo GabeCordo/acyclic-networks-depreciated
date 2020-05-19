@@ -65,4 +65,4 @@ class NodeBalancer(Node, linkerJSON.Handler):
 			print(f'Console: Received bad reciept from {connectingAddress}')
 		
 		#we always want this to return False, there is NO need to have any other functionality
-		return False
+		return (False, 'Successfuly Handled')

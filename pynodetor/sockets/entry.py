@@ -48,7 +48,7 @@ class NodeEntry(Node):
 			@returns a boolean true if the userid was added to the indexing node
 			@exception returns boolean false if the userid or ip is already used
 		'''
-		request = f'2:{id_origin}/{ip_connecting}'
+		request = f'2:{id_origin}~{ip_connecting}'
 		return self.send(self.ip_index, request)
 
 	def deindexUserID(self, id_origin, ip_connecting):
@@ -62,7 +62,7 @@ class NodeEntry(Node):
 					 node
 			@exception returns boolean false if the paramaters were invalid
 		'''
-		request = f'3:{id_origin}/{ip_connecting}'
+		request = f'3:{id_origin}~{ip_connecting}'
 		return self.send(self.ip_index, request)
 		
 	def useridOfAddress(self, ip):
@@ -81,7 +81,7 @@ class NodeEntry(Node):
 			:formats the data into an advanced parsable bitsream request for
 			 transmitting messages
 		'''
-		return self.send(self.ip_index, f'4:{id_target}/{message}')
+		return self.send(self.ip_index, f'4:{id_target}~{message}')
 	
 	def specialFunctionality(self, message, connectingAddress):
 		'''
@@ -99,21 +99,25 @@ class NodeEntry(Node):
 			data_first = b.getPrimaryData()
 			data_last = b.getSecondaryData()
 		except:
-			return
+			return (False, '')
 		
 		#request to lookup index (most likely)
 		if (request == '0'):
-			self.checkDestination(data)
+			check = self.checkDestination(data)
+			return (False, check)
 		#request to send a message
 		elif (request == '4'):
-			self.formatMessage(connectingAddress, data_first, data_last, b.getOtherData()[0])
+			check = self.formatMessage(connectingAddress, data_first, data_last, b.getOtherData()[0])
+			return (False, check)
 		#request to add index
 		elif (request == '2'):
-			self.indexUserID(data_fist, data_last) #data_first: userid | data_last: userip
+			check = self.indexUserID(data_fist, data_last) #data_first: userid | data_last: userip
+			return (False, check)
 		#request to delete index (least likely)
 		elif (request == '3'):
-			self.deindexUserID(data_first, data_last) #data_first: userid | data_last: userip
+			check = self.deindexUserID(data_first, data_last) #data_first: userid | data_last: userip
+			return (False, check)
 		
 		#the message has been handled automaticly, there is no need to enqueue
-		return False
+		return (False, '')
 	

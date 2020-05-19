@@ -68,4 +68,4 @@ class NodeRelay(Node):
 		
 		#the relay node should only redirect data, it should never do anything else
 		#(we want to avoid users capturing any traffic on the network)
-		return False
+		return (False, 'Successfuly Handled')

@@ -64,5 +64,5 @@ class NodeExit(Node):
 			self.send(destination, message_formated)
 			
 		#we shouldn't need any functionality other than sending data to a user's computer
-		return False
+		return (False, 'Successfuly Handled')
 	

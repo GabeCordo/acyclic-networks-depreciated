@@ -144,7 +144,7 @@ class Index(Node, linkerJSON.Handler):
 		
 		return True
 	
-	def addIndex(self, id_origin, ip, publicRSA):
+	def addIndex(self, id_origin, publicRSA, ip_connecting):
 		'''
 			(Index, string) -> (boolean)
 			:insert a new user-id / ip link within the index JSON file and 
@@ -158,19 +158,21 @@ class Index(Node, linkerJSON.Handler):
 		'''
 		#check to see if the userid already exists
 		if (self.lookupIndex(id_origin) != ''):
-			return False
+			return '0'
 		#check to see if the ipaddress already has an id assigned
-		if (self.lookupIP(ip) != ''):
-			return False
+		if (self.lookupIP(ip_connecting) != ''):
+			return '0'
 		
 		self.index[id_origin] = {
-			'ip': ip,
-			'rsa': self.directoryKeys + f'/{userid}.pem'
+			'ip': ip_connecting,
+			'rsa': self.directory_collected_keys + f'/{id_origin}.pem'
 		}
-		self.log[ip] =  userid
+		self.log[ip_connecting] =  id_origin
 		self.addRSA(id_origin, publicRSA)
+		
+		return 'Succesfully Added'
 	
-	def deleteIndex(self, id_origin, connectingIp):
+	def deleteIndex(self, id_origin, ip_connecting):
 		'''
 			(Index, string) -> (boolean)
 			:delete the userid and ip found within the index and log JSON files
@@ -180,18 +182,20 @@ class Index(Node, linkerJSON.Handler):
 			@returns boolean true if the userid was sucessfuly deleted
 			@exception returns boolean false if any of the paramaters are not met
 		'''
-		loggedIP = self.lookupIndex(id_origin)
+		ip_is_logged = self.lookupIndex(id_origin)
 		
 		#check to see that if the userid exists (the ip will exist if the userid does)
-		if (loggedIP == ''):
-			return False
+		if (ip_is_logged == ''):
+			return '0'
 		#check to see that the ip-address matches the logged user-id
-		if (loggedIP != connectingIp):
-			return False
+		if (ip_is_logged != ip_connecting):
+			return '0'
 		
 		self.deleteRSA(id_origin)
 		self.index.pop(id_origin)
-		self.log.pop(connectingIp)
+		self.log.pop(ip_connecting)
+		
+		return 'Succesfully Deleted'
 	
 	def validateRelay(self, ip):
 		'''
@@ -223,23 +227,25 @@ class Index(Node, linkerJSON.Handler):
 			
 	def encryptPathwayAndExit(self):
 		'''
-			(Index) -> (string)
+			(Index) -> (string, string)
 			:creates a randomized path through the server relay nodes
 			
-			@returns a path of 4 node relays
+			@returns the first relay ip and a path of 4 node relays encrypted
 		'''
 		h = rsa.Handler()
 		activeRelays = self.log.keys()
 		
+		ip_first = ''
 		ip_previous = ''
-		for i in range(0, 4 ):
+		for i in range(0, 4):
 			random_index = random.randrange(0, len(activeRelays))
 			
 			if i > 0:
 				relay_ip = activeRelays.pop(random_index)
 				relay_encrypted = h.encrypt(relay_ip, self.lookupRSA(ip = ip_previous))
 			else:
-				relay_encrypted = activeRelays.pop(random_index)
+				ip_first = activeRelays.pop(random_index)
+				continue #skip to the begining of the loop
 			
 			pathway = pathway + ":" + relay_encrypted
 			ip_previous = relay_ip
@@ -250,7 +256,7 @@ class Index(Node, linkerJSON.Handler):
 				
 				exit = self.index['exit'][exitNode]['ip']
 		
-		return f'^{pathway}^@{exit}@'
+		return (ip_first, f'^{pathway}^@{exit}@')
 		
 	def encryptData(self, id_origin, message):
 		'''
@@ -282,7 +288,7 @@ class Index(Node, linkerJSON.Handler):
 			
 			request = p.getRequest()
 			data_first = p.getPrimaryData()
-			data_last = p.getSecondaryData()
+			data_second = p.getSecondaryData()
 		except:
 			return (False, '400') #error code 400: invalid request type
 		
@@ -293,16 +299,17 @@ class Index(Node, linkerJSON.Handler):
 			userid = self.lookupIP(data_first) #the first data is the ip
 			return (False, userid)
 		elif (request == '2'):
-			print(data_first)
-			print(data_last)
-			check = self.addIndex(data_first, data_last) #the first data is the userid, last is userip
+			data_third = p.getOtherData()[0]
+			check = self.addIndex(data_first, data_second, p.getOtherData()[0]) #the first data is the userid, second is publicRSA, last is userip
 			return (False, check)
 		elif (request == '3'):
-			check = self.deleteIndex(data_first, data_last) #the first data is the userid, last is userip
+			check = self.deleteIndex(data_first, data_second) #the first data is the userid, last is userip
 			return (False, check)
 		elif (request == '4'):
-			message = self.formatMessage(data_firt, data_last, p.getOtherData()[0])
-			self.send(connectingAddress, message)
+			data_third = p.getOtherData()[0]
+			message = self.formatMessage(data_firt, data_second, data_third)
+			check = self.send(message[0], message[1])
+			return (False, check)
 		
 		#the message has been handled by the generic implemented index requests
 		return (False, '400') #error code 400: invalid request type
