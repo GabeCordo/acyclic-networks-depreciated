@@ -10,8 +10,8 @@ n2 = Node(
 n2.settup()
 
 pk = n2.handler_keys.getPublicKey().decode()
-message = f'3:bob~127.0.0.1'
+message = f'8:bob'
 
 
-result = n2.send('127.0.0.1', message, 1052)
+result = n2.send('159.89.120.107', message, 8075)
 print(result)

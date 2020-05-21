@@ -17,7 +17,7 @@ from pynodetor.utils import errors, enums
 ###############################
 
 class Node:
-	def __init__(self, ip='', port='', ip_index=None, ip_backup=None,
+	def __init__(self, ip='', port=8075, ip_index=None, ip_backup=None,
 				 directory_key_private=None, directory_key_public=None,
 				 supports_encryption=True, supports_listening=True,
 				 supports_monitoring=True, supports_backup_ip=True):
@@ -154,6 +154,8 @@ class Node:
 			
 			message = ''.join(cyphertexts)
 			
+			print(f'Node: Received message: {message}') #debugging
+			
 			#allow child classes to manipulate the message
 			data_processed = self.specialFunctionality(message, addr[0])
 
@@ -163,6 +165,7 @@ class Node:
 					data_encoded = self.handler_keys.encrypt(data_processed[1], publicRSA)
 				else:
 					data_encoded = bytes(data_processed[1], 'utf-8')
+				print(f'Node: sent response {data_encoded}') #debugging
 				c.send(data_encoded)
 				
 			#append to the message queue if required for further functionality
@@ -271,7 +274,7 @@ class Node:
 					return response
 			except Exception as e:
 				#we need to check that the ip_target is not self.ip_backup to avoid going into a recursive infinite loop
-				if (ip_target != self.ip_backup and self.supports_backup_ip == True):
+				if (self.supports_backup_ip != None and ip_target != self.ip_backup):
 					self.send(self.ip_backup, message)
 				else:
 					outgoing.close()
