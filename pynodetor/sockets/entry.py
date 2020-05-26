@@ -15,7 +15,7 @@ from pynodetor.utils import errors, enums
 class NodeEntry(Node):
 	def __init__(self, ip, port, ip_index, ip_backup, directory_key_private, directory_key_public):
 		'''
-			(NodeEntry, string, string, string, string) -> None
+			(NodeEntry, string, string, string, string, boolean) -> None
 			
 			:constructor for the node entry class; provides all the connective
 			 functionality to begin routing messages or act as a middle-man for
@@ -23,6 +23,10 @@ class NodeEntry(Node):
 		'''
 		super().__init__(ip, port, ip_index, ip_backup, directory_key_private,
 						 directory_key_public, True, True, False, True) #ecryption, listening, monitoring
+		
+		#determines whether the message should be sent strait to the target-ip after
+		#being encrypted by the indexing node
+		self.simplified_network = False
 		
 	def checkDestination(self, id_origin):
 		'''
@@ -81,7 +85,12 @@ class NodeEntry(Node):
 			:formats the data into an advanced parsable bitsream request for
 			 transmitting messages
 		'''
-		return self.send(self.ip_index, f'4:{id_target}~{message}')
+		#process the relay-web ready string
+		message = self.send(self.ip_index, f'4:{id_target}~{message}')
+		data = message.split('%')
+		#send the message to the target or into the network and get a status code
+		check = self.send(data[0], data[1])
+		return check
 	
 	def specialFunctionality(self, message, connectingAddress):
 		'''
@@ -107,7 +116,7 @@ class NodeEntry(Node):
 			return (False, check)
 		#request to send a message
 		elif (request == '4'):
-			check = self.formatMessage(connectingAddress, data_first, data_last, b.getOtherData()[0])
+			message = self.formatMessage(connectingAddress, data_first, data_last, b.getOtherData()[0])
 			return (False, check)
 		#request to add index
 		elif (request == '2'):

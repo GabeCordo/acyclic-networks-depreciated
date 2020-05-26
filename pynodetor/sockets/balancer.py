@@ -59,7 +59,7 @@ class NodeBalancer(Node, linkerJSON.Handler):
 			self.synatxValidator(message) #will throw an error if invalid (hence, using try/catch)
 			entry = self.redirect()
 			#if the syntax is valid and we have a new entry node, send the message into the network
-			message_modified = message + f'/{connectingAddress}'
+			message_modified = message + f'~{connectingAddress}'
 			self.send(entry, message_modified)
 		except:
 			print(f'Console: Received bad reciept from {connectingAddress}')

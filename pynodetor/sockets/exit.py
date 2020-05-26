@@ -40,7 +40,7 @@ class NodeExit(Node):
 			@returns list with a simple bitsream 'request:message/origin_id' and
 					 the destination id
 		'''
-		return f'4:{message}/{origin}'
+		return f'4:{message}~{origin}'
 	
 	def specialFunctionality(self, message, connectingAddress):
 		'''(Node, string, string) -> (boolean)

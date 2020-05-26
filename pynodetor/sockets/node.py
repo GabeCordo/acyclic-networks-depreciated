@@ -349,12 +349,12 @@ class Node:
 		'''
 		if (self.supports_listening == True):
 			##settup and start the incoming socket##
-			self.thread_one.daemon = True # Daemonize thread (run in background)
+			self.thread_one.setDaemon(True) # Daemonize thread (run in background)
 			self.thread_one.start()
 		
 		if (self.supports_monitoring == True):
 			##settup and start the queue monitor##  
-			self.thread_two.daemon = True # Daemonize thread (run in background)
+			self.thread_two.setDaemon(True) # Daemonize thread (run in background)
 			self.thread_two.start()
 		
 		##settup the end-to-end encryption keys##

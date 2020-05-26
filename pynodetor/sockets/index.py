@@ -23,9 +23,10 @@ from pynodetor.utils import linkerJSON, errors, enums
 
 class Index(Node, linkerJSON.Handler):
 	def __init__(self, ip, port, directory_key_private, directory_key_public,
-				 directory_index, directory_log, directory_collected_keys):
+				 directory_index, directory_log, directory_collected_keys,
+				 simplified_network = False):
 		'''
-			(Index, string, string, string, string, string) -> None
+			(Index, string, string, string, string, string, boolean) -> None
 			:constructor method for the Index Class
 			
 			@paramaters a valid pathway(directory) for all the user-id 
@@ -41,6 +42,7 @@ class Index(Node, linkerJSON.Handler):
 		self.directory_log = directory_log
 		self.directory_collected_keys = directory_collected_keys
 		
+		self.simplified_network
 		self.index = self.data[0]
 		self.log = self.data[1]
 		
@@ -260,19 +262,31 @@ class Index(Node, linkerJSON.Handler):
 		
 	def encryptData(self, id_origin, message):
 		'''
-			(Index) -> (string)
+			(Index, string, string) -> (string)
 		'''
 		h = rsa.Handler()
 		encrypted_message = h.encrypt(message, self.lookupRSA(id_origin = id_origin))
-		return f'#{encrypted_message}#'
+		#send the encrypted data with the RSA of the reciever
+		return encrypted_message
 	
 	def formatMessage(self, id_target, message, id_origin):
 		'''
-			(Index) -> (string)
+			(Index, string, string, string) -> (string)
 		'''
 		message = self.encryptData(message)
 		route = self.encryptPathwayAndExit()
-		return data + route + f'<{id_origin}<>{id_target}>'
+		#send the next_ip and the bitstream readable only to the network
+		return (route[0], f'#{message}#{route}<{id_origin}<>{id_target}>')
+		
+	def formatMessageShort(self, id_target, message, id_origin):
+		'''
+			(Index, string, string, string) -> (string)
+		'''
+		ip_target = self.lookupIndex(id_target)
+		message = self.encryptData(id_origin, message)
+		#send the next_ip (target-ip since it is simplified network msg)
+		#and the message readable by the target
+		return (ip_target, f'4:{message}~{id_origin}')
 				
 	def specialFunctionality(self, message, connectingAddress):
 		'''
@@ -292,6 +306,7 @@ class Index(Node, linkerJSON.Handler):
 		except:
 			return (False, '400') #error code 400: invalid request type
 		
+		#check all the standard network requests
 		if (request == '0'):
 			address = self.lookupIndex(data_first) #the first data is the userid
 			return (False, address)
@@ -307,9 +322,11 @@ class Index(Node, linkerJSON.Handler):
 			return (False, check)
 		elif (request == '4'):
 			data_third = p.getOtherData()[0]
-			message = self.formatMessage(data_firt, data_second, data_third)
-			check = self.send(message[0], message[1])
-			return (False, check)
+			if (self.simplified_network):
+				message = self.formatMessageShort(data_first, data_second, data_third) #for simplified networks
+			else:
+				message = self.formatMessage(data_firt, data_second, data_third) #for complex networks
+			return (False, f'{message[0]}%{message[1]}')
 		
 		#the message has been handled by the generic implemented index requests
 		return (False, '400') #error code 400: invalid request type
