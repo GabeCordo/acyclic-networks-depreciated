@@ -2,7 +2,7 @@
 #		python imports
 ###############################
 import socket
-from time import sleep
+from time import sleep, time
 from sys import getsizeof
 from threading import Thread
 
@@ -132,20 +132,29 @@ class Node:
 					pre_message = b'None'
 				c.send(pre_message) #send the encryption key or None indiciating it's disabled
 				
+				time_first = time() #start timing the transfer time according to latency
+				
 				if (self.supports_encryption == True):
 					#receive the connectors public RSA key
 					publicRSA = c.recv(1024)
 					
 					print(f'Console: Recieved RSA: {publicRSA}') #console logging
 					
+				time_diff = time() - time_first #measure the latency time to compensate for when sending data 
 				
 				#receive the cypher text from the connector
 				i = 0
+				time_warning = time() #keep track of the start (we want to avoid going over ~3 seconds)
 				cyphertexts = [ c.recv(1024) ]
+				
+				#start receiving data from the sending socket
 				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
-					sleep(0.01)
+					sleep(time_diff)
 					cyphertexts.append(c.recv(1024))
-					print(f'Console: recieved: {cyphertexts[i]}')
+					#add the time needed to append the new message
+					time_warning = time_warning + time()
+					if (time_warning > 3.0):
+						c.close() #if time has exceeded ~3s terminate connection (avoid inf. loop)
 					i+=1
 				cyphertexts.pop() #remove the null terminating character
 				
@@ -223,12 +232,17 @@ class Node:
 				if (message == ''):
 					return '1'
 				
+				time_first = time() #start timing the transfer time according to latency 
+				
 				received_rsa_public = outgoing.recv(1024).decode()
 				print(f'Console: Received public_rsa {received_rsa_public}') #console logging
+				
+				time_diff = time() - time_first #measure the latency time to compensate for when sending data 
 				
 				key_pub_ours = self.handler_keys.getPublicKey()
 				if (received_rsa_public != 'None'):
 					outgoing.send(key_pub_ours) #send public key for any responses
+				
 				
 				message_lst = []
 				permited_char_len = 100 #the max number of chars allowed per bitstream (RSA maximum)
@@ -261,12 +275,12 @@ class Node:
 				
 				message_lst.append(b'<<') #add the message transfer terminator
 				
-				print('Console: Done preparing message') #console logging
+				print(f'Console: Done preparing message {message_lst}') #console logging
 				
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
 				for message_segment in message_lst:
-					sleep(0.01)
+					sleep(time_diff)
 					outgoing.send(message_segment)
 					
 				print('Console: Sent message') #console logging
@@ -274,7 +288,8 @@ class Node:
 				#we are going to receive a response code back from the user after this possibly indicating some status
 				#code or will 'spit out' some sort of data associated with the request
 				response_cyphered = outgoing.recv(1024)
-				if(received_rsa_public != 'None'):
+				if(received_rsa_public != 'None' and response_cyphered != b''):
+					print(f'Console: Recieved cypher: {response_cyphered}')
 					response = self.handler_keys.decrypt(response_cyphered)
 				else:
 					response = response_cyphered.decode()

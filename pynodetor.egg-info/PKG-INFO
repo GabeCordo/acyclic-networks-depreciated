@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: pynodetor
-Version: 1.1.5.3
+Version: 1.1.5.4
 Summary: A mid-weight framework for replicating tor entry, relay and exit nodes. Developed for programmers looking to provide highly-secure messaging/file transfer applications. Equipt with end-to-end encryption and anonymous server meshing.
 Home-page: https://github.com/GabeCordo/python-node-tor
 Author: Gabriel Cordovado
 Author-email: gabriel.cordovado@icloud.com
 License: MIT
-Download-URL: https://github.com/GabeCordo/python_node_tor/archive/v_1.1.5.3.tar.gz
+Download-URL: https://github.com/GabeCordo/python_node_tor/archive/v_1.1.5.4.tar.gz
 Description: # Python Node Tor
         *A mid-weight framework for replicating tor entry, relay and exit nodes. Developed for programmers looking to provide highly-secure messaging/file transfer applications. Equipt with end-to-end encryption and anonymous server meshing.*
         
