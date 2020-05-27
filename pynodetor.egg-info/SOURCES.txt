@@ -14,14 +14,12 @@ pynodetor/encryption/__init__.py
 pynodetor/encryption/rsa.py
 pynodetor/encryption/type.py
 pynodetor/sockets/__init__.py
-pynodetor/sockets/admin.py
 pynodetor/sockets/balancer.py
 pynodetor/sockets/entry.py
 pynodetor/sockets/exit.py
 pynodetor/sockets/index.py
 pynodetor/sockets/node.py
 pynodetor/sockets/relay.py
-pynodetor/sockets/test_entry.py
 pynodetor/utils/__init__.py
 pynodetor/utils/authenitcator.py
 pynodetor/utils/containers.py

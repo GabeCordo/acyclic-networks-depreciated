@@ -121,6 +121,8 @@ class Node:
 		while True:
 			c, addr = self.incoming.accept()
 			
+			print("Console: Received connection from {addr}")
+			
 			#send whether the node supports end-to-end encryption
 			if (self.supports_encryption == True):
 				pre_message = self.handler_keys.getPublicKey()
@@ -154,7 +156,7 @@ class Node:
 			
 			message = ''.join(cyphertexts)
 			
-			print(f'Node: Received message: {message}') #debugging
+			print(f'Console: Received message: {message}') #debugging
 			
 			#allow child classes to manipulate the message
 			data_processed = self.specialFunctionality(message, addr[0])

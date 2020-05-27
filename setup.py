@@ -8,7 +8,7 @@ longDescription = 'A mid-weight framework for replicating tor entry, relay and e
 setup(
 	name = 'pynodetor',
 	packages = find_packages(),
-	version = '1.1.4.1',
+	version = '1.1.5.1',
 	licence = 'MIT',
 	description = longDescription,
 	author = 'Gabriel Cordovado',
@@ -16,7 +16,7 @@ setup(
 	long_description = readme_description,
 	long_description_content_type = 'text/markdown',
 	url ='https://github.com/GabeCordo/python-node-tor',
-	download_url = 'https://github.com/GabeCordo/python-node-tor/archive/v_1.1.4.1.tar.gz',
+	download_url = 'https://github.com/GabeCordo/python_node_tor/archive/v_1.1.5.tar.gz',
 	keywords = ['TOR', 'SOCKETS', 'SECURITY', 'ENCRYPTION'],
 	install_requires = [
 		'cffi',

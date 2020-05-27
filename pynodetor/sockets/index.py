@@ -42,7 +42,7 @@ class Index(Node, linkerJSON.Handler):
 		self.directory_log = directory_log
 		self.directory_collected_keys = directory_collected_keys
 		
-		self.simplified_network
+		self.simplified_network = simplified_network
 		self.index = self.data[0]
 		self.log = self.data[1]
 		
