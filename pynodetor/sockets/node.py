@@ -118,65 +118,71 @@ class Node:
 		'''
 		self.incoming.bind((self.ip, self.port))
 		self.incoming.listen(10)
-		while True:
-			c, addr = self.incoming.accept()
-			
-			print("Console: Received connection from {addr}")
-			
-			#send whether the node supports end-to-end encryption
-			if (self.supports_encryption == True):
-				pre_message = self.handler_keys.getPublicKey()
-			else:
-				pre_message = b'None'
-			c.send(pre_message) #send the encryption key or None indiciating it's disabled
-			
-			if (self.supports_encryption == True):
-				#receive the connectors public RSA key
-				publicRSA = c.recv(1024)
-			
-			#receive the cypher text from the connector
-			i = 0
-			cyphertexts = [ c.recv(1024) ]
-			while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
-				sleep(0.0001)
-				cyphertexts.append(c.recv(1024))
-				i+=1
-			cyphertexts.pop() #remove the null terminating character
-			
-			#we want to decrypt the message only if encryption is enabled otherwise it is
-			#in plain-text and decrypting it will raise an error
-			if (self.supports_encryption == True):
-				#we need to individualy decrypt each message and then join it
-				for i in range(0, len(cyphertexts)):
-					cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
-			else:
-				#we need to individualy decode the utf-8 bitsream into plain text
-				for i in range(0, len(cyphertexts)):
-					cyphertexts[i] = cyphertexts[i].decode()
-			
-			message = ''.join(cyphertexts)
-			
-			print(f'Console: Received message: {message}') #debugging
-			
-			#allow child classes to manipulate the message
-			data_processed = self.specialFunctionality(message, addr[0])
-
-			#return the data to the user
-			if (data_processed[1] != ''):
+		
+		try:
+			while True:
+				c, addr = self.incoming.accept()
+				
+				print(f'Console: Received connection from {addr}') #console logging
+				
+				#send whether the node supports end-to-end encryption
 				if (self.supports_encryption == True):
-					data_encoded = self.handler_keys.encrypt(data_processed[1], publicRSA)
+					pre_message = self.handler_keys.getPublicKey()
 				else:
-					data_encoded = bytes(data_processed[1], 'utf-8')
-				print(f'Node: sent response {data_encoded}') #debugging
-				c.send(data_encoded)
+					pre_message = b'None'
+				c.send(pre_message) #send the encryption key or None indiciating it's disabled
 				
-			#append to the message queue if required for further functionality
-			if (data_processed[0]):
-				self.queue.append(message)
+				if (self.supports_encryption == True):
+					#receive the connectors public RSA key
+					publicRSA = c.recv(1024)
+					
+					print(f'Console: Recieved RSA: {publicRSA}') #console logging
+					
 				
-			#close the connection with the connector
-			c.close()
+				#receive the cypher text from the connector
+				i = 0
+				cyphertexts = [ c.recv(1024) ]
+				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
+					sleep(0.0001)
+					cyphertexts.append(c.recv(1024))
+					i+=1
+				cyphertexts.pop() #remove the null terminating character
+				
+				#we want to decrypt the message only if encryption is enabled otherwise it is
+				#in plain-text and decrypting it will raise an error
+				if (self.supports_encryption == True):
+					#we need to individualy decrypt each message and then join it
+					for i in range(0, len(cyphertexts)):
+						cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
+				else:
+					#we need to individualy decode the utf-8 bitsream into plain text
+					for i in range(0, len(cyphertexts)):
+						cyphertexts[i] = cyphertexts[i].decode()
+				
+				message = ''.join(cyphertexts)
+				
+				print(f'Console: Received message: {message}') #console logging
+				
+				#allow child classes to manipulate the message
+				data_processed = self.specialFunctionality(message, addr[0])
 
+				#return the data to the user
+				if (data_processed[1] != ''):
+					if (self.supports_encryption == True):
+						data_encoded = self.handler_keys.encrypt(data_processed[1], publicRSA)
+					else:
+						data_encoded = bytes(data_processed[1], 'utf-8')
+					print(f'Node: sent response {data_encoded}') #console logging
+					c.send(data_encoded)
+				
+				#append to the message queue if required for further functionality
+				if (data_processed[0]):
+					self.queue.append(message)
+					
+				#close the connection with the connector
+				c.close()
+		except Exception as e:
+			print(f'Console: ERRORED OUT {e}')
 	def close(self):
 		'''
 			(Node) -> None

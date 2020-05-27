@@ -13,5 +13,5 @@ pk = n2.handler_keys.getPublicKey().decode()
 message = f'8:bob'
 
 
-result = n2.send('159.89.120.107', message, 8075)
-print("test: " + result)
+result = n2.send('178.128.231.70', message, 8075)
+print(result)
