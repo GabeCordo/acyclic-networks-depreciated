@@ -154,8 +154,7 @@ class Node:
 					#add the time needed to append the new message
 					time_warning = time_warning + time()
 					if (time_warning > 10.0):
-						print('Console: We have exceeded 10 seconds')
-						c.close() #if time has exceeded ~10s terminate connection (avoid inf. loop)
+						raise TimeoutError('Console: We have exceeded a 10 second data transfer')
 					i+=1
 				cyphertexts.pop() #remove the null terminating character
 				
