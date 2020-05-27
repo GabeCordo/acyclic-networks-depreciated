@@ -143,8 +143,9 @@ class Node:
 				i = 0
 				cyphertexts = [ c.recv(1024) ]
 				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
-					sleep(0.0001)
+					sleep(0.01)
 					cyphertexts.append(c.recv(1024))
+					print(f'Console: recieved: {cyphertexts[i]}')
 					i+=1
 				cyphertexts.pop() #remove the null terminating character
 				
@@ -265,7 +266,7 @@ class Node:
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
 				for message_segment in message_lst:
-					sleep(0.0001)
+					sleep(0.01)
 					outgoing.send(message_segment)
 					
 				print('Console: Sent message') #console logging
