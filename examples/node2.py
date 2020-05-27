@@ -14,4 +14,4 @@ message = f'8:bob'
 
 
 result = n2.send('178.128.231.70', message, 8075)
-print(result)
+print("test: " + result)

@@ -148,12 +148,15 @@ class Node:
 					i+=1
 				cyphertexts.pop() #remove the null terminating character
 				
+				print(f'Console: Received cyphertext') #console logging
+				
 				#we want to decrypt the message only if encryption is enabled otherwise it is
 				#in plain-text and decrypting it will raise an error
 				if (self.supports_encryption == True):
 					#we need to individualy decrypt each message and then join it
 					for i in range(0, len(cyphertexts)):
 						cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
+						print(f'Console: added {cyphertexts[i]}')
 				else:
 					#we need to individualy decode the utf-8 bitsream into plain text
 					for i in range(0, len(cyphertexts)):
@@ -220,7 +223,8 @@ class Node:
 					return '1'
 				
 				received_rsa_public = outgoing.recv(1024).decode()
-
+				print(f'Console: Received public_rsa {received_rsa_public}') #console logging
+				
 				key_pub_ours = self.handler_keys.getPublicKey()
 				if (received_rsa_public != 'None'):
 					outgoing.send(key_pub_ours) #send public key for any responses
@@ -256,11 +260,15 @@ class Node:
 				
 				message_lst.append(b'<<') #add the message transfer terminator
 				
+				print('Console: Done preparing message') #console logging
+				
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
 				for message_segment in message_lst:
 					sleep(0.0001)
 					outgoing.send(message_segment)
+					
+				print('Console: Sent message') #console logging
 				
 				#we are going to receive a response code back from the user after this possibly indicating some status
 				#code or will 'spit out' some sort of data associated with the request
@@ -269,6 +277,8 @@ class Node:
 					response = self.handler_keys.decrypt(response_cyphered)
 				else:
 					response = response_cyphered.decode()
+				
+				print(f'Console: Received response: {response}') #console logging
 				
 				#if we receive a status code of '0' that means something went wrong
 				if (response == '400'):
@@ -281,6 +291,9 @@ class Node:
 					outgoing.close()
 					return response
 			except Exception as e:
+				
+				print(f'Console: Experienced Error {e}') #debugging
+				
 				#we need to check that the ip_target is not self.ip_backup to avoid going into a recursive infinite loop
 				if (self.supports_backup_ip != None and ip_target != self.ip_backup):
 					self.send(self.ip_backup, message)
