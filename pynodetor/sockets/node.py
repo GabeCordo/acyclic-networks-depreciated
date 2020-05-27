@@ -144,7 +144,7 @@ class Node:
 				
 				#receive the cypher text from the connector
 				i = 0
-				time_warning = time() #keep track of the start (we want to avoid going over ~3 seconds)
+				time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
 				cyphertexts = [ c.recv(1024) ]
 				
 				#start receiving data from the sending socket
@@ -153,8 +153,9 @@ class Node:
 					cyphertexts.append(c.recv(1024))
 					#add the time needed to append the new message
 					time_warning = time_warning + time()
-					if (time_warning > 3.0):
-						c.close() #if time has exceeded ~3s terminate connection (avoid inf. loop)
+					if (time_warning > 10.0):
+						print('Console: We have exceeded 10 seconds')
+						c.close() #if time has exceeded ~10s terminate connection (avoid inf. loop)
 					i+=1
 				cyphertexts.pop() #remove the null terminating character
 				
