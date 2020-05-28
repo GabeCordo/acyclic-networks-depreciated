@@ -133,14 +133,17 @@ class Node:
 				c.send(pre_message) #send the encryption key or None indiciating it's disabled
 				
 				time_first = time() #start timing the transfer time according to latency
-				
 				if (self.supports_encryption == True):
 					#receive the connectors public RSA key
 					publicRSA = c.recv(1024)
 					
 					print(f'Console: Recieved RSA: {publicRSA}') #console logging
-					
-				time_diff = time() - time_first #measure the latency time to compensate for when sending data 
+
+				##measure the latency time to compensate for when sending data
+				time_diff = time() - time_first - 0.002 #tested that the server is 80% of the time 0.02 seconds slower, cause of the if statement
+				if (time_diff < 0):
+					time_diff = 0.001
+				print(f'Console: time difference - {time_diff}')
 				
 				#receive the cypher text from the connector
 				i = 0
@@ -152,13 +155,15 @@ class Node:
 					sleep(time_diff)
 					cyphertexts.append(c.recv(1024))
 					#add the time needed to append the new message
-					time_warning = time_warning + time()
-					if (time_warning > 10.0):
-						raise TimeoutError('Console: We have exceeded a 10 second data transfer')
+					print(time_warning)
+					if ((time() - time_warning) > 10.0):
+						break;
+					temp = cyphertexts[i]
+					print(f'Console: recieved cypher - {temp}')
 					i+=1
 				cyphertexts.pop() #remove the null terminating character
 				
-				print(f'Console: Received cyphertext') #console logging
+				print(f'Console: Received cyphertext {cyphertexts}') #console logging
 				
 				#we want to decrypt the message only if encryption is enabled otherwise it is
 				#in plain-text and decrypting it will raise an error
@@ -238,6 +243,7 @@ class Node:
 				print(f'Console: Received public_rsa {received_rsa_public}') #console logging
 				
 				time_diff = time() - time_first #measure the latency time to compensate for when sending data 
+				print(f'Console: time difference - {time_diff}')
 				
 				key_pub_ours = self.handler_keys.getPublicKey()
 				if (received_rsa_public != 'None'):

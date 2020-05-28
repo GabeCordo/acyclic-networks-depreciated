@@ -24,13 +24,9 @@ class NodeEntry(Node):
 		super().__init__(ip, port, ip_index, ip_backup, directory_key_private,
 						 directory_key_public, True, True, False, True) #ecryption, listening, monitoring
 		
-		#determines whether the message should be sent strait to the target-ip after
-		#being encrypted by the indexing node
-		self.simplified_network = False
-		
-	def checkDestination(self, id_origin):
+	def checkDestination(self, bitstream, id_origin):
 		'''
-			(Node) -> (string)
+			(NodeEntry, string, string) -> (string)
 			:retrieves the ip-address of the userid inputed from the index server
 			
 			@returns the string representation of the ip-address associated with
@@ -38,12 +34,11 @@ class NodeEntry(Node):
 			@exception if the connection is lost or the userid is invalid, returns
 					 an empty string
 		'''
-		request = f'0:{id_origin}'
-		return self.send(self.ip_index, request) #settup ip and port of indexing server
+		return self.send(self.ip_index, bitstream) #settup ip and port of indexing server
 	
-	def indexUserID(self, id_origin, ip_connecting):
+	def indexUserID(self, bitstream, id_origin, ip_connecting):
 		'''
-			(NodeEntry, string, string) -> (boolean)
+			(NodeEntry, string, string, string) -> (boolean)
 			:add a new userid and ip-address match on the indexing node for
 			 transmission
 			
@@ -52,12 +47,11 @@ class NodeEntry(Node):
 			@returns a boolean true if the userid was added to the indexing node
 			@exception returns boolean false if the userid or ip is already used
 		'''
-		request = f'2:{id_origin}~{ip_connecting}'
-		return self.send(self.ip_index, request)
+		return self.send(self.ip_index, bitstream)
 
-	def deindexUserID(self, id_origin, ip_connecting):
+	def deindexUserID(self, bitstream, id_origin, ip_connecting):
 		'''
-			(NodeEntry, string, string) -> (boolean)
+			(NodeEntry, string, string, string) -> (boolean)
 			:remove a userid and ip-address match on the indexing node
 			
 			@paramaters the userid must be valid and the ip must be associated
@@ -66,27 +60,26 @@ class NodeEntry(Node):
 					 node
 			@exception returns boolean false if the paramaters were invalid
 		'''
-		request = f'3:{id_origin}~{ip_connecting}'
-		return self.send(self.ip_index, request)
+		return self.send(self.ip_index, bitstream)
 		
-	def useridOfAddress(self, ip):
+	def useridOfAddress(self, bitstream, ip):
 		'''
-			(NodeEntry, string) -> (string)
+			(NodeEntry, string, string) -> (string)
 			:finds the associated id with the connecting ip address
 			
 			** this is a private function, it is important only the
 			   entry node has this functionality					 **
 		'''
-		return self.send(self.ip_index, f'1:{ip}')
+		return self.send(self.ip_index, bitstream)
 		
-	def formatMessage(self, id_target, message, id_origin):
+	def formatMessage(self, bitstream, id_target, message, id_origin):
 		'''
-			(NodeEntry) -> None
+			(NodeEntry, string, string, string, string) -> None
 			:formats the data into an advanced parsable bitsream request for
 			 transmitting messages
 		'''
 		#process the relay-web ready string
-		message = self.send(self.ip_index, f'4:{id_target}~{message}')
+		message = self.send(self.ip_index, bitstream)
 		data = message.split('%')
 		#send the message to the target or into the network and get a status code
 		check = self.send(data[0], data[1])
@@ -106,25 +99,30 @@ class NodeEntry(Node):
 			b = basic.Parser(message)
 			request = b.getRequest()
 			data_first = b.getPrimaryData()
-			data_last = b.getSecondaryData()
+			data_second = b.getSecondaryData()
+			
+			#check to see if the message has been run through a balancer which appends the origin-ip to a third
+			#spot, ELSE, append it (this might be the case when using a simplified network
+			if (len(b.getOtherData()) == 0):
+				message = message + f'~{connectingAddress}'
 		except:
 			return (False, '')
 		
 		#request to lookup index (most likely)
 		if (request == '0'):
-			check = self.checkDestination(data)
+			check = self.checkDestination(message, data_first)
 			return (False, check)
 		#request to send a message
 		elif (request == '4'):
-			message = self.formatMessage(connectingAddress, data_first, data_last, b.getOtherData()[0])
+			message = self.formatMessage(message, connectingAddress, data_first, data_second, b.getOtherData()[0])
 			return (False, check)
 		#request to add index
 		elif (request == '2'):
-			check = self.indexUserID(data_fist, data_last) #data_first: userid | data_last: userip
+			check = self.indexUserID(message, data_first, data_second) #data_first: userid | data_second: userip
 			return (False, check)
 		#request to delete index (least likely)
 		elif (request == '3'):
-			check = self.deindexUserID(data_first, data_last) #data_first: userid | data_last: userip
+			check = self.deindexUserID(message, data_first, data_second) #data_first: userid | data_second: userip
 			return (False, check)
 		
 		#the message has been handled automaticly, there is no need to enqueue

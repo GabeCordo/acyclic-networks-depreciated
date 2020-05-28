@@ -38,6 +38,8 @@ class Handler:
 		##instance variables
 		self._privateKey = ''
 		self._publicKey = ''
+		
+		self.restoreKeySet()
 	
 	def getPublicKey(self):
 		'''
@@ -78,15 +80,15 @@ class Handler:
 		if (self.directory_key_private != None):
 			#Open the file containing the private key and store in the class instance variable
 			try:
-				keyPrivate = open(self.directory_key_private, 'rb').read()
-				self._privateKey = RSA.importKey(keyPrivate)
+				key_private = open(self.directory_key_private, 'rb')
+				self._privateKey = key_private.read()
 			except:
 				raise Exception(f'There was a problem restoring the private key: check if the directoryKeyPrivate path is valid or that the file is not empty')
 		if (self.directory_key_public != None):
 			#Open the file containing the public key and store in the class instance variable
 			try:
-				keyPublic = open(self.directory_key_public, 'rb').read()
-				self._publicKey = RSA.import_key(keyPublic)
+				key_public = open(self.directory_key_public, 'rb')
+				self._publicKey = key_public.read()
 			except:
 				raise Exception(f'There was a problem restoring the public key: check if the directoryKeyPublic path is valid or that the file is not empty')
 	

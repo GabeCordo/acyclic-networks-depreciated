@@ -314,7 +314,10 @@ class Index(Node, linkerJSON.Handler):
 			userid = self.lookupIP(data_first) #the first data is the ip
 			return (False, userid)
 		elif (request == '2'):
+			print("oi")
+			print(p.getOtherData())
 			data_third = p.getOtherData()[0]
+			print("io")
 			check = self.addIndex(data_first, data_second, p.getOtherData()[0]) #the first data is the userid, second is publicRSA, last is userip
 			return (False, check)
 		elif (request == '3'):
