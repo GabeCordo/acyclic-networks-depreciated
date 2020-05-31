@@ -130,77 +130,83 @@ class Node:
 					pre_message = self.handler_keys.getPublicKey()
 				else:
 					pre_message = b'None'
+					
+				time_first = time() #start timing the transfer time according to latency	
+				
 				c.send(pre_message) #send the encryption key or None indiciating it's disabled
 				
-				time_first = time() #start timing the transfer time according to latency
+				##measure the latency time to compensate for when sending data
+				time_diff = time() - time_first
+				print(f'Console: time difference - {time_diff}')
+				
 				if (self.supports_encryption == True):
 					#receive the connectors public RSA key
 					publicRSA = c.recv(1024)
 					
 					print(f'Console: Recieved RSA: {publicRSA}') #console logging
-
-				##measure the latency time to compensate for when sending data
-				time_diff = time() - time_first - 0.002 #tested that the server is 80% of the time 0.02 seconds slower, cause of the if statement
-				if (time_diff < 0):
-					time_diff = 0.001
-				print(f'Console: time difference - {time_diff}')
 				
 				#receive the cypher text from the connector
 				i = 0
 				time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
-				cyphertexts = [ c.recv(1024) ]
+				cyphertexts = [c.recv(1024)]
 				
+				DIDNT_EXCEEDED_TIME = True
 				#start receiving data from the sending socket
 				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
 					sleep(time_diff)
 					cyphertexts.append(c.recv(1024))
+					print(time() - time_warning) #debugging
 					#add the time needed to append the new message
-					print(time_warning)
-					if ((time() - time_warning) > 10.0):
+					if ((time() - time_warning) > 5.0):
+						DIDNT_EXCEEDED_TIME = False
 						break;
 					temp = cyphertexts[i]
-					print(f'Console: recieved cypher - {temp}')
 					i+=1
-				cyphertexts.pop() #remove the null terminating character
-				
-				print(f'Console: Received cyphertext {cyphertexts}') #console logging
-				
-				#we want to decrypt the message only if encryption is enabled otherwise it is
-				#in plain-text and decrypting it will raise an error
-				if (self.supports_encryption == True):
-					#we need to individualy decrypt each message and then join it
-					for i in range(0, len(cyphertexts)):
-						cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
-						print(f'Console: added {cyphertexts[i]}')
-				else:
-					#we need to individualy decode the utf-8 bitsream into plain text
-					for i in range(0, len(cyphertexts)):
-						cyphertexts[i] = cyphertexts[i].decode()
-				
-				message = ''.join(cyphertexts)
-				
-				print(f'Console: Received message: {message}') #console logging
-				
-				#allow child classes to manipulate the message
-				data_processed = self.specialFunctionality(message, addr[0])
-
-				#return the data to the user
-				if (data_processed[1] != ''):
+					
+				if (DIDNT_EXCEEDED_TIME):
+					
+					cyphertexts.pop() #remove the null terminating character
+					
+					print(f'Console: Received cyphertext {cyphertexts}') #console logging
+					
+					#we want to decrypt the message only if encryption is enabled otherwise it is
+					#in plain-text and decrypting it will raise an error
 					if (self.supports_encryption == True):
-						data_encoded = self.handler_keys.encrypt(data_processed[1], publicRSA)
+						#we need to individualy decrypt each message and then join it
+						for i in range(0, len(cyphertexts)):
+							cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
+							print(f'Console: added {cyphertexts[i]}')
 					else:
-						data_encoded = bytes(data_processed[1], 'utf-8')
-					print(f'Node: sent response {data_encoded}') #console logging
-					c.send(data_encoded)
-				
-				#append to the message queue if required for further functionality
-				if (data_processed[0]):
-					self.queue.append(message)
+						#we need to individualy decode the utf-8 bitsream into plain text
+						for i in range(0, len(cyphertexts)):
+							cyphertexts[i] = cyphertexts[i].decode()
+					
+					message = ''.join(cyphertexts)
+					
+					print(f'Console: Received message: {message}') #console logging
+					
+					#allow child classes to manipulate the message
+					data_processed = self.specialFunctionality(message, addr[0])
+
+					#return the data to the user
+					if (data_processed[1] != ''):
+						if (self.supports_encryption == True):
+							data_encoded = self.handler_keys.encrypt(data_processed[1], publicRSA)
+						else:
+							data_encoded = bytes(data_processed[1], 'utf-8')
+						print(f'Node: sent response {data_encoded}') #console logging
+						c.send(data_encoded)
+					
+					#append to the message queue if required for further functionality
+					if (data_processed[0]):
+						self.queue.append(message)
 					
 				#close the connection with the connector
 				c.close()
+				
 		except Exception as e:
 			print(f'Console: ERRORED OUT {e}')
+
 	def close(self):
 		'''
 			(Node) -> None
@@ -230,20 +236,21 @@ class Node:
 				#the one given upon class declaration (option: send to a diff network)
 				if (port == ''):
 					port = self.port
+				
+				time_first = time() #start timing the transfer time according to latency 
+				
 				outgoing.connect((ip_target, port)) #all outgoing requests are sent on port 8075
+				
+				time_diff = time() - time_first #measure the latency time to compensate for when sending data 
+				print(f'Console: time difference - {time_diff}')
 				
 				#if we leave the string empty we are asking for a simple ping of the listening
 				#server so if we establish connection return '1' and end everything else
 				if (message == ''):
 					return '1'
 				
-				time_first = time() #start timing the transfer time according to latency 
-				
 				received_rsa_public = outgoing.recv(1024).decode()
 				print(f'Console: Received public_rsa {received_rsa_public}') #console logging
-				
-				time_diff = time() - time_first #measure the latency time to compensate for when sending data 
-				print(f'Console: time difference - {time_diff}')
 				
 				key_pub_ours = self.handler_keys.getPublicKey()
 				if (received_rsa_public != 'None'):

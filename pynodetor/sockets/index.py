@@ -116,6 +116,7 @@ class Index(Node, linkerJSON.Handler):
 			if (id_origin != None):
 				self.lookupIndex(id_origin)
 			
+			test = self.index[id_origin]['rsa']
 			f = open(self.index[id_origin]['rsa'], 'rb')
 			key = f.read()
 			f.close()
@@ -264,8 +265,13 @@ class Index(Node, linkerJSON.Handler):
 		'''
 			(Index, string, string) -> (string)
 		'''
+		print("\ntest1\n")
 		h = rsa.Handler()
-		encrypted_message = h.encrypt(message, self.lookupRSA(id_origin = id_origin))
+		print("\ntest2\n")
+		rsa_temp = self.lookupRSA(id_origin)
+		print(f'TESTING THIS IS THE RSA: {rsa_temp}')
+		encrypted_message = h.encrypt(message, rsa_temp)
+		print("\ntest3\n")
 		#send the encrypted data with the RSA of the reciever
 		return encrypted_message
 	

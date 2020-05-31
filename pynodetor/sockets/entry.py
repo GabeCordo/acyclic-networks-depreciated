@@ -72,7 +72,7 @@ class NodeEntry(Node):
 		'''
 		return self.send(self.ip_index, bitstream)
 		
-	def formatMessage(self, bitstream, id_target, message, id_origin):
+	def formatMessage(self, bitstream, id_target, message):
 		'''
 			(NodeEntry, string, string, string, string) -> None
 			:formats the data into an advanced parsable bitsream request for
@@ -81,6 +81,7 @@ class NodeEntry(Node):
 		#process the relay-web ready string
 		message = self.send(self.ip_index, bitstream)
 		data = message.split('%')
+		print(data) #debugging
 		#send the message to the target or into the network and get a status code
 		check = self.send(data[0], data[1])
 		return check
@@ -98,6 +99,7 @@ class NodeEntry(Node):
 		try:
 			b = basic.Parser(message)
 			request = b.getRequest()
+			
 			data_first = b.getPrimaryData()
 			data_second = b.getSecondaryData()
 			
@@ -114,7 +116,7 @@ class NodeEntry(Node):
 			return (False, check)
 		#request to send a message
 		elif (request == '4'):
-			message = self.formatMessage(message, connectingAddress, data_first, data_second, b.getOtherData()[0])
+			message = self.formatMessage(message, data_first, data_second) #data_first: target_id | data_second: data
 			return (False, check)
 		#request to add index
 		elif (request == '2'):
