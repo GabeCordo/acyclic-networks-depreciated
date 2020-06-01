@@ -11,10 +11,11 @@ n2.settup()
 
 pk = n2.handler_keys.getPublicKey().decode()
 print(pk)
-message = f'8:bob'
+message1 = f'2:bob~{pk[6:]}~127.0.0.1'
+message2 = f'3:bob~127.0.0.1'
 
 
-#result = n2.send('178.128.231.70', message, 8075)
-#print(result)
+result = n2.send('127.0.0.1', message1, 1052)
+print(result)
 
 print(n2.handler_keys.getPublicKey())

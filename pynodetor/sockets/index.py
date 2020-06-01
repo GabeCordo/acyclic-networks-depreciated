@@ -89,7 +89,8 @@ class Index(Node, linkerJSON.Handler):
 				** files created with the formated (userid).pem **
 		'''
 		try:
-			f = open(self.index[id_origin]['rsa'], 'wb')
+			print(f'\n NEW \n {rsa_public}')
+			f = open(self.index[id_origin]['rsa'], 'w')
 			f.write(rsa_public)
 			f.close()
 		except:

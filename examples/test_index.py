@@ -12,7 +12,18 @@ index = Index(
 	)
 index.settup()
 
+NOT_DONE_BEFORE = True
+
 while True:
 		
 		sleep(0.01) #stop the cpu from constantly running at 100% cpu
 		#keep the program running to test the listener
+		
+		if (NOT_DONE_BEFORE):
+			try:
+				key = index.lookupRSA(id_origin = 'bob')
+				cypher = index.handler_keys.encrypt('testing', key)
+				print(cypher)
+				NOT_DONE_BEFORE = False
+			except:
+				print("FUCK")

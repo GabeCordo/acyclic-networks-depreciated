@@ -119,11 +119,12 @@ class Node:
 		self.incoming.bind((self.ip, self.port))
 		self.incoming.listen(10)
 		
-		try:
-			while True:
-				c, addr = self.incoming.accept()
-				
-				print(f'Console: Received connection from {addr}') #console logging
+		while True:
+			
+			c, addr = self.incoming.accept()
+			print(f'Console: Received connection from {addr}') #console logging
+			
+			try:
 				
 				#send whether the node supports end-to-end encryption
 				if (self.supports_encryption == True):
@@ -200,12 +201,13 @@ class Node:
 					#append to the message queue if required for further functionality
 					if (data_processed[0]):
 						self.queue.append(message)
-					
-				#close the connection with the connector
-				c.close()
 				
-		except Exception as e:
-			print(f'Console: ERRORED OUT {e}')
+			except Exception as e:
+
+				print(f'Console: ERRORED OUT {e}')
+			
+			#close the connection with the connector
+			c.close()
 
 	def close(self):
 		'''
