@@ -89,7 +89,6 @@ class Index(Node, linkerJSON.Handler):
 				** files created with the formated (userid).pem **
 		'''
 		try:
-			print(f'\n NEW \n {rsa_public}')
 			f = open(self.index[id_origin]['rsa'], 'w')
 			f.write(rsa_public)
 			f.close()
@@ -162,14 +161,14 @@ class Index(Node, linkerJSON.Handler):
 		'''
 		#check to see if the userid already exists
 		if (self.lookupIndex(id_origin) != ''):
-			return '0'
+			return 'Already Indexed'
 		#check to see if the ipaddress already has an id assigned
 		if (self.lookupIP(ip_connecting) != ''):
-			return '0'
+			return 'Already Has IP'
 		
 		self.index[id_origin] = {
 			'ip': ip_connecting,
-			'rsa': self.directory_collected_keys + f'/{id_origin}.pem'
+			'rsa': self.directory_collected_keys + f'{id_origin}.pem'
 		}
 		self.log[ip_connecting] =  id_origin
 		self.addRSA(id_origin, publicRSA)
@@ -266,13 +265,9 @@ class Index(Node, linkerJSON.Handler):
 		'''
 			(Index, string, string) -> (string)
 		'''
-		print("\ntest1\n")
-		h = rsa.Handler()
-		print("\ntest2\n")
 		rsa_temp = self.lookupRSA(id_origin)
-		print(f'TESTING THIS IS THE RSA: {rsa_temp}')
-		encrypted_message = h.encrypt(message, rsa_temp)
-		print("\ntest3\n")
+		print(message)
+		encrypted_message = self.handler_keys.encrypt(message, rsa_temp)
 		#send the encrypted data with the RSA of the reciever
 		return encrypted_message
 	
@@ -313,6 +308,8 @@ class Index(Node, linkerJSON.Handler):
 		except:
 			return (False, '400') #error code 400: invalid request type
 		
+		print(self.index)
+		
 		#check all the standard network requests
 		if (request == '0'):
 			address = self.lookupIndex(data_first) #the first data is the userid
@@ -321,11 +318,9 @@ class Index(Node, linkerJSON.Handler):
 			userid = self.lookupIP(data_first) #the first data is the ip
 			return (False, userid)
 		elif (request == '2'):
-			print("oi")
-			print(p.getOtherData())
 			data_third = p.getOtherData()[0]
-			print("io")
-			check = self.addIndex(data_first, data_second, p.getOtherData()[0]) #the first data is the userid, second is publicRSA, last is userip
+			check = self.addIndex(data_first, data_second, data_third) #the first data is the userid, second is publicRSA, last is userip
+			print(f'CHECK: {check}')
 			return (False, check)
 		elif (request == '3'):
 			check = self.deleteIndex(data_first, data_second) #the first data is the userid, last is userip

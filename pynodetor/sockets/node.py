@@ -103,6 +103,16 @@ class Node:
 		'''
 		return (True, '0') #by default we wan't it to queue all the requests
 	
+	def specialFunctionalityError(self, status):
+		'''
+			(string) -> (string)
+			:child classes can overide this function to offer special functionality
+			 to processing and re-writting the errors processed by the node
+			
+			@returns a string representing a processed error code
+		'''
+		return (status)
+	
 	def listen(self):
 		'''
 			(Node, int) -> None
@@ -131,80 +141,100 @@ class Node:
 					pre_message = self.handler_keys.getPublicKey()
 				else:
 					pre_message = b'None'
-					
-				time_first = time() #start timing the transfer time according to latency	
-				
-				c.send(pre_message) #send the encryption key or None indiciating it's disabled
-				
-				##measure the latency time to compensate for when sending data
-				time_diff = time() - time_first
-				print(f'Console: time difference - {time_diff}')
+				c.send(pre_message) ##send the encryption key or None indiciating it's disabled
 				
 				if (self.supports_encryption == True):
 					#receive the connectors public RSA key
 					publicRSA = c.recv(1024)
-					
-					print(f'Console: Recieved RSA: {publicRSA}') #console logging
 				
 				#receive the cypher text from the connector
-				i = 0
 				time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
-				cyphertexts = [c.recv(1024)]
 				
-				DIDNT_EXCEEDED_TIME = True
+				time_first = time() #start timing the transfer time according to latency	
+				cyphertexts = [c.recv(1024)]
+				time_diff = time() - time_first #measure the latency time to compensate for when sending data
+				print(f'Console: Time difference - {time_diff}')
+				i = 0
+
 				#start receiving data from the sending socket
 				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
-					sleep(time_diff)
+				
+					sleep(0.01)
 					cyphertexts.append(c.recv(1024))
-					print(time() - time_warning) #debugging
-					#add the time needed to append the new message
+					
+					#ensure data collection has not exceeded 5 seconds
 					if ((time() - time_warning) > 5.0):
-						DIDNT_EXCEEDED_TIME = False
-						break;
-					temp = cyphertexts[i]
+						raise TimeoutError('Data Transfer Exceeded 5 seconds')
 					i+=1
+				
+				cyphertexts.pop() #remove the null terminating character
+				
+				#we want to decrypt the message only if encryption is enabled otherwise it is
+				#in plain-text and decrypting it will raise an error
+				if (self.supports_encryption == True):
+					#we need to individualy decrypt each message and then join it
+					for i in range(0, len(cyphertexts)):
+						cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
+				else:
+					#we need to individualy decode the utf-8 bitsream into plain text
+					for i in range(0, len(cyphertexts)):
+						cyphertexts[i] = cyphertexts[i].decode()
 					
-				if (DIDNT_EXCEEDED_TIME):
-					
-					cyphertexts.pop() #remove the null terminating character
-					
-					print(f'Console: Received cyphertext {cyphertexts}') #console logging
-					
-					#we want to decrypt the message only if encryption is enabled otherwise it is
-					#in plain-text and decrypting it will raise an error
-					if (self.supports_encryption == True):
-						#we need to individualy decrypt each message and then join it
-						for i in range(0, len(cyphertexts)):
-							cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
-							print(f'Console: added {cyphertexts[i]}')
-					else:
-						#we need to individualy decode the utf-8 bitsream into plain text
-						for i in range(0, len(cyphertexts)):
-							cyphertexts[i] = cyphertexts[i].decode()
-					
-					message = ''.join(cyphertexts)
-					
-					print(f'Console: Received message: {message}') #console logging
-					
-					#allow child classes to manipulate the message
-					data_processed = self.specialFunctionality(message, addr[0])
+				message = ''.join(cyphertexts)
+				
+				#allow child classes to manipulate the message
+				data_processed = self.specialFunctionality(message, addr[0])
 
-					#return the data to the user
-					if (data_processed[1] != ''):
-						if (self.supports_encryption == True):
-							data_encoded = self.handler_keys.encrypt(data_processed[1], publicRSA)
-						else:
-							data_encoded = bytes(data_processed[1], 'utf-8')
-						print(f'Node: sent response {data_encoded}') #console logging
-						c.send(data_encoded)
+				#return the data to the user
+				if (data_processed[1] != '0'):
 					
-					#append to the message queue if required for further functionality
-					if (data_processed[0]):
-						self.queue.append(message)
+					data_processed_lst = []
+					permited_char_len = 100 #the max number of chars allowed per bitstream (RSA maximum)
+					
+					#prepare the message we are going to send to the 
+					if(self.supports_encryption == True):
+						
+						#if encryption is enabled, cypher it with the recieved public rsa
+						#we need to make sure the byte size of the string being encrypted does not grow > than 250
+						remaining_chars = permited_char_len
+						
+						while ((len(data_processed[1]) - len(data_processed_lst)*permited_char_len) > permited_char_len): #repeat untill the len is less than 150 chars
+							#for visibility we will throw this into temp vars
+							beggining = remaining_chars - permited_char_len
+							end = remaining_chars
+							
+							#encrypt and append to the list of message segments to send that are encrypted
+							temp = self.handler_keys.encrypt(data_processed[1][beggining:end], publicRSA)
+							data_processed_lst.append(temp)
+							
+							#append the number of chars that remain within the message
+							remaining_chars+=permited_char_len
+						
+						#append the final part of the message to the list
+						beggining = remaining_chars - permited_char_len
+						temp = self.handler_keys.encrypt(data_processed[1][beggining:], publicRSA)
+						data_processed_lst.append(temp)
+							
+					else:
+						
+						data_processed_lst.append(bytes(data_processed[1], 'utf-8'))
+					
+					data_processed_lst.append(b'<<') #add the message transfer terminator
+					
+					#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
+					#already be in this form, and won't be able to be sent
+					for data_segment in data_processed_lst:
+						sleep(0.01)
+						c.send(data_segment)
+					
+				#append to the message queue if required for further functionality
+				if (data_processed[0]):
+					self.queue.append(message)
 				
 			except Exception as e:
-
-				print(f'Console: ERRORED OUT {e}')
+				
+				proccessed_error = self.specialFunctionalityError(e)
+				print(f'Console: ERRORED OUT {proccessed_error}')
 			
 			#close the connection with the connector
 			c.close()
@@ -239,12 +269,10 @@ class Node:
 				if (port == ''):
 					port = self.port
 				
-				time_first = time() #start timing the transfer time according to latency 
-				
+				time_first = time() #start timing the transfer time according to latency
 				outgoing.connect((ip_target, port)) #all outgoing requests are sent on port 8075
-				
 				time_diff = time() - time_first #measure the latency time to compensate for when sending data 
-				print(f'Console: time difference - {time_diff}')
+				print(f'Console: Time difference - {time_diff}')
 				
 				#if we leave the string empty we are asking for a simple ping of the listening
 				#server so if we establish connection return '1' and end everything else
@@ -252,17 +280,15 @@ class Node:
 					return '1'
 				
 				received_rsa_public = outgoing.recv(1024).decode()
-				print(f'Console: Received public_rsa {received_rsa_public}') #console logging
 				
 				key_pub_ours = self.handler_keys.getPublicKey()
 				if (received_rsa_public != 'None'):
 					outgoing.send(key_pub_ours) #send public key for any responses
 				
-				
 				message_lst = []
 				permited_char_len = 100 #the max number of chars allowed per bitstream (RSA maximum)
 				
-				#prepare the message we are going to send to the 
+				#prepare the message we are going to send to the
 				if(received_rsa_public != 'None'):
 					#if encryption is enabled, cypher it with the recieved public rsa
 					#we need to make sure the byte size of the string being encrypted does not grow > than 250
@@ -290,29 +316,50 @@ class Node:
 				
 				message_lst.append(b'<<') #add the message transfer terminator
 				
-				print(f'Console: Done preparing message {message_lst}') #console logging
-				
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
 				for message_segment in message_lst:
-					sleep(time_diff)
+					sleep(0.01)
 					outgoing.send(message_segment)
-					
-				print('Console: Sent message') #console logging
 				
 				#we are going to receive a response code back from the user after this possibly indicating some status
 				#code or will 'spit out' some sort of data associated with the request
-				response_cyphered = outgoing.recv(1024)
-				if(received_rsa_public != 'None' and response_cyphered != b''):
-					print(f'Console: Recieved cypher: {response_cyphered}')
-					response = self.handler_keys.decrypt(response_cyphered)
-				else:
-					response = response_cyphered.decode()
 				
-				print(f'Console: Received response: {response}') #console logging
+				#receive the cypher text from the connector
+				time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
+				
+				cyphertexts = [outgoing.recv(1024)]
+				i = 0
+
+				#start receiving data from the sending socket
+				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
+				
+					sleep(0.01)
+					cyphertexts.append(outgoing.recv(1024))
+					
+					#ensure data collection has not exceeded 5 seconds
+					if ((time() - time_warning) > 5.0):
+						raise TimeoutError('Data Transfer Exceeded 5 seconds')
+					
+					i+=1
+					
+				cyphertexts.pop() #remove the null terminating character
+				
+				#we want to decrypt the message only if encryption is enabled otherwise it is
+				#in plain-text and decrypting it will raise an error
+				if (received_rsa_public != 'None'):
+					#we need to individualy decrypt each message and then join it
+					for i in range(0, len(cyphertexts)):
+						cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
+				else:
+					#we need to individualy decode the utf-8 bitsream into plain text
+					for i in range(0, len(cyphertexts)):
+						cyphertexts[i] = cyphertexts[i].decode()
+					
+				response = ''.join(cyphertexts) #join the decoded cyphertexts
 				
 				#if we receive a status code of '0' that means something went wrong
-				if (response == '400'):
+				if (response == '400' or response == None):
 					#if there is default to returning an empty string
 					outgoing.close()
 					return 'Error 400: Bad Resquest'
@@ -321,6 +368,7 @@ class Node:
 					#the server we may need to process (it might be a response)
 					outgoing.close()
 					return response
+			
 			except Exception as e:
 				
 				print(f'Console: Experienced Error {e}') #debugging
