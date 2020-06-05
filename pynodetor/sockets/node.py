@@ -10,7 +10,7 @@ from threading import Thread
 #	   pynodetor imports
 ###############################
 from pynodetor.encryption import rsa
-from pynodetor.utils import errors, enums
+from pynodetor.utils import errors, enums, timing
 
 ###############################
 #		   main code
@@ -147,6 +147,8 @@ class Node:
 					#receive the connectors public RSA key
 					publicRSA = c.recv(1024)
 				
+				print(f'Console: Received publicRSA') #console logging
+				
 				#receive the cypher text from the connector
 				time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
 				
@@ -155,11 +157,11 @@ class Node:
 				time_diff = time() - time_first #measure the latency time to compensate for when sending data
 				print(f'Console: Time difference - {time_diff}')
 				i = 0
-
+				
 				#start receiving data from the sending socket
 				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
 				
-					sleep(0.01)
+					sleep(0.1)
 					cyphertexts.append(c.recv(1024))
 					
 					#ensure data collection has not exceeded 5 seconds
@@ -168,6 +170,8 @@ class Node:
 					i+=1
 				
 				cyphertexts.pop() #remove the null terminating character
+				
+				print(f'Console: Received cyphertext') #console logging
 				
 				#we want to decrypt the message only if encryption is enabled otherwise it is
 				#in plain-text and decrypting it will raise an error
@@ -184,7 +188,9 @@ class Node:
 				
 				#allow child classes to manipulate the message
 				data_processed = self.specialFunctionality(message, addr[0])
-
+				
+				print(f'Console: proccessed data') #console logging
+				
 				#return the data to the user
 				if (data_processed[1] != '0'):
 					
@@ -221,11 +227,15 @@ class Node:
 					
 					data_processed_lst.append(b'<<') #add the message transfer terminator
 					
+					print(f'Console: finished preparing response') #console logging
+					
 					#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 					#already be in this form, and won't be able to be sent
 					for data_segment in data_processed_lst:
-						sleep(0.01)
+						sleep(0.1)
 						c.send(data_segment)
+						
+					print(f'Console: sent response') #console logging
 					
 				#append to the message queue if required for further functionality
 				if (data_processed[0]):
@@ -316,11 +326,15 @@ class Node:
 				
 				message_lst.append(b'<<') #add the message transfer terminator
 				
+				print(f'Console: prepared message') #console logging
+				
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
 				for message_segment in message_lst:
-					sleep(0.01)
+					sleep(0.1)
 					outgoing.send(message_segment)
+					
+				print(f'Console: Sent message') #console logging
 				
 				#we are going to receive a response code back from the user after this possibly indicating some status
 				#code or will 'spit out' some sort of data associated with the request
@@ -334,7 +348,7 @@ class Node:
 				#start receiving data from the sending socket
 				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
 				
-					sleep(0.01)
+					sleep(0.1)
 					cyphertexts.append(outgoing.recv(1024))
 					
 					#ensure data collection has not exceeded 5 seconds
@@ -344,6 +358,8 @@ class Node:
 					i+=1
 					
 				cyphertexts.pop() #remove the null terminating character
+				
+				print(f'Console: Recieved Cyphertext') #console logging
 				
 				#we want to decrypt the message only if encryption is enabled otherwise it is
 				#in plain-text and decrypting it will raise an error
@@ -357,6 +373,8 @@ class Node:
 						cyphertexts[i] = cyphertexts[i].decode()
 					
 				response = ''.join(cyphertexts) #join the decoded cyphertexts
+				
+				print(f'Console: Formated cypher to plain text') #console logging
 				
 				#if we receive a status code of '0' that means something went wrong
 				if (response == '400' or response == None):
