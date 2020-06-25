@@ -21,7 +21,7 @@ class Timer:
 						ch float value will have that is logged, default 3
 		'''
 		self.precision = precision
-		self.start = round(time(), precision) #start time of the class
+		self.start = round(time(), self.precision) #start time of the class
 		
 		self.log = []
 	
@@ -71,7 +71,7 @@ class Timer:
 				
 			@returns a float representing time since placed on the heap
 		'''
-		temp = round(time, self.precision) - self.start
+		temp = round(time(), self.precision) - self.start
 		return temp
 		
 	def __eq__(self, other):

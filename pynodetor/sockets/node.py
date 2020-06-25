@@ -10,6 +10,7 @@ from threading import Thread
 #	   pynodetor imports
 ###############################
 from pynodetor.encryption import rsa
+from pynodetor.timing.stopwatch import StopWatch
 from pynodetor.utils import errors, enums, timing
 
 ###############################
@@ -134,6 +135,8 @@ class Node:
 			c, addr = self.incoming.accept()
 			print(f'Console: Received connection from {addr}') #console logging
 			
+			optimizer = StopWatch(4) #we will use this to capture time between data captures to offer the best latency
+			
 			try:
 				
 				#send whether the node supports end-to-end encryption
@@ -141,7 +144,9 @@ class Node:
 					pre_message = self.handler_keys.getPublicKey()
 				else:
 					pre_message = b'None'
+				optimizer.log()
 				c.send(pre_message) ##send the encryption key or None indiciating it's disabled
+				optimizer.log()
 				
 				if (self.supports_encryption == True):
 					#receive the connectors public RSA key
@@ -152,16 +157,17 @@ class Node:
 				#receive the cypher text from the connector
 				time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
 				
-				time_first = time() #start timing the transfer time according to latency	
+				optimizer.log() #start timing the transfer time according to latency
 				cyphertexts = [c.recv(1024)]
-				time_diff = time() - time_first #measure the latency time to compensate for when sending data
-				print(f'Console: Time difference - {time_diff}')
+				optimizer.log() #measure the latency time to compensate for when sending data
+				print(f'Console: Time difference - {optimizer.getLog()}')
 				i = 0
 				
+				delay = optimizer.getShortestLap()
 				#start receiving data from the sending socket
 				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
 				
-					sleep(0.1)
+					sleep(delay)
 					cyphertexts.append(c.recv(1024))
 					
 					#ensure data collection has not exceeded 5 seconds
@@ -232,7 +238,7 @@ class Node:
 					#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 					#already be in this form, and won't be able to be sent
 					for data_segment in data_processed_lst:
-						sleep(0.1)
+						sleep(delay)
 						c.send(data_segment)
 						
 					print(f'Console: sent response') #console logging
@@ -279,17 +285,19 @@ class Node:
 				if (port == ''):
 					port = self.port
 				
-				time_first = time() #start timing the transfer time according to latency
+				optimizer = StopWatch(4) #we will use this to capture time between data captures to offer the best latency
 				outgoing.connect((ip_target, port)) #all outgoing requests are sent on port 8075
-				time_diff = time() - time_first #measure the latency time to compensate for when sending data 
-				print(f'Console: Time difference - {time_diff}')
+				optimizer.log()
+				print(f'Console: Time difference - {optimizer.getLog()}')
 				
 				#if we leave the string empty we are asking for a simple ping of the listening
 				#server so if we establish connection return '1' and end everything else
 				if (message == ''):
 					return '1'
 				
+				optimizer.log()
 				received_rsa_public = outgoing.recv(1024).decode()
+				optimizer.log()
 				
 				key_pub_ours = self.handler_keys.getPublicKey()
 				if (received_rsa_public != 'None'):
@@ -328,10 +336,11 @@ class Node:
 				
 				print(f'Console: prepared message') #console logging
 				
+				delay = optimizer.getShortestLap()
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
 				for message_segment in message_lst:
-					sleep(0.1)
+					sleep(delay)
 					outgoing.send(message_segment)
 					
 				print(f'Console: Sent message') #console logging
@@ -348,7 +357,7 @@ class Node:
 				#start receiving data from the sending socket
 				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
 				
-					sleep(0.1)
+					sleep(delay)
 					cyphertexts.append(outgoing.recv(1024))
 					
 					#ensure data collection has not exceeded 5 seconds

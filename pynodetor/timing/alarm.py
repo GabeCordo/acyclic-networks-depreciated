@@ -51,7 +51,7 @@ class Alarm(Timer):
 		'''
 		if (type(event) != type(Event)):
 			return False
-			
+		
 		log.append(event) #the argument is of type Event, and should be added
 	
 	def _monitor(self):

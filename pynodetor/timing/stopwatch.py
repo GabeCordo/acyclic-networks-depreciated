@@ -58,8 +58,16 @@ class StopWatch(Timer):
 			(Timing) -> (float)
 			:append a new time to the list of laps
 		'''
-		temp = round(time(), self.precision) - self.log[-1]
-		self.log.append(temp)
+		temp = round(time(), self.precision)
+		log_len = len(self.log)
+		
+		#check to see if we have a log already or not
+		if (log_len > 0): #we are more likely to already have a log, therefore, we put it first
+			temp -= (sum(self.log) + self.start)
+		elif (log_len == 0):
+			temp -= self.start #if not, sub from the start time
+			
+		self.log.append(temp) #append the time in-between to the class variable log[]
 		return temp
 	
 	def _findValue(self, find_min=True):
