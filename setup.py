@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 longDescription = 'A mid-weight framework for replicating tor entry, relay and exit nodes. Developed for programmers looking to provide highly-secure messaging/file transfer applications. Equipt with end-to-end encryption and anonymous server meshing.'
 
 setup(
-	name = 'pynodetor',
+	name = 'quickscms',
 	packages = find_packages(),
 	version = '1.1.5.7',
 	licence = 'MIT',

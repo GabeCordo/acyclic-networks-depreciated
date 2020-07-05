@@ -1,0 +1,18 @@
+{
+  "entry": [
+     {
+        "ip": "159.89.120.107",
+        "user-id": "0"
+     }
+  ],
+  "exit": [
+    {
+      "ip": "64.227.123.214",
+      "user-id": "1"
+    }
+  ],
+  "relay_official_1": {
+      "ip": "178.128.248.176",
+      "rsa": "keys_stored/relay_official_1.pem"
+  }
+}

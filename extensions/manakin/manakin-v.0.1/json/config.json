@@ -1,0 +1,1 @@
+{"settings": {"port": 8075, "indexed": false, "incoming": true}, "caching": {"enabled": true, "directory": "cache/"}, "entry-server": {"ip-address": "178.128.231.70"}, "encryption-keys": {"public": "keys/public.pem", "private": "keys/private.pem"}}
