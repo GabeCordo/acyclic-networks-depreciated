@@ -1,9 +1,9 @@
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.bitstream import basic
-from pynodetor.sockets.node import Node
-from pynodetor.utils import errors, enums
+from quickscmp.bitstream import basic
+from quickscmp.sockets.node import Node
+from quickscmp.utils import errors, enums, containers
 
 ###############################
 #		   main code
@@ -13,7 +13,7 @@ from pynodetor.utils import errors, enums
 # [ensure a failproof transfer of data to more sensitive areas of the network
 
 class NodeEntry(Node):
-	def __init__(self, ip, port, ip_index, ip_backup, directory_key_private, directory_key_public):
+	def __init__(self, container_addresses, container_paths):
 		'''
 			(NodeEntry, string, string, string, string, boolean) -> None
 			
@@ -21,8 +21,7 @@ class NodeEntry(Node):
 			 functionality to begin routing messages or act as a middle-man for
 			 indexing/removing/lookingup userids on the index node
 		'''
-		super().__init__(ip, port, ip_index, ip_backup, directory_key_private,
-						 directory_key_public, True, True, False, True) #ecryption, listening, monitoring
+		super().__init__(container_addresses, container_paths, containers.PRESET_SETTINGS_ENTRY)
 		
 	def checkDestination(self, bitstream, id_origin):
 		'''
@@ -34,7 +33,7 @@ class NodeEntry(Node):
 			@exception if the connection is lost or the userid is invalid, returns
 					 an empty string
 		'''
-		return self.send(self.ip_index, bitstream) #settup ip and port of indexing server
+		return self.send(self.container_addresses.ip_index, bitstream) #settup ip and port of indexing server
 	
 	def indexUserID(self, bitstream, id_origin, ip_connecting):
 		'''
@@ -47,7 +46,7 @@ class NodeEntry(Node):
 			@returns a boolean true if the userid was added to the indexing node
 			@exception returns boolean false if the userid or ip is already used
 		'''
-		return self.send(self.ip_index, bitstream)
+		return self.send(self.container_addresses.ip_index, bitstream)
 
 	def deindexUserID(self, bitstream, id_origin, ip_connecting):
 		'''
@@ -60,7 +59,7 @@ class NodeEntry(Node):
 					 node
 			@exception returns boolean false if the paramaters were invalid
 		'''
-		return self.send(self.ip_index, bitstream)
+		return self.send(self.container_addresses.ip_index, bitstream)
 		
 	def useridOfAddress(self, bitstream, ip):
 		'''
@@ -70,7 +69,7 @@ class NodeEntry(Node):
 			** this is a private function, it is important only the
 			   entry node has this functionality					 **
 		'''
-		return self.send(self.ip_index, bitstream)
+		return self.send(self.container_addresses.ip_index, bitstream)
 		
 	def formatMessage(self, bitstream, id_target, message):
 		'''
@@ -79,7 +78,7 @@ class NodeEntry(Node):
 			 transmitting messages
 		'''
 		#process the relay-web ready string
-		message = self.send(self.ip_index, bitstream)
+		message = self.send(self.container_addresses.ip_index, bitstream)
 		data = message.split('%')
 		print(data) #debugging
 		#send the message to the target or into the network and get a status code

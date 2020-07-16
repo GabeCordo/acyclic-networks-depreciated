@@ -7,11 +7,11 @@ from datetime import datetime
 from threading import Thread
 
 ###############################
-#	  pynodetor imports
+#	  quickscmp imports
 ###############################
 
-from pynodetor.timing.timer import Timer
-from pynodetor.timing.event import Event
+from quickscmp.timing.timer import Timer
+from quickscmp.timing.event import Event
 
 ###############################
 #	   	  Alarm Class

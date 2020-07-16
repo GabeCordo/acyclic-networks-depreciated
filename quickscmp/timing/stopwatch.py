@@ -5,10 +5,10 @@
 from time import time
 
 ###############################
-#	  pynodetor imports
+#	  quickscmp imports
 ###############################
 
-from pynodetor.timing.timer import Timer
+from quickscmp.timing.timer import Timer
 
 ###############################
 #	    Stop Watch Class
@@ -66,9 +66,11 @@ class StopWatch(Timer):
 			temp -= (sum(self.log) + self.start)
 		elif (log_len == 0):
 			temp -= self.start #if not, sub from the start time
-			
-		self.log.append(temp) #append the time in-between to the class variable log[]
-		return temp
+		
+		#we don't want to accept any values of 0
+		if (temp > 0):
+			self.log.append(temp) #append the time in-between to the class variable log[]
+			return temp
 	
 	def _findValue(self, find_min=True):
 		'''

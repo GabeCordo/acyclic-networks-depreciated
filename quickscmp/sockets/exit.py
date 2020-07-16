@@ -1,9 +1,9 @@
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.sockets.node import Node
-from pynodetor.bitstream import advanced
-from pynodetor.utils import errors, enums
+from quickscmp.sockets.node import Node
+from quickscmp.bitstream import advanced
+from quickscmp.utils import errors, enums, containers
 
 ###############################
 #		   main code
@@ -11,14 +11,13 @@ from pynodetor.utils import errors, enums
 #Responisble for sending the message request to the final destination in the userid
 
 class NodeExit(Node):
-	def __init__(self, ip, port, ip_index, directory_key_private, directory_key_public):
+	def __init__(self, container_addresses, container_paths):
 		'''(NodeExit, string, string, string, string) -> None
 			:the consturctor is the same as the node server, small maniplulation
 			 of the origional node server to specifically redirect data to the
 			 final ip
 		'''
-		super().__init__(ip, port, ip_index, '', directory_key_private,
-						 directory_key_public, False, True, False, False) #ecryption, listening, monitoring
+		super().__init__(container_addresses, container_paths, containers.PRESET_SETTINGS_EXIT)
 	
 	def checkDestination(self, id_origin):
 		'''(Node) -> (string)
@@ -30,7 +29,7 @@ class NodeExit(Node):
 					   an empty string
 		'''
 		request = f'0:{id_origin}'
-		return self.send(self.ip_index, request) #settup ip and port of indexing server
+		return self.send(self.container_addresses.ip_index, request) #settup ip and port of indexing server
 	
 	def formatMessage(self, message, origin):
 		'''(NodeExit, string) -> (string)

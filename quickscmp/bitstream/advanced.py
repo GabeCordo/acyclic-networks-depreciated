@@ -8,9 +8,9 @@
 	as requested by the class instance variables		***
 '''
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.utils.errors import *
+from quickscmp.utils.errors import *
 from cffi import FFI
 
 ###############################

@@ -1,4 +1,4 @@
-#Secure Communication and Messaging Protocol
+# Secure Communication and Messaging Protocol
 The (S)ecure (C)ommunication and (M)essaging (S)ervice is a lightweight tool for 
 providing encrypted client-server messaging with path-routing features. Initial development
 and planning began in September 2019 and has been progressively growing with weekly updates.
@@ -122,17 +122,17 @@ latency between each socket is not the same, we can run into errors.
 
 -> Valid Transfers
 
-Node | | | | |
+Node | Trial 1 | Trial 2 | Trial 3 | Trial 4 |
 ------------ | ------------- | ------------- | ------------- | ------------- |
 client | 0.026 | 0.027 | 0.02788 | 0.01796
 server | 0.00122 | 0.0018 | 0.00144 | 0.00119233
 
 -> Invalid Transfers
 
-Node | | |
+Node | Trial 1 | Trial 2 |
 ------------ | ------------- | -------------
 client | 0.029129 | 0.02327
-server | 0.8210 | 0.0018
+server | 0.082100 | 0.03383
 
 What we can conclude from the data-set is that if the logged latency by the server (used to determine the interval
 to read packets) exceeds the logged latency by the client, we experience a packet-loss and run into errors.

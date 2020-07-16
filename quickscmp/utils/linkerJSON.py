@@ -6,9 +6,9 @@ from json import dump, load
 from threading import Thread
 
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.utils import errors
+from quickscmp.utils import errors
 
 ###############################
 #		   main code
@@ -59,7 +59,7 @@ class Handler:
 				self.data.append(load(file_current))
 				file_current.close()
 		except:
-			raise FileNotFoundError('linkerJSON Error: one or more of the provided files does not exist.')
+			raise FileNotFoundError(f'linkerJSON Error: one or more of the provided files does not exist.')
 	
 	def cleanerFunctionality(self, element):
 		'''(Handler) -> None

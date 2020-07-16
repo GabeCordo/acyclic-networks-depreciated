@@ -7,12 +7,12 @@ from datetime import date
 from threading import Thread
 
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.encryption import rsa
-from pynodetor.bitstream import basic
-from pynodetor.sockets.node import Node
-from pynodetor.utils import linkerJSON, errors, enums
+from quickscmp.encryption import rsa
+from quickscmp.bitstream import basic
+from quickscmp.sockets.node import Node
+from quickscmp.utils import linkerJSON, errors, enums, containers
 
 ###############################
 #		   main code
@@ -22,8 +22,8 @@ from pynodetor.utils import linkerJSON, errors, enums
 #node in such a way that it acts as a proxy to conceal the address or data of this node
 
 class Index(Node, linkerJSON.Handler):
-	def __init__(self, ip, port, directory_key_private, directory_key_public,
-				 directory_index, directory_log, directory_collected_keys,
+	def __init__(self, container_addresses, container_paths, 
+				 directory_index, directory_log, directory_collected_keys, 
 				 simplified_network = False):
 		'''
 			(Index, string, string, string, string, string, boolean) -> None
@@ -34,15 +34,18 @@ class Index(Node, linkerJSON.Handler):
 			@exception the class constructor will throw an error if the
 					   pathway is NOT valid
 		'''
-		Node.__init__(self, ip, port, ip, '', directory_key_private,
-					  directory_key_public, True, True, False, False) #ecryption, listening, monitoring
+		Node.__init__(self, container_addresses, container_paths, containers.PRESET_SETTINGS_INDEX)
 		linkerJSON.Handler.__init__(self, directory_index, directory_log)
 		
+		##Setting up indexing, logging JSON files AND the RSA keys directory for storage
 		self.directory_index = directory_index
 		self.directory_log = directory_log
 		self.directory_collected_keys = directory_collected_keys
 		
+		##Settup the indexing node to either run on simplified network mode or full mode
 		self.simplified_network = simplified_network
+		
+		##Pull the extracted JSON sheets from the linkerJSON class variable 'self.data'
 		self.index = self.data[0]
 		self.log = self.data[1]
 		

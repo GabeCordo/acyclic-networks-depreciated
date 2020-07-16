@@ -1,8 +1,8 @@
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.encryption import rsa
-from pynodetor.utils import enums, errors
+from quickscmp.encryption import rsa
+from quickscmp.utils import enums, errors
 
 ###############################
 #		   main code

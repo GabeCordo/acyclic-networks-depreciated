@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
 	readme_description = fh.read()
 
-longDescription = 'A mid-weight framework for replicating tor entry, relay and exit nodes. Developed for programmers looking to provide highly-secure messaging/file transfer applications. Equipt with end-to-end encryption and anonymous server meshing.'
+longDescription = 'A (S)ecure (C)ommunication and (M)essaging (S)ervice is a lightweight tool for providing encrypted client-server messaging with path-routing features.'
 
 setup(
-	name = 'quickscms',
+	name = 'quickscmp',
 	packages = find_packages(),
 	version = '1.1.5.7',
 	licence = 'MIT',
@@ -20,7 +20,9 @@ setup(
 	keywords = ['TOR', 'SOCKETS', 'SECURITY', 'ENCRYPTION'],
 	install_requires = [
 		'cffi',
-		'pycryptodomex'
+		'pycryptodomex',
+		'pyfiglet',
+		'clint'
 	],
 	classifiers = [
 		'License :: OSI Approved :: MIT License',

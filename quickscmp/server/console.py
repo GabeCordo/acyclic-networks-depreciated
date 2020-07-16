@@ -6,11 +6,11 @@ from datetime import date, datetime
 from threading import Thread
 
 ###############################
-#		pynodetor imports
+#		quickscmp imports
 ###############################
 
-from pynodetor.utils import caching, terminal
-from pynodetor.server import container
+from quickscmp.utils import caching, terminal
+from quickscmp.server import container
 
 ###############################
 #		 Console Class

@@ -7,53 +7,47 @@ from sys import getsizeof
 from threading import Thread
 
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.encryption import rsa
-from pynodetor.timing.stopwatch import StopWatch
-from pynodetor.utils import errors, enums, timing
+from quickscmp.encryption import rsa
+from quickscmp.timing.stopwatch import StopWatch
+from quickscmp.timing.timer import Timer
+from quickscmp.utils import errors, enums, logging, containers
 
 ###############################
 #		   main code
 ###############################
 
 class Node:
-	def __init__(self, ip='', port=8075, ip_index=None, ip_backup=None,
-				 directory_key_private=None, directory_key_public=None,
-				 supports_encryption=True, supports_listening=True,
-				 supports_monitoring=True, supports_backup_ip=True):
+	def __init__(self, container_addresses, container_paths, container_customizations):
 		'''
-			(Node, string, int, boolean, DataTransfer) -> None
+			(Node, Addresses, Paths, Customizations) -> None
 			
 			:the class constructor for the primitive node type. All children
 			 class are specific variations of the node class for specific
 			 socket input and output manipulation on the mock 'tor' network.
 			
-			ip : the protocol adress of the current server
-			port : the socket for incoming connections to the server
+			!the node class uses containers to store huge amounts of variables
+			 for better customizability, reusability and to make code cleaner
+			
+				L-> all wrapper classes found under utils/containers
 			
 			** defaulted to end-to-end encryption enabled **
 		'''
 		##Generic Variables##
-		self.ip = ip
-		self.port = port
 		self.queue = [] #all unhandled requests will go here
-		self.supports_monitoring = supports_monitoring
 		
 		##Initialize the recieving socket##
-		self.supports_listening = supports_listening
 		self.incoming = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
 		##Initialize the encryption handler##
-		self.supports_encryption = supports_encryption
-		self.handler_keys = rsa.Handler(directory_key_private, directory_key_public)
+		self.handler_keys = rsa.Handler(container_paths.directory_key_private, container_paths.directory_key_public)
 		
-		##Settup connection to an indexing/logging server##
-		self.ip_index = ip_index
+		##Settup logging file for connection speed data
+		logging.Logger(container_paths.directory_file_logging, container_customizations.supports_console_cout)
 		
-		self.supports_backup_ip = supports_backup_ip
-		self.ip_backup = ip_backup
-		
+		#these threads will need to be visible to a grouping of functions in the
+		#class so we are throwing it in the constructor
 		self.thread_one = Thread(target=self.listen, args=())
 		self.thread_two = Thread(target=self.monitor, args=())
 	
@@ -64,7 +58,7 @@ class Node:
 			
 			@returns the ip of the server the socket is binded to.
 		'''
-		return self.ip
+		return self.container_addresses.ip
 	
 	def isListening(self):
 		'''
@@ -74,7 +68,7 @@ class Node:
 			
 			@returns whether the socket is currently listening.
 		'''
-		return self.supports_listening
+		return self.container_customizations.supports_listening
 		
 	def isEncrypted(self):
 		'''
@@ -83,7 +77,7 @@ class Node:
 			
 			@returns whether the node allows for end-to-end encryption
 		'''
-		return self.supports_encryption
+		return self.container_customizations.supports_encryption
 	
 	def isMonitoring(self):
 		'''
@@ -92,7 +86,7 @@ class Node:
 			
 			@returns a boolean value representing whether the montior is toggled
 		'''
-		return self.supports_monitoring
+		return self.container_customizations.supports_monitoring
 	
 	def specialFunctionality(self, message, address):
 		'''
@@ -127,7 +121,7 @@ class Node:
 			**despite not returning anything, all incoming messages
 			 are checked and then enqued on the node to be processed.**
 		'''
-		self.incoming.bind((self.ip, self.port))
+		self.incoming.bind((self.container_addresses.ip, self.container_addresses.port))
 		self.incoming.listen(10)
 		
 		while True:
@@ -136,30 +130,32 @@ class Node:
 			print(f'Console: Received connection from {addr}') #console logging
 			
 			optimizer = StopWatch(4) #we will use this to capture time between data captures to offer the best latency
+			print("Set Optimizer" + str(optimizer))
 			
 			try:
 				
 				#send whether the node supports end-to-end encryption
-				if (self.supports_encryption == True):
+				if (self.container_customizations.supports_encryption == True):
 					pre_message = self.handler_keys.getPublicKey()
 				else:
 					pre_message = b'None'
-				optimizer.log()
+				optimizer.lap()
 				c.send(pre_message) ##send the encryption key or None indiciating it's disabled
-				optimizer.log()
+				optimizer.lap()
 				
-				if (self.supports_encryption == True):
+				if (self.container_customizations.supports_encryption == True):
 					#receive the connectors public RSA key
 					publicRSA = c.recv(1024)
 				
 				print(f'Console: Received publicRSA') #console logging
+				print(publicRSA) #debuging
 				
 				#receive the cypher text from the connector
 				time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
 				
-				optimizer.log() #start timing the transfer time according to latency
+				optimizer.lap() #start timing the transfer time according to latency
 				cyphertexts = [c.recv(1024)]
-				optimizer.log() #measure the latency time to compensate for when sending data
+				optimizer.lap() #measure the latency time to compensate for when sending data
 				print(f'Console: Time difference - {optimizer.getLog()}')
 				i = 0
 				
@@ -181,7 +177,7 @@ class Node:
 				
 				#we want to decrypt the message only if encryption is enabled otherwise it is
 				#in plain-text and decrypting it will raise an error
-				if (self.supports_encryption == True):
+				if (self.container_customizations.supports_encryption == True):
 					#we need to individualy decrypt each message and then join it
 					for i in range(0, len(cyphertexts)):
 						cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
@@ -196,9 +192,14 @@ class Node:
 				data_processed = self.specialFunctionality(message, addr[0])
 				
 				print(f'Console: proccessed data') #console logging
+				print(data_processed) #debuging
+				
+				#send the response code that will alert the sender whether to listen for future
+				#response data associated with the request sent to the "server"
+				c.send(data_processed[1].encode())
 				
 				#return the data to the user
-				if (data_processed[1] != '0'):
+				if (data_processed[1] == '1'):
 					
 					data_processed_lst = []
 					permited_char_len = 100 #the max number of chars allowed per bitstream (RSA maximum)
@@ -234,7 +235,9 @@ class Node:
 					data_processed_lst.append(b'<<') #add the message transfer terminator
 					
 					print(f'Console: finished preparing response') #console logging
+					print(data_processed_lst) #debugging
 					
+					delay = optimizer.getLongestLap()
 					#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 					#already be in this form, and won't be able to be sent
 					for data_segment in data_processed_lst:
@@ -262,7 +265,7 @@ class Node:
 		'''
 		#make sure the listening port is open in the first place before closing
 		#the socket otherwise it will throw an error.
-		if (self.supports_listening == False):
+		if (self.container_customizations.supports_listening == False):
 			#ensure the socket is closed
 			self.incoming.close()
 	
@@ -285,19 +288,17 @@ class Node:
 				if (port == ''):
 					port = self.port
 				
-				optimizer = StopWatch(4) #we will use this to capture time between data captures to offer the best latency
+				optimizer = StopWatch(6) #we will use this to capture time between data captures to offer the best latency
 				outgoing.connect((ip_target, port)) #all outgoing requests are sent on port 8075
-				optimizer.log()
-				print(f'Console: Time difference - {optimizer.getLog()}')
 				
 				#if we leave the string empty we are asking for a simple ping of the listening
 				#server so if we establish connection return '1' and end everything else
 				if (message == ''):
 					return '1'
 				
-				optimizer.log()
+				optimizer.lap()
 				received_rsa_public = outgoing.recv(1024).decode()
-				optimizer.log()
+				optimizer.lap()
 				
 				key_pub_ours = self.handler_keys.getPublicKey()
 				if (received_rsa_public != 'None'):
@@ -305,6 +306,8 @@ class Node:
 				
 				message_lst = []
 				permited_char_len = 100 #the max number of chars allowed per bitstream (RSA maximum)
+				
+				print(f'Console: Time difference - {optimizer.getLog()}')
 				
 				#prepare the message we are going to send to the
 				if(received_rsa_public != 'None'):
@@ -336,7 +339,7 @@ class Node:
 				
 				print(f'Console: prepared message') #console logging
 				
-				delay = optimizer.getShortestLap()
+				delay = optimizer.getLongestLap()
 				#send the encrypted message to the listening node, we don't encode this into utf-8 as the cyphered text will
 				#already be in this form, and won't be able to be sent
 				for message_segment in message_lst:
@@ -348,60 +351,75 @@ class Node:
 				#we are going to receive a response code back from the user after this possibly indicating some status
 				#code or will 'spit out' some sort of data associated with the request
 				
-				#receive the cypher text from the connector
-				time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
+				response_code = outgoing.recv(1024)
 				
-				cyphertexts = [outgoing.recv(1024)]
-				i = 0
+				if (response_code == b'1'):
+				
+					#receive the cypher text from the connector
+					time_warning = time() #keep track of the start (we want to avoid going over ~10 seconds)
+					
+					cyphertexts = [outgoing.recv(1024)]
+					i = 0
 
-				#start receiving data from the sending socket
-				while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
-				
-					sleep(delay)
-					cyphertexts.append(outgoing.recv(1024))
+					delay = optimizer.getShortestLap()
+					#start receiving data from the sending socket
+					while (cyphertexts[i] != b'<<'): #loop until the terminating operator is reached
 					
-					#ensure data collection has not exceeded 5 seconds
-					if ((time() - time_warning) > 5.0):
-						raise TimeoutError('Data Transfer Exceeded 5 seconds')
+						sleep(delay)
+						cyphertexts.append(outgoing.recv(1024))
+						
+						#ensure data collection has not exceeded 5 seconds
+						if ((time() - time_warning) > 5.0):
+							raise TimeoutError('Data Transfer Exceeded 5 seconds')
+						
+						i+=1
+						
+					cyphertexts.pop() #remove the null terminating character
 					
-					i+=1
+					print(f'Console: Recieved Cyphertext') #console logging
 					
-				cyphertexts.pop() #remove the null terminating character
-				
-				print(f'Console: Recieved Cyphertext') #console logging
-				
-				#we want to decrypt the message only if encryption is enabled otherwise it is
-				#in plain-text and decrypting it will raise an error
-				if (received_rsa_public != 'None'):
-					#we need to individualy decrypt each message and then join it
-					for i in range(0, len(cyphertexts)):
-						cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
+					#we want to decrypt the message only if encryption is enabled otherwise it is
+					#in plain-text and decrypting it will raise an error
+					if (received_rsa_public != 'None'):
+						#we need to individualy decrypt each message and then join it
+						for i in range(0, len(cyphertexts)):
+							cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
+					else:
+						#we need to individualy decode the utf-8 bitsream into plain text
+						for i in range(0, len(cyphertexts)):
+							cyphertexts[i] = cyphertexts[i].decode()
+						
+					response = ''.join(cyphertexts) #join the decoded cyphertexts
+					
+					print(f'Console: Formated cypher to plain text') #console logging
+					
+					#if we receive a status code of '0' that means something went wrong
+					if (response == '400' or response == None):
+						#if there is default to returning an empty string
+						outgoing.close()
+						return 'Error 400: Bad Resquest'
+					else:
+						#the bitsream was successfuly sent, we received usfull information from
+						#the server we may need to process (it might be a response)
+						outgoing.close()
+						return response
+			
 				else:
-					#we need to individualy decode the utf-8 bitsream into plain text
-					for i in range(0, len(cyphertexts)):
-						cyphertexts[i] = cyphertexts[i].decode()
 					
-				response = ''.join(cyphertexts) #join the decoded cyphertexts
-				
-				print(f'Console: Formated cypher to plain text') #console logging
-				
-				#if we receive a status code of '0' that means something went wrong
-				if (response == '400' or response == None):
-					#if there is default to returning an empty string
-					outgoing.close()
-					return 'Error 400: Bad Resquest'
-				else:
-					#the bitsream was successfuly sent, we received usfull information from
-					#the server we may need to process (it might be a response)
-					outgoing.close()
-					return response
+					if (response_code == b'0'):
+						print(f'Console: (Code 0) General Failure')
+					elif (response_code == b'2'):
+						print(f'Console: (Code 2) Transfer Failure')
+						
+				outgoing.close()
+				return None
 			
 			except Exception as e:
 				
 				print(f'Console: Experienced Error {e}') #debugging
 				
 				#we need to check that the ip_target is not self.ip_backup to avoid going into a recursive infinite loop
-				if (self.supports_backup_ip != None and ip_target != self.ip_backup):
+				if (self.container_customizations.supports_backup_ip != None and ip_target != self.container_customizations.ip_backup):
 					self.send(self.ip_backup, message)
 				else:
 					outgoing.close()
@@ -424,7 +442,7 @@ class Node:
 			@exception returns an empty string if the queue is empty
 		'''
 		length_queue = len(self.queue)
-		if ( length_queue > 0 ):
+		if (length_queue > 0):
 			#return the first element in the queue acording to the first-in-first-out
 			#principle enforced by the queue algorithm
 			return self.queue.pop(0)
@@ -447,7 +465,7 @@ class Node:
 		'''
 		length_queue_previous = 0
 		#runs throughout the lifetime of the incoming socket
-		while (self.supports_listening == True):
+		while (self.container_customizations.supports_listening == True):
 			sleep(60)
 			#account for the fact that during runtime, this might be closed midway
 			try:
@@ -474,12 +492,12 @@ class Node:
 			
 			** settup end-to-end encryption keys for the socket node **
 		'''
-		if (self.supports_listening == True):
+		if (self.container_customizations.supports_listening == True):
 			##settup and start the incoming socket##
 			self.thread_one.setDaemon(True) # Daemonize thread (run in background)
 			self.thread_one.start()
 		
-		if (self.supports_monitoring == True):
+		if (self.container_customizations.supports_monitoring == True):
 			##settup and start the queue monitor##  
 			self.thread_two.setDaemon(True) # Daemonize thread (run in background)
 			self.thread_two.start()

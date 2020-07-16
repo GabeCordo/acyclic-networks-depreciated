@@ -1,9 +1,9 @@
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.sockets.node import Node
-from pynodetor.bitstream import advanced
-from pynodetor.utils import errors, enums
+from quickscmp.sockets.node import Node
+from quickscmp.bitstream import advanced
+from quickscmp.utils import errors, enums, containers
 
 ###############################
 #		   main code
@@ -11,13 +11,12 @@ from pynodetor.utils import errors, enums
 #Responisble for routing the packet to the next relay or exit node
 
 class NodeRelay(Node):
-	def __init__(self, ip, port, ip_backup, directory_key_private, directory_key_public):
+	def __init__(self, container_addresses, container_paths):
 		'''(NodeRelay, string, string, string, string) -> None
 			:constructor for the NodeRelay class, sets up the relay node
 			 server
 		'''
-		super().__init__(ip, port, None, ip_backup, directory_key_private,
-						 directory_key_public, False, True, True, True) #ecryption, listening, monitoring, backup
+		super().__init__(container_addresses, container_paths, containers.PRESET_SETTINGS_RELAY)
 		
 	def discoverNextNode(self, bitsream):
 		'''(NodeRelay, string) -> (list of strings)

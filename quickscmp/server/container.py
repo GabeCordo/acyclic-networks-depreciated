@@ -3,10 +3,10 @@
 ###############################
 
 ###############################
-#	  pynodetor imports
+#	  quickscmp imports
 ###############################
 
-from pynodetor.timing.timer import Timer
+from quickscmp.timing.timer import Timer
 
 ###############################
 #		Container Class

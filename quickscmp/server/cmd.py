@@ -5,11 +5,11 @@
 import cmd, os, sys
 
 #####################################
-#		 pynodetor Imports
+#		 quickscmp Imports
 #####################################
 
-from pynodetor.utils import terminal
-from pynodetor.server import console
+from quickscmp.utils import terminal
+from quickscmp.server import console
 
 #####################################
 #		 Terminal Interface

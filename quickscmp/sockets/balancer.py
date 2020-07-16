@@ -1,21 +1,20 @@
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.bitstream import basic
-from pynodetor.sockets.node import Node
-from pynodetor.utils import linkerJSON, errors, enums
+from quickscmp.bitstream import basic
+from quickscmp.sockets.node import Node
+from quickscmp.utils import linkerJSON, errors, enums, containers
 
 ###############################
 #		   main code
 ###############################
 class NodeBalancer(Node, linkerJSON.Handler):
-	def __init__(self, ip, port, directory_key_private, directory_key_public, directory_entry_nodes):
+	def __init__(self, container_addresses, container_paths, directory_file_logging, directory_entry_nodes):
 		'''(Balancer, list of strings) -> None
 			:constuctor for the Balancer class takes a list of ip-addresses
 			 representing the available entry Nodes.
 		'''
-		Node.__init__(self, ip, port, None, '', directory_key_private,
-					  directory_key_public, True, True, False, False) #ecryption, listening, monitoring
+		Node.__init__(self, container_addresses, container_paths, containers.PRESET_SETTINGS_BALANCER)
 		
 		linkerJSON.Handler.__init__(self, directory_entry_nodes)
 		

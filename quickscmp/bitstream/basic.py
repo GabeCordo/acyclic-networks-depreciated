@@ -7,9 +7,9 @@
 		request, can be used by any node class: O(n) ***
 '''
 ###############################
-#	   pynodetor imports
+#	   quickscmp imports
 ###############################
-from pynodetor.utils.errors import *
+from quickscmp.utils.errors import *
 
 ###############################
 #		   main code
