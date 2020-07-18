@@ -1,9 +1,11 @@
 ###############################
 #	   quickscmp imports
 ###############################
+
 from quickscmp.bitstream import basic
 from quickscmp.sockets.node import Node
-from quickscmp.utils import linkerJSON, errors, enums, containers
+from quickscmp.linker import linkerJSON
+from quickscmp.utils import errors, enums, containers
 
 ###############################
 #		   main code

@@ -1,6 +1,7 @@
 ###############################
 #		python imports
 ###############################
+
 import socket
 from time import sleep, time
 from sys import getsizeof
@@ -9,6 +10,7 @@ from threading import Thread
 ###############################
 #	   quickscmp imports
 ###############################
+
 from quickscmp.encryption import rsa
 from quickscmp.timing.stopwatch import StopWatch
 from quickscmp.timing.timer import Timer

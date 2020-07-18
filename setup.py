@@ -22,7 +22,9 @@ setup(
 		'cffi',
 		'pycryptodomex',
 		'pyfiglet',
-		'clint'
+		'clint',
+		'pyyaml',
+		'json'
 	],
 	classifiers = [
 		'License :: OSI Approved :: MIT License',

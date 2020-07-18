@@ -2,7 +2,6 @@
 #		python imports
 ###############################
 from time import sleep
-from json import dump, load
 from threading import Thread
 
 ###############################
@@ -27,9 +26,9 @@ class Handler:
 		self.data  = []
 		self.pull() #validate that the files provided to the class exist
 			
-	def push(self):
+	def template_push(self, dump_function):
 		'''
-			(Handler) -> None
+			(Handler, Markup Dump Function) -> None
 			:responsible for pushing the class dictionaries in data into
 			 the JSON files linearly
 				
@@ -38,15 +37,15 @@ class Handler:
 		'''
 		try:
 			for i in range(0, len(self.files)):
-				write_to_json = open(self.files[i], 'w')
-				dump(self.data[i], write_to_json)
-				write_to_json.close()
+				write_to_markup = open(self.files[i], 'w')
+				dump_function(self.data[i], write_to_json)
+				write_to_markup.close()
 		except:
 			raise FileNotFoundError('linkerJSON Error: one or more of the provided files does not exist.')
 	
-	def pull(self):
+	def template_pull(self, load_function):
 		'''
-			(Handler) -> None
+			(Handler, Markup Loader Function) -> None
 			:responsible for pulling the data from the JSON files into the
 			 class dictionaries linearly
 				
@@ -56,7 +55,7 @@ class Handler:
 		try:
 			for i in range(0, len(self.files)):
 				file_current = open(self.files[i], 'r')
-				self.data.append(load(file_current))
+				self.data.append(load_function(file_current))
 				file_current.close()
 		except:
 			raise FileNotFoundError(f'linkerJSON Error: one or more of the provided files does not exist.')
