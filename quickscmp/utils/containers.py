@@ -37,7 +37,7 @@ class Paths:
 class Customizations:
 	def __init__(self, supports_encryption=True, supports_listening=True,
 				 supports_monitoring=True, supports_recovery=True, 
-				 supports_console_cout=False):
+				 supports_console_cout=False, supports_data_capture=False):
 		'''
 			(bool, bool, bool, bool, bool, bool)
 			:a container class for all the various customization options for the Node class
@@ -48,6 +48,7 @@ class Customizations:
 		self.supports_monitoring = supports_monitoring
 		self.supports_recovery = supports_recovery
 		self.supports_console_cout = supports_console_cout
+		self.supports_data_capture = supports_data_capture
 		
 ## PRE-SET CUSTOMIZATIONS FOR ROUTING NODES
 

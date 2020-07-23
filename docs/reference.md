@@ -77,19 +77,19 @@ of-the-box security and not anonymity or sudo-anonymity.
 
 
 * Children of Node
-    1. Ballancer
+    1. Balancer
     2. Entry
     3. Relay
     4. Exit
 
 ### Basic Sockets
 The role of the standard socket is to the accept incoming requests and send data-packets
-to other sockets 
+to other sockets
 
 
 #### Handshake
 
-![Standard Hanshake](/diagrams/transfer.png)
+![Standard Hanshake](https://github.com/GabeCordo/scms-protocol/blob/master/docs/diagrams/transfer.png)
 
 1. Connection
     * initializes the FTP connection, a confirmation is sent to the connecting node that communication
@@ -105,19 +105,19 @@ to other sockets
 
 #### Data Transfer
 Request and Response packet transfer is not always a strait-forward task. When dealing with routing packets
-over a complex network the notions of packet-loss (The Two General's Problem) and over-sized plaintexts need
+over a complex network the notions of packet-loss (The Two General's Problem) and over-sized plain-texts need
 to come into account during the design process.
 
 * Packet Loss
-We can experience packet-loss as a result of compensating for over-sized plainttext issues and low-internet speeds. 
+We can experience packet-loss as a result of compensating for over-sized plaint-text issues and low-internet speeds. 
     * scmp implements the error code **2** which is thrown when packet-transfer exceeds 5 seconds. 
-    * the timeout value can be changed as the parameter latency_timout
+    * the timeout value can be changed as the parameter latency-timeout
 
 * Over-sized Plaintext
 
 RSA Encryption requires plaintext to be maximum 256 bytes long, if the plaintext exceeds the byte length
 we need to break-up the text into various packets and encrypt them individually. As a result, the protocol
-requires an N number of data-packet transfers concluded by a end of transfer (EOT) characters '<<'. If the
+requires an N number of data-packet transfers concluded by an end of transfer (EOT) characters '<<'. If the
 latency between each socket is not the same, we can run into errors.
 
 -> Valid Transfers
@@ -162,7 +162,7 @@ elements found within the network packet.
 
 ### Routing
 
-![Packet Routing](/diagrams/flow.png)
+![Packet Routing](https://github.com/GabeCordo/scms-protocol/blob/master/docs/diagrams/flow.png)
 
 ### Shotgunning <span style="color:blue">*[future]*</span>
 The process of sending messages over a pre-determined interval with independent routed paths. This will make
@@ -194,6 +194,36 @@ Code | Response | Details
 ---
 
 ## Routines <span style="color:blue">*[future]*</span>
+Routines are packages of socket configurations, routing standards and data-manipulation scripts for the modification of standard
+SCMP Parent Nodes. The standardization of these packages for the protocol allows for plug and play (PnP) solutions that require little
+or no intervention by developers which require the use of modified routines.
+
+### author sheet (YAML)
+The author sheet is a standard data-sheet holding information pertaining to the developer and routine that can be used to log information
+independent of the routines functionality.
+
+The information required on all author sheets follows:
+1. Developers First and Last Name
+2. Site the Routine is publicly available
+3. Date of the routines creation
+4. The name of the routine
+5. the current version of the routine package
+6. a short description on the functionality and purpose of the routine
+7. the licence associated with the routine for further modification/fair-use
+
+### config sheet (YAML)
+The config sheet is a configuration data-sheet for socket configuration and routing standards. The config sheet must contain the data
+required parameters outlined within the SCMP Parent Node containers: Addresses, Paths and Customizations.
+
+    The config sheet is flexible to additional configurations settings that must be outlined within the 'custom' section of the sheet.
+    The routines class responsible for the creation/interpretation of the YAML sheets will store the additional information under the
+    dictionary key 'custom'. It is the responsibility of scripts to utilize this within their python code.
+
+#### scripts directory (.PY)
+The scripts directory provides specialty functions for handling data-manipulation of packets stored within the queue
+
+#### path directory (.N)
+Outlines a standard location for where confidential information should be held on the local machine that is used by the routine.
 
 ---
 

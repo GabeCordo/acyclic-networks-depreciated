@@ -13,3 +13,27 @@
 #
 #      [x] Site: [URL OF ROUTINE SITE]
 #
+
+data:
+	author:
+		name: First Last
+		email: first.last@domain.com
+		site: https://routine-direct.com
+		date: DD/MM/YYYY
+	routine:
+		name: RoutineName
+		version: 1.0
+		description: >
+			This description must identify the key features
+			and purpose to be approved as an official routine
+		licence: MIT 202N
+		keywords:
+			- tag1
+			- tag2
+			- tagN
+		classifiers:
+			- tag1
+			- tag2
+			- tagN
+		documentation: './docs/'
+		

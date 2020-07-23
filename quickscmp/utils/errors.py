@@ -99,3 +99,19 @@ class MismatchedSyntax(Exception):
 class MismatchedKeys(Exception):
 	def __init__(self):
 		Exception.__init__(self, f'Encryption Error: the key pair provided is incorrect or corrupted.')
+		
+##########################################
+#			  Routine Errors
+##########################################
+
+class CorruptedRoutine(Exception):
+	def __init__(self):
+		Exception.__init__(self, f'There was an unkown error encountered when processing the node routine!')
+		
+class IncompleteRoutineConfig(Exception):
+	def __init__(self):
+		Exception.__init__(self, f'The routines config is missing configuration data required by the socket.')
+		
+class ConflictingRoutineConfig(Exception):
+	def __init__(self):
+		Exception.__init__(self, f'The configurations found the in the scmp routine is conflicting, hence, invalid.')
