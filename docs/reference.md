@@ -17,17 +17,20 @@ future, it is important to be attentive to these labels to avoid tricky errors.
 
 1. [Theory](#Theory)
 	1. Node
+        1. Containers
 	2. Basic Sockets
 		1. Handshake
 		2. Data Transfer
 	3. Syntax
 		1. Basic Syntax
 		2. Advanced Syntax
-	4. Routing
-	5. Shotgunning
-    6. Decentralized Storage
+    4. Enums
+	5. Routing
+	6. Shotgunning
+    7. Decentralized Storage
 2. [Error Handling](#Error-Handling)
     1. Response Codes
+    2. Offical Framework Errors
 3. [Routines](#Routines)
 4. [Data Sheet](#Data-Sheet)
 	1. Standard Port
@@ -160,6 +163,52 @@ it easier for both the programmer and program to understand the contents of pack
 The design goal of the markup language was to provide intuitive mnemonics and characters to represent the various
 elements found within the network packet.
 
+### Enums
+
+##### Nodes
+Represents the official nodes of the scms protocol.
+
+0. NODE
+1. ENTRY
+2. RELAY
+3. EXIT
+4. INDEX
+5. BALANCER
+
+##### Encrypted
+Represents whether the node supports asymetric encryption or not.
+
+0. DISABLED
+1. ENABLED
+
+##### Listening
+Represents whether the node supports listening or is intented only for sending packets.
+
+0. DISABLED
+1. ENABLED
+
+##### Encryption
+Represents the type of encryption the node is currently supporting, allowing for routines to adopt various encryption algorithms depending on the level of security required.
+
+0. RSA
+1. AES
+
+##### DataTransfer
+For the use of Node networks, represents the complexity of data-routing.
+
+* basic - A "middle-man" node is used to transfer packets between two clients to avoid P2P comms.
+* advanced - Supports full path-routing between gateway and relay nodes, for more information read the data-transfer section of this documentation.
+
+0. BASIC
+1. ADVANCED
+
+##### OfficialMarkups
+These represent the official enums supported by the framework for use within routine for storing data-sets specific to there use case, though it is possible to use others.
+
+0. JSON
+1. YAML
+2. GORM
+
 ### Routing
 
 ![Packet Routing](https://github.com/GabeCordo/scms-protocol/blob/master/docs/diagrams/flow.png)
@@ -171,6 +220,8 @@ the transfer of one message look like a spider-web of pathways instead of a line
 ### Decentralized Storage <span style="color:blue">*[future]*</span>
 The protocol plans to not only let individuals send data over a network but store data within the relays that
 it has initialized, the idea is to make it harder for breaches to obtain entire data-blocks.
+
+---
 
 ## Error Handling
 The secure communication and messaging protocol implements various fail-safes that prevent processing failures when
@@ -190,6 +241,9 @@ Code | Response | Details
 0 | General Failure | There was a failure in the Connection or Pre-Transfer Phase.
 1 | Successful | There were no issues, a response was either sent or not.
 2 | Transfer Failure | There was a failure in the Transfer or Post-Transfer Phase.
+
+### Response Codes
+These will be added during the next documentation update.
 
 ---
 

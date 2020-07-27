@@ -48,6 +48,6 @@ config:
 			- script2.py
 			- script3.py
 		markup-sheets:
-			- listOfJSON
-			- listOfYAML
-			- listOfGORM
+			- sheet1.mkdn
+			- sheet2.mkdn
+			- sheet3.mkdn

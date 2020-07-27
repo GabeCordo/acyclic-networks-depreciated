@@ -19,18 +19,27 @@ class Nodes(Enum):
 
 #Whether the node has end-to-end encryption enabled
 class Encrypted(Enum):
-	ENABLED = 0
-	DISABLED = 1
+	DISABLED = 0
+	ENABLED = 1
 	
 #whether the node is set to listen for incoming traffic by default
 class Listening(Enum):
-	ENABLED = 0
-	DISABLED = 1
+	DISABLED = 0
+	ENABLED = 1
 	
 class Encryption(Enum):
 	RSA = 0
 	AES = 1
 	
 class DataTransfer(Enum):
-	BRIEF = 0
-	EXTENDED = 1
+	BASIC = 0
+	ADVANCED = 1
+	
+##########################################
+#			 Routine Enums
+##########################################
+
+class OfficialMarkups(Enum):
+	JSON = 0
+	YAML = 1
+	GORM = 2

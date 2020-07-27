@@ -2,14 +2,15 @@
 #		python imports
 ###############################
 
-
-
-###############################
-#	   quickscmp imports
-###############################
-
-
+from sys import path
 
 ###############################
-#		 routine code
+#		python imports
+###############################
+
+path.append('../custom/')
+import custom #import all the custom scripts here
+
+###############################
+#			  rcf
 ###############################

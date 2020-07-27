@@ -85,6 +85,46 @@ PRESET_SETTINGS_EXIT = Customizations(
 		supports_recovery = False,
 		supports_console_cout = False
 	)
+	
+###############################
+#	 Routine Configuration
+###############################
+
+class RoutineAuthor:
+	def __init__(self, author_name='', author_email='', author_site='',
+				 date='', name='Unnamed Routine', version=1.0, description='', 
+				 licence=None, keywords=None, classifiers=None documentation=None):
+		'''
+			(String, String, String, String, String, Int, String, String, List, List, String) -> None
+			:a container class for the contents of the author file. This is to catagorize
+			 developer and routine details that contribute to the documentation of a routine
+			 rather than the functionality of the package.
+		'''
+		self.author_name = author_name
+		self.author_email = author_email
+		self.author_site = author_site
+		self.date = date
+		self.name = name
+		self.version = version
+		self.description = description
+		self.licence = licence
+		self.keywords = keywords
+		self.classifiers = classifiers
+		self.documentation = documentation
+
+class RoutineSettings:
+	def __init__(self, port=5078, markup='Basic', return_codes=[0,1,2],
+				 buffer_size=1024, latency_size=4):
+		'''
+			(Int, String, List of Ints, Int, Int) -> None
+			:a container class for the settings of the routines config file. These are
+			 generic paramaters that control the barebone functionality of the sockets.
+		'''
+		self.port = port
+		self.markup = markup
+		self.return_codes = return_codes
+		self.buffer_size = buffer_size
+		self.latency_size = latency_size
 
 ###############################
 #		   	  EOF

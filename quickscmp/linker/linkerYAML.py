@@ -22,14 +22,14 @@ class Handler(linkerTemplate.Handler):
 		'''
 		super().__init__(args)
 		
-	def push(dump):
+	def push():
 		'''
 			:pushes to the changes in the class
 			 dictionary to all the YAML files
 		'''
 		self.template_push(dump)
 		
-	def pull(load):
+	def pull():
 		'''
 			:pulls all the data within the YAML
 			 files that have been pushed as class
