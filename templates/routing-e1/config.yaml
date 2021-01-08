@@ -19,11 +19,12 @@ config:
 		port: 5078
 		markup: Basic
 		return-codes:
-			- 0
-			- 1
-			- 2
+			rsp-0: "general failure"
+			rsp-1: "successful"
+			rsp-2: "transfer failure"
 		buffer-size: 1024
 		latency-size: 4
+		timeout-delay: 60
 	addresses:
 		ip: 127.0.0.1
 		index: 127.0.0.1
@@ -39,6 +40,8 @@ config:
 		recovery: On
 		console: Off
 		data-capture: Off
+	outgoing-transfers:
+		drop-unencrypted-connections: On
 	custom:
 		using-custom: Off
 		custom-settings:

@@ -289,6 +289,13 @@ during the initialization phase.
 
 ### Blueprint Node
 
+### Clearance Levels 
+ 
+0. no authentication required
+1. known IP + logged ID
+2. passphrase required
+3. passphrase + known IP/ID required
+
 ### Entry Node
 
 Function | Request | Parameters | Bitstream

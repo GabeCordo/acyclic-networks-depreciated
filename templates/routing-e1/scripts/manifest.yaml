@@ -1,0 +1,40 @@
+--this script automates the initialization of each script onto the command server to outline the
+--known and unkown scripts that can run on the SCMP server
+
+--#######################################
+--official scripts
+
+auto-official-ruleset:
+  build: On
+  packages: 4
+  con-log: "Official extensions of the SCMP server - Do not edit"
+
+----------------------------------------
+--official manifest
+dtpf.py:
+  version: 1.0
+  author: "gabe"
+  time-stamp: "07/01/2021"
+icf.py:
+  version: 1.0
+  author: "gabe"
+  time-stamp: "07/01/2021"
+qmf.py:
+  version: 1.0
+  author: "gabe"
+  time-stamp: "07/01/2021"
+rcf.py:
+  version: 1.0
+  author: "gabe"
+  time-stamp: "07/01/2021"
+
+--#######################################
+--custom scripts
+
+auto-official-customset:
+  build: On
+  packages: 0
+  con-log: "UnOfficial extensions of the SCMP server - be careful please"
+
+----------------------------------------
+--custom manifest

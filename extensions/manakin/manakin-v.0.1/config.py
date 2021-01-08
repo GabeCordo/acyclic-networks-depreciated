@@ -2,7 +2,7 @@
 #		   Python Imports
 #####################################
 
-from pynodetor.utils import linkerJSON
+from pyscms.utils import linkerJSON
 
 #####################################
 #		   MANAKIN CONFIG

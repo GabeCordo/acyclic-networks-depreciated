@@ -1,0 +1,2 @@
+## SCMP Server Port
+This guide will go through the operations and procedures to run an SCMP port server on your machine. This allows encrypted two-way traffic for a defined period of time for the transfer of secure data.

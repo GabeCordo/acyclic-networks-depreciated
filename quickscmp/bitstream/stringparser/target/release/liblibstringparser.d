@@ -1,1 +1,1 @@
-/Users/gabecordovado/Desktop/scms/server/stringparser/target/release/liblibstringparser.dylib: /Users/gabecordovado/Desktop/scms/server/stringparser/src/lib.rs
+/Users/gabecordovado/Desktop/tools/scms-protocol/quickscmp/bitstream/stringparser/target/release/liblibstringparser.dylib: /Users/gabecordovado/Desktop/tools/scms-protocol/quickscmp/bitstream/stringparser/src/lib.rs

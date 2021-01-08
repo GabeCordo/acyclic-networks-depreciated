@@ -1,0 +1,40 @@
+syntax-table:
+  lookupIndex:
+    id: 0
+    description: ""
+    enabled: On
+  pushIndex:
+    id: 1
+    description: ""
+    clearence: 3
+    enabled: On
+  deleteIndex:
+    id: 2
+    description: ""
+    clearence: 3
+    enabled: On
+  pushRequest:
+    id: 3
+    description: ""
+    clearence: 3
+    enabled: On
+  getRequest:
+    id: 4
+    description: ""
+    clearence: 3
+    enabled: On
+  lookupIP:
+    id: 5
+    description: ""
+    clearence: 3
+    enabled: On
+  pushIP:
+    id: 6
+    description: ""
+    clearence: 3
+    enabled: On
+  deleteIP:
+    id: 7
+    description: ""
+    clearence: 3
+    enabled: On
