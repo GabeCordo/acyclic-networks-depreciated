@@ -95,6 +95,7 @@ class fileHandler:
 		'''
 		try:
 			temp_list = self.lookupCachedFile(id_user)
+			print(temp_list)
 			temp_list.pop(id_user) #will error if it does not exist
 		except:
 			return False
@@ -158,16 +159,17 @@ class fileHandler:
 		'''
 		#grab the data currently stored within the cache file
 		data = self.lookupCachedFile(id_user)
-		i = data.index(element) #index the element we want to remove
-		print(i)
-		data.pop(i)
+		try:
+			i = data.index(element) #index the element we want to remove
+			data.pop(i)
+		except:
+			return #the index we are trying to delete doesn't exist within the file
 		
 		path = self.generatePath(id_user)
 		
 		try:
 			file_manage = open(path, 'w')
-			for line in range(0, len(data)):
-				file_manage.write(data[line]) #write the data back into the file
+			file_manage.write('\n'.join(data))
 			file_manage.close()
 		except:
 			return False

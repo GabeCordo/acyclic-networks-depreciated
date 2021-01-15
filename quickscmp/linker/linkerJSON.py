@@ -22,15 +22,15 @@ class Handler(linkerTemplate.Handler):
 			:
 		'''
 		super().__init__(args)
-		
-	def push():
+	
+	def push(self):
 		'''
 			:pushes to the changes in the class
 			 dictionary to all the JSON files
 		'''
 		self.template_push(dump)
-			
-	def pull():
+	
+	def pull(self):
 		'''
 			:pulls all the data within the JSON
 			 files that have been pushed as class

@@ -93,7 +93,7 @@ PRESET_SETTINGS_EXIT = Customizations(
 class RoutineAuthor:
 	def __init__(self, author_name='', author_email='', author_site='',
 				 date='', name='Unnamed Routine', version=1.0, description='', 
-				 licence=None, keywords=None, classifiers=None documentation=None):
+				 licence=None, keywords=None, classifiers=None, documentation=None):
 		'''
 			(String, String, String, String, String, Int, String, String, List, List, String) -> None
 			:a container class for the contents of the author file. This is to catagorize

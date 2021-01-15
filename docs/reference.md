@@ -212,6 +212,51 @@ These represent the official enums supported by the framework for use within rou
 ### Routing
 
 ![Packet Routing](https://github.com/GabeCordo/scms-protocol/blob/master/docs/diagrams/flow.png)
+The above diagram is a simplified overview of the routing procedure, segmented into identifiable zones used by reponse codes of the protocol post-completion.  
+
+#### Preliminary Phase
+The preliminary-phase comprises of computationaly intesive node operations that maintain the security and anonymous nature of the connected routing network. Hence, the nodes within this ficitcoious-region are controlled by the SCMS team, meaning that 3rd-party nodes installed on possibly unsecure devices do not have control over the business-logic regions of the routing protocol.  
+
+##### Balancers (BL)
+The notion of a blancer should be trivial, (in essence) the purpose being to: (1) conceal the origin-ip of the entry nodes that communicate with the indexers, (2) reduce the traffic flow into any given entry-gateway, and (3) allow for non-critical nodes to be easily changable over an interval of n-time.
+
+It is important to not confuse balancers as being the entry-way into the SCMS routing network. While they are the first node within the routing segment, they do not contribute to computing routing-pathways or verifying requests (which are done by entries and indexers dicussed in the next segments). They are incharge of distributing traffic to entries with a lower request-queue and mitigating overload attempts by devices attempting to connect to the network. In later of the framework, balancer nodes were also in-charge of enforcing the "advanced-syntax" used by SCMS, dropping connections that have attempted to queue invalid requests.
+
+###### Node Requirments
+1. Concealing the Origin-IP of Entries
+- Origin-IPs are the only nodes with authorization to contact the Indexers.
+- Avoid making the IPs of nodes that control logical-functionalities public.
+- If the Entries-IP is concealed, traffic cannot be snooped to find the Indexers-IP. 
+2. Reducing Traffic Flow into Entires
+- Nodes (by default) monitor for queue overloads, reduces the chance of entries being forced to dump/ignore requests.
+- Balancers maintain a manifest of all traffic flowing into each entry, Entries with reduced-traffic are preffered for request processing.
+3. Balancer Swapping
+- The balancers are non-crictial with respect to network logic as they act as relays into the network. This means that they can be swapped, retired, or added onto the network without needing to distrupt SCMS logical functionality.
+
+##### Entries (EN)
+Entries are the first logical-component of the network, alternativly reffered to as "entry-gateways" or "entry-nodes" into the SCMS. Unlike balancers, these are logically-intensive components that: (1) receive validated request from balancers, (2) pattern-match the request to a given routine, (3) request a pathway, entry, or retreival from an Indexer, and (4) send the processed request with routing-headers into the network. Entries are the glue or "conductors" that mitigate the responisbilites of nodes at all layers of the SCMS, hence, why it is important to maintaing there anonyminity with balancers. If an entry is leaked or discovered by an individual, the network is not compramised but the node must be retired to risk snooping for connections to Indexers, Route-Stops, etc.
+
+##### Indexers (IN)
+Indexers are the heart of data-collection within the network. Similar to a Certificate Authority, there origional operations was to monitor IP-ID associations the have been logged, and their associative public-keys to facilitate "pathways" to follow within the advanced-syntax. This responisiblity has been expanded to observing the ongoing pathways of packets and verifying each received packet is from an "ordered" routing-phase node. This will be described in further detail under the packet-relay section of this documentation.
+
+###### Indexers Designation
+Both designations must be paired in order to communicate sensitive data in a P2P transmision. 
+1. ID-IP Association Authority (IDP)
+- Handle requests for ID/IP lookups, insertions, and deletions.
+- Maintiain an Public-Key association to an ID that is used to protect information to them or protect the IP they must send a packet too in the next sequence of the route. This is so that the next IP in the routing sequence can be seen by the ID that must transmit the packet.
+- Generate new pathways 
+2. Pathway Verification Authority (PAT)
+- Once a node has received a packet, they will verify the origin of the packet is apart of the Pathway given by the ID-IP Association.
+- NOTE: while it may seem the PAT has less-respinsibilites, it must facilitate verifications with N nodes of a given pathway. This is a significant increase in-contrast to a IDP with one-transmition per pathway
+
+#### Routing Phase
+
+##### Route-Stop (RN)
+
+#### Post-Transfer Phase
+
+#### Exit(EX)
+---
 
 ### Shotgunning <span style="color:blue">*[future]*</span>
 The process of sending messages over a pre-determined interval with independent routed paths. This will make

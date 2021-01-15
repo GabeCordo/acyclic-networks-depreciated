@@ -10,7 +10,7 @@ from datetime import datetime
 #		  quickscmp Imports
 #####################################
 
-from quickscmp.utils import linkerJSON
+from quickscmp.linker import linkerJSON
 
 #####################################
 #			  Constants

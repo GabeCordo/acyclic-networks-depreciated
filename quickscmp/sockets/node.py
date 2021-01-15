@@ -36,6 +36,11 @@ class Node:
 			
 			** defaulted to end-to-end encryption enabled **
 		'''
+		##Imported Containers##
+		self.container_addresses = container_addresses
+		self.container_paths = container_paths
+		self.container_customizations = container_customizations
+		
 		##Generic Variables##
 		self.queue = [] #all unhandled requests will go here
 		

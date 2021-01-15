@@ -24,7 +24,8 @@ class Handler:
 		'''
 		self.files = args
 		self.data  = []
-		self.pull() #validate that the files provided to the class exist
+		#self.template_pull(None) #validate that the files provided to the class exist
+		#TODO - fix this this is based on a legacy version
 			
 	def template_push(self, dump_function):
 		'''
@@ -54,10 +55,12 @@ class Handler:
 		'''
 		try:
 			for i in range(0, len(self.files)):
-				file_current = open(self.files[i], 'r')
-				self.data.append(load_function(file_current))
-				file_current.close()
-		except:
+				if (self.files[i][0] != None):
+					file_current = open(self.files[i][0], 'r')
+					self.data.append(load_function(file_current))
+					file_current.close()
+		except Exception as e:
+			print(e)
 			raise FileNotFoundError(f'linkerJSON Error: one or more of the provided files does not exist.')
 	
 	def cleanerFunctionality(self, element):

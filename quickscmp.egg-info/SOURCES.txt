@@ -10,9 +10,17 @@ quickscmp.egg-info/top_level.txt
 quickscmp/bitstream/__init__.py
 quickscmp/bitstream/advanced.py
 quickscmp/bitstream/basic.py
+quickscmp/bitstream/nrm.py
 quickscmp/encryption/__init__.py
 quickscmp/encryption/rsa.py
 quickscmp/encryption/type.py
+quickscmp/linker/__init__.py
+quickscmp/linker/linkerJSON.py
+quickscmp/linker/linkerTemplate.py
+quickscmp/linker/linkerYAML.py
+quickscmp/routines/__init__.py
+quickscmp/routines/generator.py
+quickscmp/routines/handler.py
 quickscmp/server/__init__.py
 quickscmp/server/cmd.py
 quickscmp/server/console.py
@@ -36,5 +44,5 @@ quickscmp/utils/caching.py
 quickscmp/utils/containers.py
 quickscmp/utils/enums.py
 quickscmp/utils/errors.py
-quickscmp/utils/linkerJSON.py
+quickscmp/utils/logging.py
 quickscmp/utils/terminal.py
