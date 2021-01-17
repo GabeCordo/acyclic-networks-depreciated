@@ -1,0 +1,53 @@
+#
+#               [ROUTINE NAME] HEADER FILE
+#
+#                [Created on DD/MM/YYYY]
+#
+#   EDITS  MADE  TO  THIS DOCUMENT OR ANY FILES APART OF
+#   THIS ROUTINE MAY RESULT IN ERRONEOUS CODE FOR WHICH,
+#   THE  AUTHOR  OR  ORGINIZATION IS NOT RESPONSIBLE FOR
+#   POSSIBLE  EDGE-CASES  OR FAULTY NODE SOCKETS IN SCMP
+#
+#      L-> if  a  modification results  in  faulty  code,
+#          please  redownload  the  routine from the site
+#
+#      [x] Site: [URL OF ROUTINE SITE]
+#
+
+config:
+	settings:
+		port: 5078
+		markup: Basic
+		return-codes:
+			- 0
+			- 1
+			- 2
+		buffer-size: 1024
+		latency-size: 4
+	addresses:
+		ip: 127.0.0.1
+		index: 127.0.0.1
+		backup: 127.0.0.1
+	paths:
+		rsa: './paths/keys/'
+		logging: './paths/logging/'
+		markup: './paths/markup'
+	customizations:
+		encryption: On
+		listening: On
+		monitoring: Off
+		recovery: On
+		console: Off
+		data-capture: Off
+	custom:
+		using-custom: Off
+		custom-settings:
+			- blank
+		custom-scripts:
+			- script1.py
+			- script2.py
+			- script3.py
+		markup-sheets:
+			- sheet1.mkdn
+			- sheet2.mkdn
+			- sheet3.mkdn

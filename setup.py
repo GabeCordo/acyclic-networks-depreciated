@@ -6,9 +6,9 @@ with open("README.md", "r") as fh:
 longDescription = 'A (S)ecure (C)ommunication and (M)essaging (S)ervice is a lightweight tool for providing encrypted client-server messaging with path-routing features.'
 
 setup(
-	name = 'quickscmp',
+	name = 'quickscms',
 	packages = find_packages(),
-	version = '1.1.5.7',
+	version = '1.1.6',
 	licence = 'MIT',
 	description = longDescription,
 	author = 'Gabriel Cordovado',
