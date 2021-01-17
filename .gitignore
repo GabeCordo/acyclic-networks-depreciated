@@ -7,3 +7,9 @@ eggs
 src/*.egg-info
 lib
 lib64
+.idea
+.vscode
+__pychache__
+build
+keys
+.DS_Store
