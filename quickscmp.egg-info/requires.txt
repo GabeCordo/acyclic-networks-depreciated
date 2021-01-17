@@ -1,6 +1,0 @@
-cffi
-pycryptodomex
-pyfiglet
-clint
-pyyaml
-json
