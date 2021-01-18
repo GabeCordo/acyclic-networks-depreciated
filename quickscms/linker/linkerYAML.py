@@ -5,7 +5,7 @@
 from yaml import load, dump
 
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
 
 from quickscms.linker import linkerTemplate
@@ -18,7 +18,8 @@ class Handler(linkerTemplate.Handler):
 	
 	def __init__(self, *args):
 		'''
-			(String...) -> None
+			(List of Strings) -> None
+			:Constructor function for the YAML handler. This function allows any number of JSON files to be entered under args*.  
 		'''
 		super().__init__(args)
 	

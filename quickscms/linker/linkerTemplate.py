@@ -5,7 +5,7 @@ from time import sleep
 from threading import Thread
 
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
 from quickscms.utils import errors
 
@@ -65,7 +65,7 @@ class Handler:
 	
 	def cleanerFunctionality(self, element):
 		'''(Handler) -> None
-			:adds special functionality to the JSON updater file
+			:adds special functionality to the Markup updater file
 		'''
 		pass
 	
@@ -73,7 +73,7 @@ class Handler:
 		'''
 			(Handler, int) -> None
 			:responsible for manipulating and pushing the dictionary data
-			 to the JSON files every 'timer' seconds
+			 to the Markup files every 'timer' seconds
 		'''
 		while True:
 			#complete this loop every 'timer' seconds

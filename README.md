@@ -19,17 +19,21 @@ A (S)ecure (C)ommunication and (M)essaging (S)ervice is a lightweight framework 
 
 ### Further Reading
 
-[Documentation](https://github.com/GabeCordo/scms-protocol/tree/master/docs/reference.md)
-[Framework](https://github.com/GabeCordo/scms-protocol/tree/master/docs/functions.md)
-[Server-Setup](https://github.com/GabeCordo/scms-protocol/tree/master/docs/server.md)
+* [Documentation](https://github.com/GabeCordo/scms-protocol/tree/master/docs/reference.md)
+* [Framework](https://github.com/GabeCordo/scms-protocol/tree/master/docs/functions.md)
+* [Server-Setup](https://github.com/GabeCordo/scms-protocol/tree/master/extensions/manakin/docs/server.md)
 
 ## Extensions
 
 ### SORL
-[Segment Oriented Routing Language](https://github.com/GabeCordo/scms-protocol/tree/master/docs/markdown.md) is a (simplistic) syntactical structure for encapsulating encoded-data required for segmented("stage") routing blocks. 
+[Segment Oriented Routing Language](https://github.com/GabeCordo/scms-protocol/tree/master/extensions/sorl) is a (simplistic) syntactical structure for encapsulating encoded-data required for segmented("stage") routing blocks. 
+
+* [Documentation] (https://github.com/GabeCordo/scms-protocol/tree/master/extensions/sorl/docs/markdown.md)
 
 ### Manakin
-[Manakin](https://github.com/GabeCordo/Manakin) is a command-line interface for interacting with the SCMS frameworks built-in server tools. This allows nodes, traffic-managements, logging, scheduling, and events to be initialized with minimal overhead.
+[Manakin](https://github.com/GabeCordo/scms-protocol/tree/master/extensions/manakin) is a command-line interface for interacting with the SCMS frameworks built-in server tools. This allows nodes, traffic-managements, logging, scheduling, and events to be initialized with minimal overhead.
+
+* [Documentation] (https://github.com/GabeCordo/scms-protocol/tree/master/extensions/manakin/docs/server.md)
 
 ## Credits
 

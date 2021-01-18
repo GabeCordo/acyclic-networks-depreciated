@@ -5,7 +5,7 @@
 from json import dump, load
 
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
 
 from quickscms.linker import linkerTemplate
@@ -18,15 +18,15 @@ class Handler(linkerTemplate.Handler):
 	
 	def __init__(self, *args):
 		'''
-			(Strings) -> None
-			:
+			(List of Strings) -> None
+			:Constructor function for the JSON handler. This function allows any number of JSON files to be entered under args*.
 		'''
 		super().__init__(args)
 	
 	def push(self):
 		'''
 			:pushes to the changes in the class
-			 dictionary to all the JSON files
+			 dictionary to all the JSON files.
 		'''
 		self.template_push(dump)
 	
@@ -34,7 +34,7 @@ class Handler(linkerTemplate.Handler):
 		'''
 			:pulls all the data within the JSON
 			 files that have been pushed as class
-			 parameters
+			 parameters.
 		'''
 		self.template_pull(load)
 		

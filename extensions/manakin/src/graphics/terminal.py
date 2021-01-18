@@ -80,23 +80,24 @@ def file(header, data):
 	
 	line = ''
 	for i in range(0, len(data)):
-		line = '\t' + line + f'{i+1}. {data[i]}\n'
+		line = line + f'{i+1}. {data[i]}\n'
 	
 	footer = colored.green('end of text')
 	footer = f'[ {footer} ]\n'
 	
 	print(header + line + footer)
 	
-def message(id_user, message):
+def message(id_user, message, comment, timestamp):
 	'''
-		(string, string) -> (string)
+		(string, string, string, boolean) -> (string)
 		
 		@returns a pretty version of the received message
 	'''
-	header = colored.cyan(id_user)
+	header = colored.white(id_user)
 	header = f'[ {header} ] '
+	time = datetime.now()
 	
-	print(header + message) 
+	print(f'{header}{message} // {comment}\t( {time} )') 
 	
 def alert(header, message):
 	'''
@@ -110,6 +111,12 @@ def alert(header, message):
 	
 	print(header + message)
 	
+def warning(header, message):
+	header = colored.magenta(header)
+	header = f'[ {header} ]'
+	
+	print(header + message)
+
 #####################################
 #		   		EOF
 #####################################

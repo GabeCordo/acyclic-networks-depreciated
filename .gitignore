@@ -1,15 +1,27 @@
-.installed.cfg
-bin
-develop-eggs
-dist
-downloads
-eggs
-src/*.egg-info
-lib
-lib64
+#block configuration folders
 .idea
 .vscode
-__pychache__
-build
-keys
+
+#block generic meta-data files/folder
+.installed.cfg
+lib
+lib64
 .DS_Store
+__pychache__
+
+#block PIP meta-data files/folders
+setup.cfg
+setup.py
+develop-eggs
+src/*.egg-info
+eggs
+
+# encryption-key safeguards
+keys
+.pem
+
+#block development folders/files
+bin
+dist
+downloads
+build

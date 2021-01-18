@@ -2,7 +2,7 @@
 #		   Python Imports
 #####################################
 
-from pynodetor.bitstream import basic
+from quickscmp.bitstream import basic
 from sys import path
 
 #####################################

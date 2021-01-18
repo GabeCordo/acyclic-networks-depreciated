@@ -7,7 +7,7 @@ from shutil import copyfile, copytree
 from sys import path
 
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
 
 from quickscms.linker import linkerYAML
@@ -23,10 +23,10 @@ class Routine:
 				 container_addresses, container_paths, container_customizations):
 		'''
 			(Routine, Addresses, Paths, Customizations) -> None
-			:The constructor function for the Routine generator. Required to intialize
+			:The constructor function for the Routine generator. Required to initialize
 			 the various data-containers needed by the generator to create a proper r-
-			 outine directory, furthermore creating holder-class variables for YAML and
-			 directory handlers
+			 outline directory, furthermore creating holder-class variables for YAML and
+			 directory handlers.
 		'''
 		self.container_routine_author = container_routine_author,
 		self.container_routine_settings = container_routine_settings,
@@ -53,7 +53,7 @@ class Routine:
 			:creates a YAML file for the author/routine information that does not effect the
 			 functionality of the 
 				
-			@returns boolean True if the YAML file was sucesfuly created with the data in the
+			@returns boolean True if the YAML file was successfully created with the data in the
 					 containers passed as class arguments
 			@paramaters the _generate_template_routine must have been called creating the blank
 						directories and markup files
@@ -61,21 +61,21 @@ class Routine:
 		if self.directory_root is not None:
 			self.yaml_handler_author = linkerYAML.Handler(self.directory_root + 'author.yaml')
 			self.yaml_handler_author.data[0] = {
-				data : {
-					author : {
-						name: self.container_routine_author.author_name
-						email: self.container_routine_author.author_email
-						site: self.container_routine_author.author_site
-						date: self.container_routine_author.date
+				"data" : {
+					"author" : {
+						"name": self.container_routine_author.author_name,
+						"email": self.container_routine_author.author_email,
+						"site": self.container_routine_author.author_site,
+						"date": self.container_routine_author.date
 					},
-					routine : {
-						name: self.container_routine_author.name
-						version: self.container_routine_author.version
-						description: self.container_routine_author.description
-						licence: self.container_routine_author.licence
-						keywords: self.container_routine_author.keywords
-						classifiers: self.container_routine_author.classifiers
-						documentation: self.container_routine_author.documentation
+					"routine" : {
+						"name": self.container_routine_author.name,
+						"version": self.container_routine_author.version,
+						"description": self.container_routine_author.description,
+						"licence": self.container_routine_author.licence,
+						"keywords": self.container_routine_author.keywords,
+						"classifiers": self.container_routine_author.classifiers,
+						"documentation": self.container_routine_author.documentation
 					}
 				}
 			} 
@@ -89,10 +89,10 @@ class Routine:
 	def _dictionary_create_config(self):
 		'''
 			(Routine) -> (boolean)
-			:creates a YAML file for the condig information that effects the functionality of
+			:creates a YAML file for the config information that effects the functionality of
 			 the routine being implemented
 				
-			@returns boolean True if the YAML file was sucesfuly created with the data in the
+			@returns boolean True if the YAML file was successfully created with the data in the
 					 containers passed as class arguments
 			@paramaters the _generate_template_routine must have been called creating the blank
 						directories and markup files
@@ -100,37 +100,37 @@ class Routine:
 		if self.directory_root is not None:
 			self.yaml_handler_config = linkerYAML.Handler(self.directory_root + 'config.yaml')
 			self.yaml_handler_config.data[0] = {
-				config = {
-					settings = {
-						port: self.container_addresses.port,
-						markup: self.container_routine_settings.markup,
-						return-codes: self.container_routine_settings.return_codes,
-						buffer-size: self.container_routine_settings.buffer_size,
-						latency-size: self.container_routine_settings.latency_size
+				"config" : {
+					"settings" : {
+						"port": self.container_addresses.port,
+						"markup": self.container_routine_settings.markup,
+						"return-codes": self.container_routine_settings.return_codes,
+						"buffer-size": self.container_routine_settings.buffer_size,
+						"latency-size": self.container_routine_settings.latency_size
 					},
-					addresses = {
-						ip: self.container_addresses.ip,
-						index: self.container_addresses.ip_index,
-						backup: self.container_addresses.ip_backup
+					"addresses" : {
+						"ip": self.container_addresses.ip,
+						"index": self.container_addresses.ip_index,
+						"backup": self.container_addresses.ip_backup
 					},
-					paths = {
-						rsa: self.directory_root + '/paths/keys/',
-						logging: self.directory_root + './paths/logging/',
-						markup: self.directory_root + './paths/markup'
+					"paths" : {
+						"rsa": self.directory_root + '/paths/keys/',
+						"logging": self.directory_root + './paths/logging/',
+						"markup": self.directory_root + './paths/markup'
 					},
-					customizations = {
-						encryption: self.container_customizations.supports_encryption,
-						listening: self.container_customizations.supports_listening,
-						monitoring: self.container_customizations.supports_monitoring,
-						recovery: self.container_customizations.supports_recovery,
-						console: self.container_customizations.supports_console_cout,
-						data-capture: self.container_customizations.supports_data_capture
+					"customizations" : {
+						"encryption": self.container_customizations.supports_encryption,
+						"listening": self.container_customizations.supports_listening,
+						"monitoring": self.container_customizations.supports_monitoring,
+						"recovery": self.container_customizations.supports_recovery,
+						"console": self.container_customizations.supports_console_cout,
+						"data-capture": self.container_customizations.supports_data_capture
 					},
-					custom = {
-						using-custom: False,
-						custom-settings: {},
-						custom-scripts: [],
-						markup-sheets: []
+					"custom" : {
+						"using-custom": False,
+						"custom-settings": {},
+						"custom-scripts": [],
+						"markup-sheets": []
 					}
 				}
 			}
@@ -144,7 +144,7 @@ class Routine:
 	def _negate_custom_settings_bool(self):
 		'''
 			(Routine) -> (None)
-			:due to the verbose syntax, this is a form of syntatical sugar
+			:due to the verbose syntax, this is a form of syntactical sugar
 			 to make the manipulation of this deep-data in the dictionary
 			 easily changeable
 		'''
@@ -205,7 +205,7 @@ class Routine:
 		
 	def generate_new_routine(self, directory_root):
 		'''
-			(String) -> (None)
+			(Routine, String) -> (None)
 			:creates a bare-bone routine (based off of the template within the library) and
 			 customizes the author and config sheets based on data passed to the class
 			

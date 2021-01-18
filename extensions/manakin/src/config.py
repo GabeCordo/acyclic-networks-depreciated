@@ -2,10 +2,10 @@
 #		   Python Imports
 #####################################
 
-from pyscms.utils import linkerJSON
+from quickscmp.linker import linkerJSON
 
 #####################################
-#		   MANAKIN CONFIG
+#		   MANAKIN CONFIGs
 #####################################
 
 class Config:
@@ -15,6 +15,7 @@ class Config:
 			(Config, string) -> None
 		'''
 		self.l = linkerJSON.Handler(path)
+		self.l.pull()
 		self.config = self.l.data[0]
 	
 	##		Config Settings		##
