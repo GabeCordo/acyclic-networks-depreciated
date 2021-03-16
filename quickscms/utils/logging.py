@@ -42,10 +42,10 @@ class Logger(linkerJSON.Handler):
 		self.identifier = 'NONE'
 		self.num_of_commits = 0 #the number of data pieces we collect per log
 	
-	def terminal_start_logging(identifier):
+	def terminal_start_logging(self, identifier):
 		'''
 			(String) -> None
-			:Will start a new logg for a connection to the server
+			:Will start a new log for a connection to the server
 			 or client node
 		'''
 		if (self.flag_graphics):
@@ -59,7 +59,7 @@ class Logger(linkerJSON.Handler):
 			"commits": []
 		}
 	
-	def notification(text):
+	def notification(self, text):
 		'''
 			(String) -> None
 			:loggs a new entry to the JSON File specified within the class
@@ -71,12 +71,12 @@ class Logger(linkerJSON.Handler):
 			print(TITLE + f'({temp_time}) {text}')
 
 		self.num_of_commits += 1
-		seld.log[self.identifier]['commits'][self.num_of_commits] = {
+		self.log[self.identifier]['commits'][self.num_of_commits] = {
 			"time": temp_time,
 			"text": text
 		}
 	
-	def terminal_stop_logging():
+	def terminal_stop_logging(self):
 		'''
 			:Will stop a logg for a connection to the server or
 			 client node
