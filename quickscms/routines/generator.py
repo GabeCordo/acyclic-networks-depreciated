@@ -124,7 +124,9 @@ class Routine:
 						"monitoring": self.container_customizations.supports_monitoring,
 						"recovery": self.container_customizations.supports_recovery,
 						"console": self.container_customizations.supports_console_cout,
-						"data-capture": self.container_customizations.supports_data_capture
+						"data-capture": self.container_customizations.supports_data_capture,
+						"dynamic-interaction": self.container_customizations.supports_dynamic_interaction,
+						"scheduling-events": self.container_customizations.support_scheduling_events
 					},
 					"custom" : {
 						"using-custom": False,
@@ -196,8 +198,8 @@ class Routine:
 			 data-sheets that ARE NOT CONFIG SETTINGS
 				L-> Config settings are added to the official config yaml markup
 			
-			!markups must be one of the officialy supported languages, check supported
-			 markups in the scmp protocol documentation for more information
+			!markups must be one of the officially supported languages, check supported
+			 markups in the scms protocol documentation for more information
 		'''
 		self._check_custom_settings()
 		self.yaml_handler_config['config']['custom']['markup-sheets'][markup_enum].append(markup_name)
@@ -216,4 +218,4 @@ class Routine:
 			self._dictionary_create_author()
 			self._dictionary_create_config()
 		except:
-			raise CorruptedRoutine
+			raise errors.CorruptedRoutine

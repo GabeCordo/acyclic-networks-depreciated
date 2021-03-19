@@ -23,12 +23,11 @@ setup(
 		'pycryptodomex',
 		'pyfiglet',
 		'clint',
-		'pyyaml',
-		'json'
+		'pyyaml'
 	],
 	classifiers = [
 		'License :: OSI Approved :: MIT License',
 		'Operating System :: OS Independent'
 	],
-	python_requries = '>=3.4'
+	python_requires = '>=3.4'
 )

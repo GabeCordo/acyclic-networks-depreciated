@@ -1,145 +1,165 @@
 ## --------------------------------------------------------------------------------
-##		  Request Type
-###############################
+
+from quickscms.types.enums import Options
+
+class Option():
+	def __init__(self, option: Options, description: str):
+		'''
+		'''
+		self.option = option
+		self.description = description
+	def is_valid(self):
+		'''
+		'''
+		return not(self.option == None)
+	def __eq__(self, other: Options) -> bool:
+		'''
+		'''
+		if (other == None):
+			return False
+		if (type(other) != type(Options)):
+			return False
+		if (self.option != Options):
+			return False
+		return True
+	def __repr__(self) -> str:
+		'''
+		'''
+		return f'Option({self.option})'
+	def __str__(self) -> str:
+		'''
+		'''
+		return f'{self.option}: {self.description}'
+
+## --------------------------------------------------------------------------------
 
 from quickscms.types.enums import RequestCode
 
-###############################
-
 class Request():
-    def __init__(self, ip: str, cipher: str, rsa_pub: str, plaintext: str,
-                 authentication: str, nonce: str, request: RequestCode
-        ):
-        '''
-        '''
-        self.ip = ip
-        self.request = request
-        self.rsa_pub = rsa_pub
-        self.cipher = cipher
-        self.plaintext = plaintext
-        self.authentication = authentication
-        self.nonce = nonce
-    
-    def serialize(self) -> dict:
-        '''
-        '''
-        return {
-            'ip': self.ip,
-            'req': self.request,
-            'metdata': {
-                'rsa': self.rsa_pub,
-                'auth': self.authentication,
-                'nonce': self.nonce
-            },
-            'data': {
-                'cipher': self.cipher,
-                'plain': self.plaintext
-            }
-        }
+	def __init__(self, ip: str, cipher: str, rsa_pub: str, plaintext: str,
+				 authentication: str, nonce: str, request: RequestCode
+		):
+		'''
+		'''
+		self.ip = ip
+		self.request = request
+		self.rsa_pub = rsa_pub
+		self.cipher = cipher
+		self.plaintext = plaintext
+		self.authentication = authentication
+		self.nonce = nonce
+	
+	def serialize(self) -> dict:
+		'''
+		'''
+		return {
+			'ip': self.ip,
+			'req': self.request,
+			'metdata': {
+				'rsa': self.rsa_pub,
+				'auth': self.authentication,
+				'nonce': self.nonce
+			},
+			'data': {
+				'cipher': self.cipher,
+				'plain': self.plaintext
+			}
+		}
 
-    def unserialize(self, json_dic) -> None:
-        '''
-        '''
-        self.ip = json_dic['ip']
-        self.request = json_dic['req']
-        self.rsa_pub = json_dic['metdata']['rsa']
-        self.cipher = json_dic['data']['cipher']
-        self.plaintext = json_dic['data']['plain']
-        self.authentication = json_dic['metdata']['auth']
-        self.nonce = json_dic['metdata']['nonce']
+	def unserialize(self, json_dic) -> None:
+		'''
+		'''
+		self.ip = json_dic['ip']
+		self.request = json_dic['req']
+		self.rsa_pub = json_dic['metdata']['rsa']
+		self.cipher = json_dic['data']['cipher']
+		self.plaintext = json_dic['data']['plain']
+		self.authentication = json_dic['metdata']['auth']
+		self.nonce = json_dic['metdata']['nonce']
 
-    def __eq__(self, other):
-        '''
-        '''
-        if (other == None): return False
-        if (type(other) != type(Request)):  return False
-        if (self.nonce == other.nonce):
-            return True
-        return False
+	def __eq__(self, other):
+		'''
+		'''
+		if (other == None): return False
+		if (type(other) != type(Request)):  return False
+		if (self.nonce == other.nonce):
+			return True
+		return False
 
-    def __str__(self):
-        '''
-        '''
-        return (f'ip:{self.ip}\nrequest:{self.request}\nauth:{self.authentication}\n'
-             + f'nonce:{self.nonce}\n{self.rsa_pub}\n{self.cipher}\n{self.plaintext}'
-        )
+	def __str__(self):
+		'''
+		'''
+		return (f'ip:{self.ip}\nrequest:{self.request}\nauth:{self.authentication}\n'
+			 + f'nonce:{self.nonce}\n{self.rsa_pub}\n{self.cipher}\n{self.plaintext}'
+		)
 
-    def __repr__(self):
-        '''
-        '''
-        return f'Request({self.ip}, {self.request}, {self.nonce})'
+	def __repr__(self):
+		'''
+		'''
+		return f'Request({self.ip}, {self.request}, {self.nonce})'
 
 ## --------------------------------------------------------------------------------
-##		   Log Type
-###############################
 
-from time import ctime
-
-###############################
+from time import ctime, strftime
 
 class Log():
-    def __init__(self, message: str, description: str, 
-                 request: Request, latency: int 
-        ):
-        '''
-        '''
-        self.message = message
-        self.description = description
-        self.request = request
-        self.time = ctime()
-        self.latency = latency
-    
-    def serialize(self) -> dict:
-        '''
-        '''
-        return {
-            'msg': self.message,
-            'des': self.decription,
-            'data': {
-                'req': self.request,
-                'time': self.time,
-                'lat': self.latency
-            }
-        }
+	def __init__(self, message: str, description: str, 
+				 request: Request, latency: int 
+		):
+		'''
+		'''
+		self.message = message
+		self.description = description
+		self.request = request
+		self.time = ctime()
+		self.latency = latency
+	
+	def serialize(self) -> dict:
+		'''
+		'''
+		return {
+			'msg': self.message,
+			'des': self.decription,
+			'data': {
+				'req': self.request,
+				'time': self.time,
+				'lat': self.latency
+			}
+		}
 
-    def unserialize(self, json_dic) -> None:
-        '''
-        '''
-        self.message = json_dic['msg']
-        self.description = json_dic['des']
-        self.request = json_dic['data']['req']
-        self.time = json_dic['data']['time']
-        self.latency = json_dic['data']['lat']
-    
-    def __eq__(self, other) -> bool:
-        '''
-        '''
-        if (other == None): return False
-        if (type(other) != type(Log)):  return False
-        if (self.request == other.request):
-            return True
-        return False
+	def unserialize(self, json_dic) -> None:
+		'''
+		'''
+		self.message = json_dic['msg']
+		self.description = json_dic['des']
+		self.request = json_dic['data']['req']
+		self.time = json_dic['data']['time']
+		self.latency = json_dic['data']['lat']
+	
+	def __eq__(self, other) -> bool:
+		'''
+		'''
+		if (other == None): return False
+		if (type(other) != type(Log)):  return False
+		if (self.request == other.request):
+			return True
+		return False
 
-    def __str__(self) -> str:
-        '''
-        '''
-        return f'({self.time}:{self.request}) {self.message}\n{self.description}\n{str(self.request)}'
+	def __str__(self) -> str:
+		'''
+		'''
+		return f'({self.time}:{self.request}) {self.message}\n{self.description}\n{str(self.request)}'
 
-    def __repr__(self) -> str:
-        '''
-        '''
-        return f'Log({self.time}, {self.request})'
+	def __repr__(self) -> str:
+		'''
+		'''
+		return f'Log({self.time}, {self.request})'
 
 
 ## --------------------------------------------------------------------------------
-##		   Event Type
-###############################
 
-###############################
-
-class Event:
-
-	def __init__(self, generic, title, description, starts, ends, function, repeat=False):
+class Event():
+	def __init__(self, generic, title, description, starts, ends, function=None, repeat=False):
 		'''
 			(Event, Generic, string, datetime, datetime, object, boolean) -> None
 			:the constructor class for events that are scheduled on callenders
@@ -155,6 +175,19 @@ class Event:
 		self.function = function
 		self.repeat = repeat
 	
+	def linkFunction(self, new_function_p) -> bool:
+		'''
+			(None) -> (Boolean)
+			:links an external function to the event by passing it as a first class var
+
+			@returns true if the function was successfully linked
+			@exception will return false if there is a failure or it is previously defined
+		'''
+		if (self.function == None):
+			return False
+		self.function = new_function_p
+		return True
+
 	def execute(self):
 		'''
 			(Event) -> Generic
@@ -204,25 +237,37 @@ class Event:
 					 whether the event is meant to repeat
 		'''
 		return (self.title, self.starts, self.ends, self.repeat)
+		
+	def serialize(self) -> dict:
+		return {
+			'metadata': {
+				'generic': str(self.generic),
+				'title': self.title,
+				'description': self.description
+			},
+			'starts': str(self.starts),
+			'ends': str(self.ends),
+			'func': str(self.function),
+			'repeat': self.reapeat
+		}
 
-    def serialize(self) -> dict:
-        pass
-
-    def unserialize(self, json_dic) -> None:
-        pass
+	def unserialize(self, json_dic) -> None:
+		self.generic = json_dic['metadata']['generic']
+		self.title = json_dic['metadata']['title']
+		self.description = json_dic['metadata']['description']
+		self.starts = json_dic['starts']
+		self.ends = json_dic['ends']
+		self.function = None
+		self.repeat = int(json_dic['repeat'])
 		
 
 ## --------------------------------------------------------------------------------
-##		   Key Type
-###############################
 
 from quickscms.crypto import rsa
-from quickscms.utils import enums, errors
-
-###############################
+from quickscms.types import enums, errors
 
 class Keys:
-	def __init__(self, type_encryption, directory_key_private, directory_key_public):
+	def __init__(self, type_encryption: enums.EncryptionScheme, directory_key_private: str, directory_key_public: str):
 		'''
 			(Keys, Encryption, string, string) -> None
 			:constructor function of the RSA Key Pair Class
@@ -248,7 +293,7 @@ class Keys:
 			@exception throws MismatchedKeys() error
 		'''
 		try:
-			if (self.type_encryption == enums.Encryption.RSA):
+			if (self.type_encryption == enums.EncryptionScheme.RSA):
 				
 				#use the directory of the public key to encrypt a test message
 				h = rsa.Handler(self.directory_key_private, self.directory_key_public)
@@ -261,7 +306,7 @@ class Keys:
 					self._publicKey = h.getPublicKey()
 					self._privateKey = h.getPrivateKey()
 		except:
-			raise MismatchedKeys()
+			raise errors.MismatchedKeys()
 			
 	def getPublicKey(self):
 		'''
@@ -281,8 +326,31 @@ class Keys:
 		'''
 		return self._privateKey
 
-    def serialize(self) -> dict:
-        pass
+	def serialize(self) -> dict:
+		return {
+			'encryption-type': str(self.type_encryption),
+			'private-key': self.directory_key_private,
+			'public-key': self.directory_key_public
+		}
 
-    def unserialize(self, json_dic) -> None:
-        pass
+	def unserialize(self, json_dic) -> None:
+		if (json_dic['encryption-type'] == 'EncryptionScheme.RSA'):
+			self.type_encryption = enums.EncryptionScheme.RSA
+		self.directory_key_private = json_dic['private-key']
+		self.directory_key_public = json_dic['public-key']
+
+## --------------------------------------------------------------------------------
+
+class AVLTreeNode():
+	
+	def __init__(self, key, val=None, balance_factor=0):
+		self.key = key
+		self.val = val
+		self.left = None
+		self.right = None
+		self.parent = None
+		self.balance_factor = balance_factor
+		self.height = 1
+		
+
+## --------------------------------------------------------------------------------

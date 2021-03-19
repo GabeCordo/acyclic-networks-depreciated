@@ -1,6 +1,6 @@
 '''
 	USERID GENERATOR FOR IP MATCHING ON THE INDEX NODE
-	-     Accompany the alaphanumerical name 		 -
+	-     Accompany the alphanumerical name 		 -
 	-   	with a randomized 6-bit digit  	         -
 	
 	Default input/output class initializations:

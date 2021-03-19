@@ -14,7 +14,7 @@ class Timer:
 		'''
 			(Timing, int) -> (None)
 			:constructor function for the Timing class, will initialize a
-			 startiung time upon the function call
+			 starting time upon the function call
 			
 			@paramaters the precission paramater must be given a integer
 						argument, representing the number of decimals ea-
@@ -28,7 +28,7 @@ class Timer:
 	def getLog(self):
 		'''
 			(Timing) -> (list of floats)
-			:the getter funciton for the last recorded time difference
+			:the getter function for the last recorded time difference
 		'''
 		return self.log
 	

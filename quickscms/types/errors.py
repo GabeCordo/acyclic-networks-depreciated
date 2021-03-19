@@ -10,13 +10,21 @@ class UnauthorizedNetwork(Exception):
 	def __init__(self):
 		Exception.__init__(self, f'Fatal Error: There was attempt to attach a node that is not authorized to be apart of a network.')
 
+class ContainersLinkageFailed(Exception):
+	def __init__(self):
+		Exception.__init__(self, f'Fatal Error: The node failed to initialize as either a container was missing or the routine is broken.')
+
 ##########################################
 #		Generic Network Errors
 ##########################################
 
+class IllegalPortRange(Exception):
+	def __init__(self, message):
+		Exception.__init__(self, f'The specified port is outside of the permitted range.')
+
 class IllegalRequest(Exception):
 	def __init__(self, request):
-		Exception.__init__(self, f'Generic Network Error: Illigal Request was provided to the node.')
+		Exception.__init__(self, f'Generic Network Error: Illegal Request was provided to the node.')
 		self.request = request
 		
 class CorruptedMessage(Exception):

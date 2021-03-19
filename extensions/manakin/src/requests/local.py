@@ -1,7 +1,7 @@
 #####################################
 #		Client-Side Requests
 #####################################
-from quickscmp.utils import caching
+from quickscms.utils import caching
 
 ##		Whitelist Functions		##
 

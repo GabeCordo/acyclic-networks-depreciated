@@ -1,6 +1,7 @@
 ###############################
 #		python imports
 ###############################
+
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP
 from base64 import b64encode, b64decode
@@ -47,7 +48,7 @@ class Handler:
 			:getter function for the classes public encryption key
 			
 			@paramaters a public key must exist
-			@returns the public key found within the placehodler variable
+			@returns the public key found within the placeholder variable
 			@exception returns an empty string if no key was generated or
 					   restored
 		'''
@@ -59,7 +60,7 @@ class Handler:
 			:getter function for the classes private encryption key
 			
 			@paramaters a private key must exist
-			@returns the private key found within the placehodler variable
+			@returns the private key found within the placeholder variable
 			@exception returns an empty string if no key was generated or
 					   restored
 		'''
@@ -72,7 +73,7 @@ class Handler:
 			
 			@paramaters keys must be pre-initialized within the file directories,
 						password must be valid
-			@returns boolean true if the keys were transfered from file to instance
+			@returns boolean true if the keys were transferred from file to instance
 					 var
 			@exception returns boolean false if there was an issue (password likeley
 					   INVALID)
@@ -139,7 +140,7 @@ class Handler:
 	def encrypt(self, message, key_public):
 		'''
 			(Handler, string, string) -> (string)
-			:transforms a plain text into a cyhpher text
+			:transforms a plain text into a cypher text
 			
 			@paramaters no value for a password will leave it as an empty string
 			@default keyPublic defaults to your public keys path for debugging

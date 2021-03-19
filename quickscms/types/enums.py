@@ -28,7 +28,7 @@ class Listening(Enum):
 	ENABLED = 1
 
 #this is left for (future) cryptographic implementations
-class Encryption(Enum):
+class EncryptionScheme(Enum):
 	RSA = 0
 
 #DEPRECIATED - this is used as a switch variable for the processing function
@@ -45,6 +45,17 @@ class ReturnCode(Enum):
 #Default Server Request Codes
 class RequestCode(Enum):
 	PING_SERVER = 1
+
+#Option Enum
+class Options(Enum):
+	SOME = 0,
+	ERROR = 1,
+
+#Permission Authority
+class Authority(Enum):
+	BASE = 0,
+	ELEVATED = 1,
+	SUDO = 2
 	
 ##########################################
 #			 Routine Enums

@@ -3,4 +3,3 @@ pycryptodomex
 pyfiglet
 clint
 pyyaml
-json

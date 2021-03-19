@@ -7,9 +7,9 @@
 		request, can be used by any node class: O(n) ***
 '''
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
-from quickscms.utils.errors import *
+from quickscms.types import errors
 
 ###############################
 #		   main code
@@ -61,7 +61,7 @@ class Parser():
 			#split the data added on-top of the request
 			self.data = self.message[request_seperator+1:].split('~')
 		except:
-			raise MismatchedSyntax()
+			raise errors.MismatchedSyntax()
 		
 	def getRequest(self):
 		'''
@@ -125,4 +125,4 @@ class Parser():
 			(Parser) -> (string)
 			@returns a string representation of the class type
 		'''
-		return f'Parser({message})'
+		return f'Parser({self.message})'

@@ -4,26 +4,27 @@
 
 import socket
 from sys import path
+from os.path import abspath
 from time import sleep, time
-from sys import getsizeof
 from threading import Thread
-from quickscms import utils
 
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
 
-from quickscms.encryption import rsa
+from quickscms.crypto import rsa
 from quickscms.timing.stopwatch import StopWatch
 from quickscms.timing.timer import Timer
-from quickscms.utils import errors, enums, logging, containers
+from quickscms.types import alias, static, dynamic, errors, enums, containers
+from quickscms.utils import logging
 
 ###############################
 #	   extension imports
 ###############################
 
-path.append('../../../extensions/manakin/src')
-import manakin
+path.append(abspath(__file__) + '/../../../extensions/manakin/src/')
+print(abspath(__file__) + '../../../extensions/manakin/src/')
+from manakin import Interface
 
 ###############################
 #		   constants
@@ -38,12 +39,14 @@ REQUEST_TIMEOUT = 5.0
 QUEUE_MONITOR_SCANNER_DELAY = 60
 QUEUE_MONITOR_MAX_GROWTH = 1000
 
+SCHEDULER_PRECISION = 3
+
 ###############################
 #		   main code
 ###############################
 
 class Node:
-	def __init__(self, container_addresses, container_paths, container_customizations):
+	def __init__(self, routine=None, container_addresses=None, container_paths=None, container_customizations=None):
 		'''
 			(Node, Addresses, Paths, Customizations) -> None
 			
@@ -52,21 +55,33 @@ class Node:
 			 socket input and output manipulation on the mock 'tor' network.
 			
 			!the node class uses containers to store huge amounts of variables
-			 for better customizability, reusability and to make code cleaner
+			 for better customization, reusability, and to make code cleaner
 			
 				L-> all wrapper classes found under utils/containers
 			
 			** defaulted to end-to-end encryption enabled **
 		'''
+		self.routine = routine
+		## we can either have a routine or manually defined containers, NOT both)
+		if (routine ^ (container_addresses and container_paths and container_customizations)):
+			raise errors.ContainersLinkageFailed
+
 		##Imported Containers##
-		self.container_addresses = container_addresses
-		self.container_paths = container_paths
-		self.container_customizations = container_customizations
+		if (not routine):
+			## import the container wrappers manually ##
+			self.container_addresses = container_addresses
+			self.container_paths = container_paths
+			self.container_customizations = container_customizations
+		else:
+			## use the predefined config.yaml file linked to the config.py ##
+			self.container_addresses = routine.cast_to_container_addresses()
+			self.container_paths = routine.cast_to_container_paths()
+			self.container_customizations = routine.cast_to_container_customizations()
 		
 		##Generic Variables##
 		self.queue = [] #all unhandled requests will go here
 		
-		##Initialize the recieving socket##
+		##Initialize the receiving socket##
 		self.incoming = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
 		##Initialize the encryption handler##
@@ -75,10 +90,20 @@ class Node:
 		##Settup logging file for connection speed data
 		logging.Logger(container_paths.directory_file_logging, container_customizations.supports_console_cout)
 		
+		##Define a placeholder for a timer##
+		self.event_scheduler = None
+
 		#these threads will need to be visible to a grouping of functions in the
 		#class so we are throwing it in the constructor
 		self.thread_one = Thread(target=self.listen, args=())
-		self.thread_two = Thread(target=self.monitor, args=())
+		self.thread_three = Thread(target=self.scheduler, args=())
+		
+		#a routine will need to override the default functions#
+		self.thread_two = None
+		if (not routine):
+			thread_two = Thread(target=self.monitor, args=())
+		else:
+			thread_two = Thread(target=routine.func_switch['qmf'](), args=())
 	
 	def getIp(self):
 		'''
@@ -111,13 +136,13 @@ class Node:
 	def isMonitoring(self):
 		'''
 			(Node) -> (boolean)
-			:the getter function for whether the queue monitor is damianzied
+			:the getter function for whether the queue monitor is daemonize
 			
-			@returns a boolean value representing whether the montior is toggled
+			@returns a boolean value representing whether the monitor is toggled
 		'''
 		return self.container_customizations.supports_monitoring
 	
-	def specialFunctionality(self, message: str, address: str) -> (bool, str):
+	def specialFunctionality(self, message: str, address: str) -> Tuple(bool, str):
 		'''
 			(string, string) -> (boolean, string)
 			:child classes can overide this function to offer special functionality
@@ -218,7 +243,11 @@ class Node:
 				message = ''.join(cyphertexts)
 				
 				#allow child classes to manipulate the message
-				data_processed = self.specialFunctionality(message, addr[0])
+				data_processed = None
+				if (not self.routine):
+					data_processed = self.specialFunctionality(message, addr[0])
+				else:
+					data_processed = self.routine.func_switch['rtpf']()
 				
 				print(f'Console: proccessed data') #console logging
 				print(data_processed) #debuging
@@ -297,12 +326,12 @@ class Node:
 			#ensure the socket is closed
 			self.incoming.close()
 	
-	def send(self, ip_target: int, message=enums.ReturnCode.PING_SERVER: enums.ReturnCode, port=PARAM_EMPTY_PORT: str) -> (str):
+	def send(self, ip_target: int, message: enums.RequestCode, port: str) -> enums.ReturnCode:
 			'''
 				(Node, int, message) -> (string)
 				:sends a bitsream to another Node.
 				
-				ip_target : the ip-adress of the receving node
+				ip_target : the ip-address of the receiving node
 				message : the bitsream to send to the node
 				
 				@returns a response code in the form of a strins from the server.
@@ -311,7 +340,7 @@ class Node:
 			try:
 				outgoing = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 				
-				#if we arn't send a port to send the message to, assume its the same as
+				#if we aren't send a port to send the message to, assume its the same as
 				#the one given upon class declaration (option: send to a diff network)
 				if (port == PARAM_EMPTY_PORT):
 					port = self.port
@@ -337,7 +366,7 @@ class Node:
 				
 				#prepare the message we are going to send to the
 				if(received_rsa_public != 'None'):
-					#if encryption is enabled, cypher it with the recieved public rsa
+					#if encryption is enabled, cypher it with the received public rsa
 					#we need to make sure the byte size of the string being encrypted does not grow > than 250
 					remaining_chars = PARAM_PERMITTED_CHAR_LEN
 					
@@ -395,23 +424,23 @@ class Node:
 						cyphertexts.append(outgoing.recv(REQUEST_BYTE_SIZE))
 						
 						#ensure data collection has not exceeded 5 seconds
-						if ((time() - time_warning) > 5.0):
+						if ((time() - time_warning) > REQUEST_TIMEOUT):
 							raise TimeoutError('Data Transfer Exceeded 5 seconds')
 						
 						i+=1
 						
 					cyphertexts.pop() #remove the null terminating character
 					
-					print(f'Console: Recieved Cyphertext') #console logging
+					print(f'Console: Received Cyphertext') #console logging
 					
 					#we want to decrypt the message only if encryption is enabled otherwise it is
 					#in plain-text and decrypting it will raise an error
 					if (received_rsa_public != 'None'):
-						#we need to individualy decrypt each message and then join it
+						#we need to individually decrypt each message and then join it
 						for i in range(0, len(cyphertexts)):
 							cyphertexts[i] = self.handler_keys.decrypt(cyphertexts[i]) #decrypt the cypher text and place it into a temp holder
 					else:
-						#we need to individualy decode the utf-8 bitsream into plain text
+						#we need to individually decode the utf-8 bitsream into plain text
 						for i in range(0, len(cyphertexts)):
 							cyphertexts[i] = cyphertexts[i].decode()
 						
@@ -425,7 +454,7 @@ class Node:
 						outgoing.close()
 						return 'Error 400: Bad Resquest'
 					else:
-						#the bitsream was successfuly sent, we received usfull information from
+						#the bitsream was successfully sent, we received usefully information from
 						#the server we may need to process (it might be a response)
 						outgoing.close()
 						return response
@@ -508,6 +537,16 @@ class Node:
 				#stop monitoring the queue
 				return
 	
+	def scheduler(self):
+		'''
+			(Node) -> None
+			:if a event scheduler has not already been created, we need to
+			 define one on the self.event_scheduler placeholder
+		'''
+		#check to see that a scheduler has not already been created.
+		if (not self.event_scheduler):
+			self.event_scheduler = Timer(SCHEDULER_PRECISION)
+
 	def settup(self):
 		'''
 			(Node) -> None
@@ -515,6 +554,7 @@ class Node:
 			
 			1) Thread One : Receives and sorts all incoming bitsream traffic
 			2) Thread Two : Monitors the enqueued bitsreams for overflow/flooding
+			3) Thread Three : Monitors events that we may want to perform on a Node
 			
 			** settup end-to-end encryption keys for the socket node **
 		'''
@@ -528,13 +568,20 @@ class Node:
 			self.thread_two.setDaemon(True) # Daemonize thread (run in background)
 			self.thread_two.start()
 
+		if (self.container_customizations.supports_scheduling_events == True):
+			##settup and start scheduled events##
+			self.thread_three.setDaemon(True)
+			self.thread_three.start()
+
 		##settup the end-to-end encryption keys##
 		#will generate a new key-set when the server is started
 		self.handler_keys.generateKeySet()
 
 		#this is the last option as (if enabled) it will launch a terminal client
-		if (self.container_customizations.supports_dynamic_interaction = True):
+		if (self.container_customizations.supports_dynamic_interaction == True):
 			##settup and start the input console##
+			prompt = Interface(self)
+			prompt.run()
 			
 		
 	def isThreadOneRuning(self):
@@ -565,13 +612,13 @@ class Node:
 		'''
 			(Node) -> (boolean)
 		'''
-		return self.thread_two.is_alive()
+		return self.thread_three.is_alive()
 		
 	def closeThreadThree(self):
 		'''
 			(Node) -> None
 		'''
-		self.thread_two._Thread_stop()
+		self.thread_three._Thread_stop()
 
 	def __repr__(self):
 		return f'Node(ip:{self.container_addresses.ip}, port:{self.container_addresses.port}, queue-len:{len(self.queue)})'

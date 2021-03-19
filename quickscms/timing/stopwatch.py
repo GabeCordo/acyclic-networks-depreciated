@@ -5,7 +5,7 @@
 from time import time
 
 ###############################
-#	  quickscmp imports
+#	  quickscms imports
 ###############################
 
 from quickscms.timing.timer import Timer
@@ -31,7 +31,7 @@ class StopWatch(Timer):
 	def getLaps(self):
 		'''
 			(Timing) -> (list of floats)
-			:the getter funciton for the last recorded time difference
+			:the getter function for the last recorded time difference
 		'''
 		return self.log
 		

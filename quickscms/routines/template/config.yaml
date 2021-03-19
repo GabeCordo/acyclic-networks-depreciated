@@ -5,11 +5,11 @@
 #
 #   EDITS  MADE  TO  THIS DOCUMENT OR ANY FILES APART OF
 #   THIS ROUTINE MAY RESULT IN ERRONEOUS CODE FOR WHICH,
-#   THE  AUTHOR  OR  ORGINIZATION IS NOT RESPONSIBLE FOR
-#   POSSIBLE  EDGE-CASES  OR FAULTY NODE SOCKETS IN SCMP
+#   THE  AUTHOR  OR  ORGANIZATION IS NOT RESPONSIBLE FOR
+#   POSSIBLE  EDGE-CASES  OR FAULTY NODE SOCKETS IN SCMS
 #
 #      L-> if  a  modification results  in  faulty  code,
-#          please  redownload  the  routine from the site
+#          please  re-download  the  routine from the site
 #
 #      [x] Site: [URL OF ROUTINE SITE]
 #
@@ -23,7 +23,7 @@ config:
 			- 1
 			- 2
 		buffer-size: 1024
-		latency-size: 4
+		latency-size: 5.0
 	addresses:
 		ip: 127.0.0.1
 		index: 127.0.0.1
@@ -39,6 +39,9 @@ config:
 		recovery: On
 		console: Off
 		data-capture: Off
+		dynamic-interaction: Off
+		dynamic-keys: On
+		scheduling-events: On
 	custom:
 		using-custom: Off
 		custom-settings:

@@ -7,7 +7,7 @@ from threading import Thread
 ###############################
 #	   quickscms imports
 ###############################
-from quickscms.utils import errors
+from quickscms.types import errors
 
 ###############################
 #		   main code

@@ -7,11 +7,11 @@ from datetime import datetime
 from threading import Thread
 
 ###############################
-#	  quickscmp imports
+#	  quickscms imports
 ###############################
 
 from quickscms.timing.timer import Timer
-from quickscms.timing.event import Event
+from quickscms.types.static import Event
 
 ###############################
 #	   	  Alarm Class
@@ -52,7 +52,7 @@ class Alarm(Timer):
 		if (type(event) != type(Event)):
 			return False
 		
-		log.append(event) #the argument is of type Event, and should be added
+		self.log.append(event) #the argument is of type Event, and should be added
 	
 	def _monitor(self):
 		'''
@@ -83,9 +83,9 @@ class Alarm(Timer):
 	def _settup(self):
 		'''
 			(Alarm) -> (boolean)
-			:this function is incharge of establishing a new dameonized thread which
+			:this function is in charge of establishing a new daemonize thread which
 			 will start monitoring all the Events added to the log and execute them
-			 when it is the apropriate time
+			 when it is the appropriate time
 		'''
 		thread_monitoring = Thread(self._monitor, args=())
 		thread_monitoring.daemon(True)

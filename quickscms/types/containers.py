@@ -23,8 +23,8 @@ class Paths:
 	def __init__(self, directory_key_public, directory_key_private, directory_file_logging):
 		'''
 			(String, String, String) -> None
-			:a container class for JSON and public key direcetories required for encrypting
-			 packet traffic and logging latency data for tracking (respectivly)
+			:a container class for JSON and public key directories required for encrypting
+			 packet traffic and logging latency data for tracking (respectively)
 		'''
 		self.directory_key_public = directory_key_public
 		self.directory_key_private = directory_key_private
@@ -36,9 +36,10 @@ class Paths:
 
 class Customizations:
 	def __init__(self, supports_encryption=True, supports_listening=True,
-				 supports_monitoring=True, supports_dynamic_interaction=True,
+				 supports_monitoring=True, supports_dynamic_interaction=False,
 				 supports_recovery=True, supports_console_cout=False, 
-				 supports_data_capture=False, supports_dynamic_keyset=True):
+				 supports_data_capture=False, supports_dynamic_keyset=True,
+				 supports_scheduling_events=True):
 		'''
 			(bool, bool, bool, bool, bool, bool)
 			:a container class for all the various customization options for the Node class
@@ -52,6 +53,7 @@ class Customizations:
 		self.supports_data_capture = supports_data_capture
 		self.supports_dynamic_interaction = supports_dynamic_interaction
 		self.supports_dynamic_keyset = supports_dynamic_keyset
+		self.supports_scheduling_events = supports_scheduling_events
 		
 ## PRE-SET CUSTOMIZATIONS FOR ROUTING NODES
 
@@ -99,7 +101,7 @@ class RoutineAuthor:
 				 licence=None, keywords=None, classifiers=None, documentation=None):
 		'''
 			(String, String, String, String, String, Int, String, String, List, List, String) -> None
-			:a container class for the contents of the author file. This is to catagorize
+			:a container class for the contents of the author file. This is to categorize
 			 developer and routine details that contribute to the documentation of a routine
 			 rather than the functionality of the package.
 		'''

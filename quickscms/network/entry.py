@@ -1,14 +1,15 @@
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
+
 from quickscms.bitstream import basic
-from quickscms.sockets.node import Node
+from quickscms.network.node import Node
 from quickscms.utils import errors, enums, containers
 
 ###############################
 #		   main code
 ###############################
-#Responisble for handling incoming connections that are to be fed through the tor network
+#Responsible for handling incoming connections that are to be fed through the tor network
 # [we will want to keep the template (even if it can increase runtime by 0.01s, we NEED to
 # [ensure a failproof transfer of data to more sensitive areas of the network
 
@@ -19,14 +20,14 @@ class NodeEntry(Node):
 			
 			:constructor for the node entry class; provides all the connective
 			 functionality to begin routing messages or act as a middle-man for
-			 indexing/removing/lookingup userids on the index node
+			 indexing/removing/looking-up userids on the index node
 		'''
 		super().__init__(container_addresses, container_paths, containers.PRESET_SETTINGS_ENTRY)
 		
 	def checkDestination(self, bitstream, id_origin):
 		'''
 			(NodeEntry, string, string) -> (string)
-			:retrieves the ip-address of the userid inputed from the index server
+			:retrieves the ip-address of the userid inputted from the index server
 			
 			@returns the string representation of the ip-address associated with
 					 the userid
@@ -48,7 +49,7 @@ class NodeEntry(Node):
 		'''
 		return self.send(self.container_addresses.ip_index, bitstream)
 
-	def deindexUserID(self, bitstream, id_origin, ip_connecting):
+	def de_indexUserID(self, bitstream, id_origin, ip_connecting):
 		'''
 			(NodeEntry, string, string, string) -> (boolean)
 			:remove a userid and ip-address match on the indexing node
@@ -116,16 +117,16 @@ class NodeEntry(Node):
 		#request to send a message
 		elif (request == '4'):
 			message = self.formatMessage(message, data_first, data_second) #data_first: target_id | data_second: data
-			return (False, check)
+			return (False, message)
 		#request to add index
 		elif (request == '2'):
 			check = self.indexUserID(message, data_first, data_second) #data_first: userid | data_second: userip
 			return (False, check)
 		#request to delete index (least likely)
 		elif (request == '3'):
-			check = self.deindexUserID(message, data_first, data_second) #data_first: userid | data_second: userip
+			check = self.de_indexUserID(message, data_first, data_second) #data_first: userid | data_second: userip
 			return (False, check)
 		
-		#the message has been handled automaticly, there is no need to enqueue
+		#the message has been handled automatically, there is no need to enqueue
 		return (False, '400')
 	

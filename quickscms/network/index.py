@@ -9,9 +9,9 @@ from threading import Thread
 ###############################
 #	   quickscmp imports
 ###############################
-from quickscms.encryption import rsa
+from quickscms.crypto import rsa
 from quickscms.bitstream import basic
-from quickscms.sockets.node import Node
+from quickscms.network.node import Node
 from quickscms.linker import linkerJSON
 from quickscms.utils import errors, enums, containers
 

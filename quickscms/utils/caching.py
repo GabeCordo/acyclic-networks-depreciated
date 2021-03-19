@@ -52,7 +52,7 @@ class fileHandler:
 			print(f'Console: caching experienced {e}')
 			return False
 		
-		#no exceptions were encountered, run sucessful
+		#no exceptions were encountered, run successful
 		return True
 		
 	def lookupCachedFile(self, id_user):
@@ -79,7 +79,7 @@ class fileHandler:
 		'''
 			(fileHandler, string) -> (string)
 			
-			@paramaters a user-id that is chached is provided
+			@paramaters a user-id that where the chache is provided
 			@returns the cached file as a string
 			@exception returns an empty string if the file doesn't exist
 		'''
@@ -110,7 +110,7 @@ class fileHandler:
 			@paramaters a valid user-id was provided
 			@returns boolean true if the message paramater was
 					 appended to the cache file
-			@exceotion returns boolean false if the data was not
+			@exception returns boolean false if the data was not
 					   written
 		'''
 		path = self.generatePath(id_user)
@@ -123,7 +123,7 @@ class fileHandler:
 			print(f'Console: caching experienced {e}')
 			return False
 		
-		#no exceptions were encountered, run sucessful
+		#no exceptions were encountered, run successfull
 		return True
 	
 	def deleteCachedFiled(self, id_user):
@@ -141,7 +141,7 @@ class fileHandler:
 		except:
 			return False
 			
-		#no exceptions were encountered, run sucessful
+		#no exceptions were encountered, run successful
 		return True
 	
 	def deleteCachedElement(self, id_user, element):
@@ -149,9 +149,9 @@ class fileHandler:
 			(fileHandler) -> (boolean)
 			
 			@paramaters a valid user-id is provided
-			@returns boolean true if the data embeded within the
+			@returns boolean true if the data embedded within the
 					 cache file that matched the 'element' param
-					 was exclusivly removed from the file
+					 was exclusively removed from the file
 			@exception returns boolean false if the paramaters
 					   were not met
 					
@@ -174,7 +174,7 @@ class fileHandler:
 		except:
 			return False
 		
-		#no exceptions were encountered, run sucessful
+		#no exceptions were encountered, run successful
 		return True
 	
 	def __del__(self):

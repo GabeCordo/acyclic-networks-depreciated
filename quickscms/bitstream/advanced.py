@@ -8,8 +8,9 @@
 	as requested by the class instance variables		***
 '''
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
+
 from cffi import FFI
 
 ###############################

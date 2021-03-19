@@ -13,8 +13,8 @@ import config
 
 from sockets import incoming, outgoing
 from requests import local, server
-from quickscmp.sockets import node
-from quickscmp.utils import containers
+from quickscms.network import node
+from quickscms.utils import containers
 from graphics import terminal
 
 #####################################
@@ -22,7 +22,6 @@ from graphics import terminal
 #####################################
 
 config = config.Config('json/config.json')
-client = None
 
 OPEN_NODE = config.getEntryServer()
 INDEXING = config.isIndexed()
@@ -34,11 +33,14 @@ HIGHLIGHTED_NODE = ""
 #		 Terminal Interface
 #####################################
 
-class interface(cmd.Cmd):
+class Interface(cmd.Cmd):
 	
-	def __init__(self):
+	def __init__(self, client: Node):
 		cmd.Cmd.__init__(self)
 		self.prompt = HIGHLIGHTED_NODE + '> ' #this will display the node that is currently being configured
+
+	def run(self, banner=terminal.banner()):
+		self.cmdloop(intro=terminal.banner())
 	
 	##############################
 	##		Visual Settings		##
@@ -380,12 +382,3 @@ class interface(cmd.Cmd):
 		'''
 		'''
 		print("syntax: quit [userid]")
-	
-#####################################
-#		 	  Main Code
-#####################################
-
-if __name__ == '__main__':
-	prompt = interface()
-	prompt.cmdloop(intro=terminal.banner())
-	client.settup()

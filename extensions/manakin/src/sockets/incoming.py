@@ -2,7 +2,7 @@
 #		   Python Imports
 #####################################
 
-from quickscmp.bitstream import basic
+from quickscms.bitstream import basic
 from sys import path
 
 #####################################

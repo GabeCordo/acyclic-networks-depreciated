@@ -1,9 +1,9 @@
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
 
 from quickscms.bitstream import basic
-from quickscms.sockets.node import Node
+from quickscms.network.node import Node
 from quickscms.linker import linkerJSON
 from quickscms.utils import errors, enums, containers
 
@@ -13,7 +13,7 @@ from quickscms.utils import errors, enums, containers
 class NodeBalancer(Node, linkerJSON.Handler):
 	def __init__(self, container_addresses, container_paths, directory_file_logging, directory_entry_nodes):
 		'''(Balancer, list of strings) -> None
-			:constuctor for the Balancer class takes a list of ip-addresses
+			:constructor for the Balancer class takes a list of ip-addresses
 			 representing the available entry Nodes.
 		'''
 		Node.__init__(self, container_addresses, container_paths, containers.PRESET_SETTINGS_BALANCER)
@@ -43,7 +43,7 @@ class NodeBalancer(Node, linkerJSON.Handler):
 		self.trackers[index] = self.trackers[index] + 1
 		return self.nodes_entry[index]
 		
-	def synatxValidator(self, message):
+	def syntax_validator(self, message):
 		'''(Balancer, string) -> None
 			:validates whether the basic markup request is valid
 			
@@ -57,13 +57,13 @@ class NodeBalancer(Node, linkerJSON.Handler):
 			:
 		'''
 		try:
-			self.synatxValidator(message) #will throw an error if invalid (hence, using try/catch)
+			self.syntax_validator(message) #will throw an error if invalid (hence, using try/catch)
 			entry = self.redirect()
 			#if the syntax is valid and we have a new entry node, send the message into the network
 			message_modified = message + f'~{connectingAddress}'
 			self.send(entry, message_modified)
 		except:
-			print(f'Console: Received bad reciept from {connectingAddress}')
+			print(f'Console: Received bad receipt from {connectingAddress}')
 		
 		#we always want this to return False, there is NO need to have any other functionality
-		return (False, 'Successfuly Handled')
+		return (False, 'Successfully Handled')

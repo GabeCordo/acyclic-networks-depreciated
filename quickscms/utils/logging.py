@@ -7,10 +7,10 @@ from clint.textui import colored
 from datetime import datetime
 
 #####################################
-#		  quickscmp Imports
+#		  quickscms Imports
 #####################################
 
-from quickscmp.linker import linkerJSON
+from quickscms.linker import linkerJSON
 
 #####################################
 #			  Constants
@@ -33,7 +33,7 @@ class Logger(linkerJSON.Handler):
 			:the constructor class for the logging class which
 			 initializes the logging json file and the boolean
 			 flag which determines whether logging text will be
-			 outputed to the console.
+			 outputted to the console.
 		'''
 		super().__init__(file_logging_path)
 		self.flag_graphics = flag_graphics

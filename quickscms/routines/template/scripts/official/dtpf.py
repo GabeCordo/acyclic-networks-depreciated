@@ -14,3 +14,6 @@ import custom #import all the custom scripts here
 ###############################
 #			 dtpf
 ###############################
+
+def main():
+    pass

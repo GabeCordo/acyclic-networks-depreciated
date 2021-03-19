@@ -14,3 +14,6 @@ import custom #import all the custom scripts here
 ###############################
 #			  qmf
 ###############################
+
+def main():
+    pass

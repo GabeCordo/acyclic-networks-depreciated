@@ -1,27 +1,28 @@
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
-from quickscms.sockets.node import Node
+
+from quickscms.network.node import Node
 from quickscms.bitstream import advanced
 from quickscms.utils import errors, enums, containers
 
 ###############################
 #		   main code
 ###############################
-#Responisble for sending the message request to the final destination in the userid
+#Responsible for sending the message request to the final destination in the userid
 
 class NodeExit(Node):
 	def __init__(self, container_addresses, container_paths):
 		'''(NodeExit, string, string, string, string) -> None
-			:the consturctor is the same as the node server, small maniplulation
-			 of the origional node server to specifically redirect data to the
+			:the constructor is the same as the node server, small manipulation
+			 of the original node server to specifically redirect data to the
 			 final ip
 		'''
 		super().__init__(container_addresses, container_paths, containers.PRESET_SETTINGS_EXIT)
 	
 	def checkDestination(self, id_origin):
 		'''(Node) -> (string)
-			:retrieves the ip-address of the userid inputed from the index server
+			:retrieves the ip-address of the userid inputted from the index server
 				
 			@returns the string representation of the ip-address associated with
 					 the userid
@@ -33,7 +34,7 @@ class NodeExit(Node):
 	
 	def formatMessage(self, message, origin):
 		'''(NodeExit, string) -> (string)
-			:strip the advanced bitsream into a simpler form with less usless data
+			:strip the advanced bitsream into a simpler form with less useless data
 			 for the user and pass that to the specialFunctionality function
 			
 			@returns list with a simple bitsream 'request:message/origin_id' and
@@ -49,7 +50,7 @@ class NodeExit(Node):
 			@returns boolean False indicating that messages will NOT be enqueued
 					 to a queue
 		'''
-		modify = advanced.Parser(bitsream)
+		modify = advanced.Parser(message)
 		
 		request = modify.get_request_type()
 		#we need the origin in case a message needs to be sent back
@@ -63,5 +64,5 @@ class NodeExit(Node):
 			self.send(destination, message_formated)
 			
 		#we shouldn't need any functionality other than sending data to a user's computer
-		return (False, 'Successfuly Handled')
+		return (False, 'Successfully Handled')
 	

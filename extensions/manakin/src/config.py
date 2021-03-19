@@ -2,7 +2,7 @@
 #		   Python Imports
 #####################################
 
-from quickscmp.linker import linkerJSON
+from quickscms.linker import linkerJSON
 
 #####################################
 #		   MANAKIN CONFIGs

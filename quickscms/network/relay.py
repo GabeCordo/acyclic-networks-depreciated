@@ -1,14 +1,15 @@
 ###############################
-#	   quickscmp imports
+#	   quickscms imports
 ###############################
-from quickscms.sockets.node import Node
+
+from quickscms.network.node import Node
 from quickscms.bitstream import advanced
 from quickscms.utils import errors, enums, containers
 
 ###############################
 #		   main code
 ###############################
-#Responisble for routing the packet to the next relay or exit node
+#Responsible for routing the packet to the next relay or exit node
 
 class NodeRelay(Node):
 	def __init__(self, container_addresses, container_paths):
@@ -18,7 +19,7 @@ class NodeRelay(Node):
 		'''
 		super().__init__(container_addresses, container_paths, containers.PRESET_SETTINGS_RELAY)
 		
-	def discoverNextNode(self, bitsream):
+	def discoverNextNode(self, bitstream):
 		'''(NodeRelay, string) -> (list of strings)
 			:discover the next relay node for communication and modify the
 			 path
@@ -28,7 +29,7 @@ class NodeRelay(Node):
 					 pathway, exitpath]
 			@exception returns an empty list if the paramaters are not followed
 		'''
-		modify = advanced.Parser(bitsream)
+		modify = advanced.Parser(bitstream)
 		
 		#retrieve the path ids and the ip-address of the exit node
 		pathway = modify.get_relay_path()
@@ -43,7 +44,7 @@ class NodeRelay(Node):
 			node_exit = self.handler_keys.decrypt(node_exit)
 		
 		#[ only the last node, every relay but the last node, exitNode IP ]
-		return [ nextRelay, ':'.join(relay_all), node_exit ]
+		return [ relay_next, ':'.join(relay_all), node_exit ]
 		
 	
 	def specialFunctionality(self, message, connectingAddress):
@@ -57,7 +58,7 @@ class NodeRelay(Node):
 		resend_data = self.discoverNextNode(message)
 		
 		#if the next relay node is blank, this means that it needs to be sent to the exit node
-		#as it is done meshing/anonymising through the network
+		#as it is done meshing/anonymise through the network
 		if (resend_data[0] == ''):
 			self.send(resend_data[2], message)
 		#the bitsream still needs to be send through the network
@@ -67,4 +68,4 @@ class NodeRelay(Node):
 		
 		#the relay node should only redirect data, it should never do anything else
 		#(we want to avoid users capturing any traffic on the network)
-		return (False, 'Successfuly Handled')
+		return (False, 'Successfully Handled')
