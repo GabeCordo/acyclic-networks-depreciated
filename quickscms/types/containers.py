@@ -39,7 +39,7 @@ class Customizations:
 				 supports_monitoring=True, supports_dynamic_interaction=False,
 				 supports_recovery=True, supports_console_cout=False, 
 				 supports_data_capture=False, supports_dynamic_keyset=True,
-				 supports_scheduling_events=True):
+				 supports_scheduling_events=True, supports_backup_ip=False):
 		'''
 			(bool, bool, bool, bool, bool, bool)
 			:a container class for all the various customization options for the Node class
@@ -54,6 +54,7 @@ class Customizations:
 		self.supports_dynamic_interaction = supports_dynamic_interaction
 		self.supports_dynamic_keyset = supports_dynamic_keyset
 		self.supports_scheduling_events = supports_scheduling_events
+		self.supports_backup_ip = supports_backup_ip
 		
 ## PRE-SET CUSTOMIZATIONS FOR ROUTING NODES
 

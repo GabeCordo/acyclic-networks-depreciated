@@ -4,7 +4,6 @@
 
 import socket
 from sys import path
-from os.path import abspath
 from time import sleep, time
 from threading import Thread
 
@@ -17,14 +16,6 @@ from quickscms.timing.stopwatch import StopWatch
 from quickscms.timing.timer import Timer
 from quickscms.types import alias, static, dynamic, errors, enums, containers
 from quickscms.utils import logging
-
-###############################
-#	   extension imports
-###############################
-
-path.append(abspath(__file__) + '/../../../extensions/manakin/src/')
-print(abspath(__file__) + '../../../extensions/manakin/src/')
-from manakin import Interface
 
 ###############################
 #		   constants
@@ -40,6 +31,9 @@ QUEUE_MONITOR_SCANNER_DELAY = 60
 QUEUE_MONITOR_MAX_GROWTH = 1000
 
 SCHEDULER_PRECISION = 3
+
+QUEUE_DEFAULT_ITEM = ''
+QUEUE_EMPTY = 0
 
 ###############################
 #		   main code
@@ -63,7 +57,9 @@ class Node:
 		'''
 		self.routine = routine
 		## we can either have a routine or manually defined containers, NOT both)
-		if (routine ^ (container_addresses and container_paths and container_customizations)):
+		containers_defined = ((container_addresses != None) and (container_paths != None) and (container_customizations != None))
+		routine_defined = (routine != None)
+		if (not (routine_defined or containers_defined) and ((not routine_defined) or (not containers_defined)) ):
 			raise errors.ContainersLinkageFailed
 
 		##Imported Containers##
@@ -100,10 +96,10 @@ class Node:
 		
 		#a routine will need to override the default functions#
 		self.thread_two = None
-		if (not routine):
-			thread_two = Thread(target=self.monitor, args=())
+		if (routine == None):
+			self.thread_two = Thread(target=self.monitor, args=())
 		else:
-			thread_two = Thread(target=routine.func_switch['qmf'](), args=())
+			self.thread_two = Thread(target=routine.func_switch['qmf'](), args=())
 	
 	def getIp(self):
 		'''
@@ -127,6 +123,7 @@ class Node:
 	def isEncrypted(self):
 		'''
 			(Node) -> (boolean)
+
 			:the getter function for whether encryption is toggled
 			
 			@returns whether the node allows for end-to-end encryption
@@ -142,7 +139,7 @@ class Node:
 		'''
 		return self.container_customizations.supports_monitoring
 	
-	def specialFunctionality(self, message: str, address: str) -> Tuple(bool, str):
+	def specialFunctionality(self, message: str, address: str) -> list[bool, str]:
 		'''
 			(string, string) -> (boolean, string)
 			:child classes can overide this function to offer special functionality
@@ -265,11 +262,11 @@ class Node:
 					#prepare the message we are going to send to the 
 					if(self.supports_encryption == True):
 						
-						#if encryption is enabled, cypher it with the recieved public rsa
+						#if encryption is enabled, cypher it with the received public rsa
 						#we need to make sure the byte size of the string being encrypted does not grow > than 250
 						remaining_chars = permitted_char_len
 						
-						while ((len(data_processed[1]) - len(data_processed_lst)*permitted_char_len) > permitted_char_len): #repeat untill the len is less than 150 chars
+						while ((len(data_processed[1]) - len(data_processed_lst)*permitted_char_len) > permitted_char_len): #repeat until the len is less than 150 chars
 							#for visibility we will throw this into temp vars
 							beggining = remaining_chars - permitted_char_len
 							end = remaining_chars
@@ -485,7 +482,9 @@ class Node:
 			(Node) -> (int)
 			@returns the size of the queued messages
 		'''
-		return len(self.queue)
+		if (self.queue != None):
+			return len(self.queue)
+		return QUEUE_EMPTY
 	
 	def deQueue(self) -> (str):
 		'''
@@ -503,7 +502,7 @@ class Node:
 			return self.queue.pop(0)
 		else:
 			#the queue was empty, no bitsreams have been received or approved for enqueuing
-			return ''
+			return QUEUE_DEFAULT_ITEM
 	
 	def monitor(self) -> None:
 		'''
@@ -537,7 +536,7 @@ class Node:
 				#stop monitoring the queue
 				return
 	
-	def scheduler(self):
+	def scheduler(self) -> None:
 		'''
 			(Node) -> None
 			:if a event scheduler has not already been created, we need to
@@ -560,76 +559,92 @@ class Node:
 		'''
 		if (self.container_customizations.supports_listening == True):
 			##settup and start the incoming socket##
-			self.thread_one.setDaemon(True) # Daemonize thread (run in background)
-			self.thread_one.start()
+			if (self.thread_one != None):
+				self.thread_one.setDaemon(True) # Daemonize thread (run in background)
+				self.thread_one.start()
+			elif (self.container_customizations.supports_console_cout):
+				print("Warning: Thread one failed to daemonize and run.")
+			
 		
 		if (self.container_customizations.supports_monitoring == True):
 			##settup and start the queue monitor##  
-			self.thread_two.setDaemon(True) # Daemonize thread (run in background)
-			self.thread_two.start()
+			if (self.thread_two != None):
+				self.thread_two.setDaemon(True) # Daemonize thread (run in background)
+				self.thread_two.start()
+			elif (self.container_customizations.supports_console_cout):
+				print("Warning: Thread two failed to daemonize and run.")
 
 		if (self.container_customizations.supports_scheduling_events == True):
 			##settup and start scheduled events##
-			self.thread_three.setDaemon(True)
-			self.thread_three.start()
+			if (self.thread_three != None):
+				self.thread_three.setDaemon(True)
+				self.thread_three.start()
+			elif (self.container_customizations.supports_console_cout):
+				print("Warning: Thread three failed to daemonize and run.")
 
 		##settup the end-to-end encryption keys##
 		#will generate a new key-set when the server is started
-		self.handler_keys.generateKeySet()
-
-		#this is the last option as (if enabled) it will launch a terminal client
-		if (self.container_customizations.supports_dynamic_interaction == True):
-			##settup and start the input console##
-			prompt = Interface(self)
-			prompt.run()
-			
+		self.handler_keys.generateKeySet()			
 		
-	def isThreadOneRuning(self):
+	def isThreadOneRuning(self) -> bool:
 		'''
 			(Node) -> (boolean)
 		'''
-		return self.thread_one.is_alive()
+		if (self.thread_one != None):
+			return self.thread_one.is_alive()
 	
-	def closeThreadOne(self):
+	def closeThreadOne(self) -> None:
 		'''
 			(Node) -> None
 		'''
-		self.thread_one._Thread_stop()
+		if (self.thread_one != None):
+			self.thread_one._Thread_stop()
 			
-	def isThreadTwoRunning(self):
+	def isThreadTwoRunning(self) -> bool:
 		'''
 			(Node) -> (boolean)
 		'''
-		return self.thread_two.is_alive()
+		if (self.thread_two != None):
+			return self.thread_two.is_alive()
 		
-	def closeThreadTwo(self):
+	def closeThreadTwo(self) -> None:
 		'''
 			(Node) -> None
 		'''
-		self.thread_two._Thread_stop()
+		if (self.thread_two != None):
+			self.thread_two._Thread_stop()
 	
-	def isThreadThreeRunning(self):
+	def isThreadThreeRunning(self) -> bool:
 		'''
 			(Node) -> (boolean)
 		'''
-		return self.thread_three.is_alive()
+		if (self.thread_three != None):
+			return self.thread_three.is_alive()
 		
-	def closeThreadThree(self):
+	def closeThreadThree(self) -> None:
 		'''
 			(Node) -> None
 		'''
-		self.thread_three._Thread_stop()
+		if (self.thread_three != None):
+			self.thread_three._Thread_stop()
 
-	def __repr__(self):
+	def __repr__(self) -> str:
+		'''
+		'''
 		return f'Node(ip:{self.container_addresses.ip}, port:{self.container_addresses.port}, queue-len:{len(self.queue)})'
 
-	def __eq__(self, other):
+	def __eq__(self, other) -> bool:
+		'''
+		'''
 		if (other == None):
-			return
+			return False
 		if (type(other) != type(Node)):
-			return
+			return False
 		return self.container_customizations == other.container_customizations
 
-	def __del__(self):
+	def __del__(self) -> None:
+		'''
+		'''
 		self.close()
-		print('Console: the node has been closed.')
+		if (self.container_customizations.supports_console_cout):
+			print('Console: the node has been closed.')

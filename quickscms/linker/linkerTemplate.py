@@ -24,8 +24,6 @@ class Handler:
 		'''
 		self.files = args
 		self.data  = []
-		#self.template_pull(None) #validate that the files provided to the class exist
-		#TODO - fix this this is based on a legacy version
 			
 	def template_push(self, dump_function):
 		'''
@@ -39,7 +37,7 @@ class Handler:
 		try:
 			for i in range(0, len(self.files)):
 				write_to_markup = open(self.files[i], 'w')
-				dump_function(self.data[i], write_to_json)
+				dump_function(self.data[i], write_to_markup)
 				write_to_markup.close()
 		except:
 			raise FileNotFoundError('linkerJSON Error: one or more of the provided files does not exist.')
@@ -60,7 +58,6 @@ class Handler:
 					self.data.append(load_function(file_current))
 					file_current.close()
 		except Exception as e:
-			print(e)
 			raise FileNotFoundError(f'linkerJSON Error: one or more of the provided files does not exist.')
 	
 	def cleanerFunctionality(self, element):
@@ -93,7 +90,7 @@ class Handler:
 			:Starts the cleaner, we want to avoid using it (wastes cpu thread)
 			 if we don't need it
 		'''
-		#thread one and two are occupied by listening port and queue monitor respecitvley
+		#thread one and two are occupied by listening port and queue monitor respectively
 		thread_three = Thread(target=self.cleaner(timer), args=())
 		thread_three.daemon = True
 		thread_three.start()

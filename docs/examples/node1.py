@@ -1,18 +1,23 @@
-from quickscmp.sockets.node import Node
-from quickscmp.utils import containers
+from quickscms.network.node import Node
+from quickscms.types import containers
 
+from os.path import abspath
 from time import sleep
 
 addresses = containers.Addresses(
-ip, port [, ip_index [, ip_backup ]]
+	ip='', 
+	port=1052
 )
 
 paths = containers.Paths(
-directory_key_public, directory_key_private, directory_key_public
+	directory_key_public = abspath(__file__)[:-8] + 'keys/public1.pem',
+	directory_key_private =  abspath(__file__)[:-8] + 'keys/private1.pem',
+	directory_file_logging = abspath(__file__)[:-8] + 'index/json/log_node1.json'
 )
 
 options = containers.Customizations(
-[ encryption [, listening [, monitoring [, recovery [, supports_console_cout ]]]]]
+	supports_console_cout=True,
+	supports_backup_ip=False
 )
 
 n1 = Node(
@@ -20,16 +25,7 @@ n1 = Node(
 	container_paths = paths,
 	container_customizations = options
 )
-
-'''
-	ip='',
-	port=1052,
-	directory_key_public='keys/public1.pem',
-	directory_key_private='keys/private1.pem',
-	directory_file_logging='index/json/log_node1.json',
-	supports_console_cout=True,
-	supports_backup_ip=False
-'''
+n1.settup()
 
 while True:
 

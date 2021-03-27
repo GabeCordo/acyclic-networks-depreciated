@@ -1,13 +1,26 @@
-from quickscmp.sockets.node import Node
+from quickscms.network.node import Node
+from quickscms.types import containers
 
-n2 = Node(
-	ip='',
-	port=1053,
-	directory_key_public='keys/public2.pem',
-	directory_key_private='keys/private2.pem',
-	directory_file_logging='index/json/log_node2.json',
+addresses = containers.Addresses(
+	ip='', 
+	port=1053
+)
+
+paths = containers.Paths(
+	directory_key_public = 'keys/public2.pem',
+	directory_key_private =  'keys/private2.pem',
+	directory_file_logging = 'index/json/log_node2.json'
+)
+
+options = containers.Customizations(
 	supports_console_cout=True,
 	supports_backup_ip=False
+)
+
+n2 = Node(
+	container_addresses = addresses,
+	container_paths = paths,
+	container_customizations = options
 )
 n2.settup()
 

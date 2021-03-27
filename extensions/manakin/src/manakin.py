@@ -3,6 +3,7 @@
 #####################################
 
 import cmd, os, sys
+from os.path import abspath
 
 #####################################
 #		  Manakin Imports
@@ -11,17 +12,16 @@ import cmd, os, sys
 import generator
 import config
 
-from sockets import incoming, outgoing
 from requests import local, server
 from quickscms.network import node
-from quickscms.utils import containers
+from quickscms.types import containers
 from graphics import terminal
 
 #####################################
 #		Default Paramaters
 #####################################
 
-config = config.Config('json/config.json')
+config = config.Config(abspath(__file__) + '/json/config.json')
 
 OPEN_NODE = config.getEntryServer()
 INDEXING = config.isIndexed()
@@ -35,9 +35,13 @@ HIGHLIGHTED_NODE = ""
 
 class Interface(cmd.Cmd):
 	
-	def __init__(self, client: Node):
+	def __init__(self, client: node.Node):
 		cmd.Cmd.__init__(self)
 		self.prompt = HIGHLIGHTED_NODE + '> ' #this will display the node that is currently being configured
+		self.client = client
+
+	def _validate_links(self):
+		pass
 
 	def run(self, banner=terminal.banner()):
 		self.cmdloop(intro=terminal.banner())
@@ -49,8 +53,8 @@ class Interface(cmd.Cmd):
 	def do_banner(self, args):
 		'''Refresh the manakin client terminal with a new banner.
 		'''
-		os.system('clear') #clear the temrinal to have a fresh start
-		prompt.cmdloop(intro=terminal.banner())
+		os.system('clear') #clear the terminal to have a fresh start
+		self.cmdloop(intro=terminal.banner())
 	def def_banner(self, args):
 		'''
 		'''
@@ -63,10 +67,10 @@ class Interface(cmd.Cmd):
 	def do_setup_id(self, args):
 		'''Setup a new tor user-id on the indexing server.
 		'''
-		if (client != None):
-			message = server.addIndex(args, client.handler_keys.getPublicKey()) #format the message using the request modules
+		if (self.client != None):
+			message = server.addIndex(args, self.client.handler_keys.getPublicKey()) #format the message using the request modules
 			print(message)
-			result = client.send(OPEN_NODE, message)
+			result = self.client.send(OPEN_NODE, message)
 		else:
 			result = "Failed"
 		terminal.alert('UserID', f"Indexed on the server to {args}. ({result})")
@@ -80,9 +84,9 @@ class Interface(cmd.Cmd):
 	def do_lookup_id(self, args):
 		'''Validate whether your user-id is on the tor indexing server.
 		'''
-		if (client != None):
+		if (self.client != None):
 			message = server.lookupIndex(args)
-			result = client.send(OPEN_NODE, message)
+			result = self.client.send(OPEN_NODE, message)
 		else:
 			result = "Failed"
 		terminal.alert('UserID', f"Indexed on the server: {args}. ({result})")
@@ -96,9 +100,9 @@ class Interface(cmd.Cmd):
 	def do_remove_id(self, args):
 		'''Remove your user-id from the tor indexing server.
 		'''
-		if (client != None):
+		if (self.client != None):
 			message = server.deleteIndex(args)
-			result = client.send(OPEN_NODE, message)
+			result = self.client.send(OPEN_NODE, message)
 		else:
 			result = "Failed"
 		terminal.alert('UserID', f"De-indexed on the server: {args}. ({result})")
@@ -312,9 +316,9 @@ class Interface(cmd.Cmd):
 		'''Send a message to a target-id across the tor-network on your friend list.
 		'''
 		data = local.splitter(args)
-		if (client != None or len(data) < 1):
+		if (self.client != None or len(data) < 1):
 			message = server.sendMessage(data[0], data[1])
-			result = client.send(OPEN_NODE, message)
+			result = self.client.send(OPEN_NODE, message)
 		else:
 			result = "Failed"
 		terminal.alert('Ping', f'Message sent to {data[0]} over the network. ({result})')

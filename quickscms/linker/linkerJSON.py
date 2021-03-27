@@ -22,6 +22,7 @@ class Handler(linkerTemplate.Handler):
 			:Constructor function for the JSON handler. This function allows any number of JSON files to be entered under args*.
 		'''
 		super().__init__(args)
+		self.pull() #test whether the provided files exist
 	
 	def push(self):
 		'''
