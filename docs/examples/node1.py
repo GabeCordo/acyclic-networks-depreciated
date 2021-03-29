@@ -9,10 +9,12 @@ addresses = containers.Addresses(
 	port=1052
 )
 
+FILE_PATH = abspath(__file__)[:-8]
+
 paths = containers.Paths(
-	directory_key_public = abspath(__file__)[:-8] + 'keys/public1.pem',
-	directory_key_private =  abspath(__file__)[:-8] + 'keys/private1.pem',
-	directory_file_logging = abspath(__file__)[:-8] + 'index/json/log_node1.json'
+	directory_key_public = FILE_PATH + 'keys/public1.pem',
+	directory_key_private =  FILE_PATH + 'keys/private1.pem',
+	directory_file_logging = FILE_PATH + 'index/json/log_node1.json'
 )
 
 options = containers.Customizations(

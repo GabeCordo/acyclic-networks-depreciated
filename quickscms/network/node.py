@@ -471,8 +471,8 @@ class Node:
 				print(f'Console: Experienced Error {e}') #debugging
 				
 				#we need to check that the ip_target is not self.ip_backup to avoid going into a recursive infinite loop
-				if (self.container_customizations.supports_backup_ip != None and ip_target != self.container_customizations.ip_backup):
-					self.send(self.ip_backup, message)
+				if (self.container_customizations.supports_backup_ip != False and ip_target != self.container_addresses.ip_backup):
+					self.send(self.container_addresses.ip_backup, message)
 				else:
 					outgoing.close()
 					return e

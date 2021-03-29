@@ -1,15 +1,19 @@
 from quickscms.network.node import Node
 from quickscms.types import containers
 
+from os.path import abspath
+
 addresses = containers.Addresses(
 	ip='', 
 	port=1053
 )
 
+FILE_PATH = abspath(__file__)[:-8]
+
 paths = containers.Paths(
-	directory_key_public = 'keys/public2.pem',
-	directory_key_private =  'keys/private2.pem',
-	directory_file_logging = 'index/json/log_node2.json'
+	directory_key_public = FILE_PATH + 'keys/public2.pem',
+	directory_key_private =  FILE_PATH + 'keys/private2.pem',
+	directory_file_logging = FILE_PATH + 'index/json/log_node2.json'
 )
 
 options = containers.Customizations(
